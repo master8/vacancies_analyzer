@@ -61,7 +61,7 @@ class Competence(db.Model):
 class Function(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True, unique=True)
-    general_id = db.Column(db.Integer, db.ForeignKey('General.id'))
+    general_id = db.Column(db.Integer, db.ForeignKey('general.id'))
 
     competences = db.relationship('Competence', backref='function', lazy='dynamic')
 
