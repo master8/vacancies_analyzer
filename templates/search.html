@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ title }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../static/css/uikit.min.css" />
+    <script src="../static/js/uikit.min.js"></script>
+    <script src="../static/js/uikit-icons.min.js"></script>
+</head>
+
+<body>
+    <form action="/analyze" method="get" class="uk-form-stacked">
+        <div class="uk-padding">
+            <div class="uk-card uk-card-default uk-card-body">
+                <h1 class="uk-text-center">Vacancies Analyzer</h1>
+                <p class="uk-text-center">Analyze all vacancies for selected period in selected region. Use selected data source.</p>
+                <button class="uk-button uk-button-primary uk-align-center" type="submit">Analyze</button>
+            </div>
+        </div>
+        <div class="uk-padding uk-padding-remove-top">
+                <div class="uk-child-width-expand@s" uk-grid>
+                    <div class="uk-width-2-3@m">
+                        <div class="uk-card uk-card-default uk-card-body">
+                            <legend class="uk-legend">Professions</legend>
+    
+                            <div class="uk-margin">
+                                <div class="uk-form-label">You may select multiple professions</div>
+                                <div class="uk-form-controls uk-list">
+                                    {% for profession in professions %}
+                                        <label><input class="uk-checkbox" type="checkbox" value="{{ profession.id }}" name="prof"> {{ profession.name }}</label><br>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="uk-card uk-card-secondary uk-card-body">
+                            <legend class="uk-legend">Other parameters</legend>
+    
+                            <div class="uk-margin">
+                                <label class="uk-form-label" for="form-stacked_select">Region</label>
+                                <div class="uk-form-controls">
+                                    <select name="region" class="uk-select uk-form-width-medium" id="form-stacked_select">
+                                        <option>Москва</option>
+                                        <option>Санкт-Петербург</option>
+                                        <option>Челябинск</option>
+                                        <option>Казань</option>
+                                    </select>
+                                </div>
+                            </div>
+    
+                            <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
+                                <label class="uk-form-label">Start date<input type="date" name="sdate" class="uk-input"/></label>
+                                <label class="uk-form-label">End date<input type="date" name="edate" class="uk-input"/></label>
+                            </div>
+    
+                            <div class="uk-margin">
+                                <div class="uk-form-label">Source</div>
+                                <div class="uk-form-controls">
+                                    <label><input class="uk-radio" type="radio" value="hh" name="source" checked> HeadHunter</label><br>
+                                    <label><input class="uk-radio" type="radio" disabled value="sj" name="source"> Superjob</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </form>
+    </body>
+    </html>

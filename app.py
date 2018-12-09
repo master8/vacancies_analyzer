@@ -10,7 +10,7 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-from models import Profstandard
+from models import Profstandard, Vacancy, ClassificatedVacancy
 
 # @app.route('/')
 # def hello_world():
@@ -110,8 +110,22 @@ def analyze():
     return 'analyze results ' + str(request.args) + ' ' + pr.name
 
 @app.route('/search')
-def search(sdate,edate,profstandards = list(),regions = list()):
-    pass
+def search():
+    arguments = request.args
+    for pid in profstandards:
+        profstandard = Profstandard.query.get(id)
+        prof_name = profstandard.name
+        class_vacancy = ClassificatedVacancy.query.filter_by(profstandard_id = pid).all()
+        for sample in class_vacancy:
+            vac = Vacancy.query.filter_by(id=sample.vacancy_id).first()
+            vac_count =0 
+            vac_count +=1
+            link = 'NULL'
+    prof_id = profstandards
+
+
+    obj = {'profstandard_id': prof_id, 'name':prof_name, 'count': vac_count, 'link_diagram':link}
+    return link#render_template('search.html', title='search', obj=obj)
 
 if __name__ == '__main__':
     app.run()
