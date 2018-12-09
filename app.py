@@ -101,6 +101,11 @@ def home():
 def analyze():
     return 'analyze results ' + str(request.args)
 
+@app.route('/search')
+def search(sdate,edate,profstandards = list(),regions = list()):
+    pass
+
+
 
 if __name__ == '__main__':
     app.run()
