@@ -1,9 +1,16 @@
 from flask import Flask, request
 from flask import render_template
-from flask_wtf import FlaskForm
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+
+from config import Config
 
 app = Flask(__name__)
+app.config.from_object(Config)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
+from models import Profstandard
 
 # @app.route('/')
 # def hello_world():
@@ -99,13 +106,13 @@ def home():
 
 @app.route('/analyze')
 def analyze():
-    return 'analyze results ' + str(request.args)
+    pr = Profstandard.query.get(14)
+    return 'analyze results ' + str(request.args) + ' ' + pr.name
 
 @app.route('/search')
 def search(sdate,edate,profstandards = list(),regions = list()):
     pass
 
 
-
 if __name__ == '__main__':
-    app.run()
+app.run()
