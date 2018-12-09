@@ -33,17 +33,51 @@ def analyze():
 
 @app.route('/search')
 def search():
-    count = 0
-    prof = request.args.getlist('prof')
-    for pid in prof:
-        profstandard = Profstandard.query.get(pid)
-        class_vacancy = ClassificatedVacancy.query.filter_by(profstandard_id = pid)
-    
+    reg_id = request.args.get('region')
+    region = Region.query.filter_by(id= reg_id).first().name
+
+    source_id =request.args.get('source')
+    source = Source.query.filter_by(id= source_id).first().name
+
+    sdate = request.args.get('sdate')
+    edate = request.args.get('edate')
+
+    period = 'from: ' + str(sdate)+' to: '+str(edate) #месяц - день - год
+
+    prof_id_list = request.args.getlist('prof')
+
+
+    professions = []
+
+
+    for prof_id in prof_id_list:
+        count = 0
+
+        class_vacancy = ClassificatedVacancy.query.filter_by(profstandard_id = prof_id)
         for sample in class_vacancy:
-            
             vacancy = Vacancy.query.filter_by(id=sample.vacancy_id)
             count +=1
-            
+
+
+        prof_dict = {
+            'profstandard_id': prof_id,
+            'code': Profstandard.query.get(prof_id).code,
+            'name': Profstandard.query.get(prof_id).name,
+            'count': count
+        }
+        professions.append(prof_dict)
+
+
+    if professions == []:
+        professions = [{
+            'profstandard_id': 0,
+            'code': '',
+            'name': 'Профессия не выбрана',
+            'count': 0
+        }]
+
+    diagram_link = '../static/diagram/test_diagram.svg'
+
     return render_template('results.html',
                            title='results',
                            region=region,
@@ -53,12 +87,6 @@ def search():
                            diagram_link=diagram_link)
 
 
-    # arguments = request.args
-    # profstandards = arguments.getlist('prof')
-    # region = arguments.get('region')
-    # source = arguments.get('source')
-    # sdate = arguments.get('sdate')
-    # edate = arguments.get('edate')
 
     # for pid in profstandards:
     #     profstandard = Profstandard.query.get(id)
@@ -71,9 +99,6 @@ def search():
     #         link = 'NULL'
     # prof_id = profstandards
 
-
-    # obj = {'profstandard_id': prof_id, 'name':prof_name, 'count': vac_count, 'link_diagram':link}
-    # return str(priofstandards) #render_template('search.html', title='search', obj=obj)
 
 if __name__ == '__main__':
     app.run(debug = True)
