@@ -1,5 +1,5 @@
-from datetime import datetime
 from app import db
+
 
 class Region(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -10,18 +10,19 @@ class Region(db.Model):
     def __repr__(self):
         return '<Region {}>'.format(self.name)
 
+
 class Vacancy(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     region_id = db.Column(db.Integer, db.ForeignKey('region.id'))
     source_id = db.Column(db.Integer, db.ForeignKey('source.id'))
     name = db.Column(db.String(64))
     create_date = db.Column(db.DateTime, index=True)
-    
 
     # vacancy_part = db.relationship('VacancyPart', backref='vacancy', lazy='dynamic')
 
     def __repr__(self):
         return '<Vacancy {}>'.format(self.name)
+
 
 class ClassificatedVacancy(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -87,18 +88,19 @@ class ClassificatedVacancy(db.Model):
 #     def __repr__(self):
 #         return '<General {}>'.format(self.name)
 
+
 class Profstandard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.Float, unique=True)
     name = db.Column(db.String(128), index=True, unique=True)
     is_support = db.Column(db.Boolean)
 
-
     # generals = db.relationship('General', backref='profstandard', lazy='dynamic')
     vacancies = db.relationship('ClassificatedVacancy', backref ='profstandard', lazy ='dynamic')
 
     def __repr__(self):
         return '<Profstandard {}>'.format(self.name)
+
 
 class Source(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -109,5 +111,3 @@ class Source(db.Model):
 
     def __repr__(self):
         return '<Source {}>'.format(self.name)
-
-    
