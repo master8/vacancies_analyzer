@@ -2,6 +2,8 @@ from flask import Flask, request
 from flask import render_template
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+import seaborn as sns
+import numpy as np
 
 from config import Config
 
@@ -90,7 +92,20 @@ def search():
 
 
 def plot_search(professions):
+    t = []
+    num = []
+    for i in professions:
+        t.append(i['code'])
+        num.append(i['count'])
+    x = np.array(t)
+    y = np.array(num)
+
+    diagram = sns.barplot(x=x, y=y, palette="rocket")
+    dia = diagram.get_figure()
+    dia.savefig('./static/diagram/test_diagram.svg')
+    
     diagram_link = '../static/diagram/test_diagram.svg'
+    #diagram_link = 'test_diagram.svg'
     return diagram_link
 
 
