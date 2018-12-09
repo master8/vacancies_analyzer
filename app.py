@@ -55,8 +55,9 @@ def search():
 
         class_vacancy = ClassificatedVacancy.query.filter_by(profstandard_id = prof_id)
         for sample in class_vacancy:
-            vacancy = Vacancy.query.filter_by(id=sample.vacancy_id)
-            count +=1
+            vacancy = Vacancy.query.filter_by(id=sample.vacancy_id).filter_by(region_id = reg_id).filter_by(source_id = source_id)
+            for i in vacancy:
+                count +=1
 
 
         prof_dict = {
@@ -76,7 +77,7 @@ def search():
             'count': 0
         }]
 
-    diagram_link = '../static/diagram/test_diagram.svg'
+    diagram_link = plot_search(professions)
 
     return render_template('results.html',
                            title='results',
@@ -88,16 +89,10 @@ def search():
 
 
 
-    # for pid in profstandards:
-    #     profstandard = Profstandard.query.get(id)
-    #     prof_name = profstandard.name
-    #     class_vacancy = ClassificatedVacancy.query.filter_by(profstandard_id = pid).all()
-    #     for sample in class_vacancy:
-    #         vac = Vacancy.query.filter_by(id=sample.vacancy_id).first()
-    #         vac_count =0 
-    #         vac_count +=1
-    #         link = 'NULL'
-    # prof_id = profstandards
+def plot_search(professions):
+    diagram_link = '../static/diagram/test_diagram.svg'
+    return diagram_link
+
 
 
 if __name__ == '__main__':
