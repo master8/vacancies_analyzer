@@ -29,25 +29,45 @@ def home():
 @app.route('/analyze')
 def analyze():
     pr = Profstandard.query.get(14)
-    return 'analyze results ' + str(request.args) + ' ' + pr.name
+    return 'analyze results ' + str(request.args.getlist('prof')) + ' ' + pr.name
 
 @app.route('/search')
 def search():
-    arguments = request.args
-    for pid in profstandards:
-        profstandard = Profstandard.query.get(id)
-        prof_name = profstandard.name
-        class_vacancy = ClassificatedVacancy.query.filter_by(profstandard_id = pid).all()
+    count = 0
+    prof = request.args.getlist('prof')
+    for pid in prof:
+        profstandard = Profstandard.query.get(pid)
+        class_vacancy = ClassificatedVacancy.query.filter_by(profstandard_id = pid)
+    
         for sample in class_vacancy:
-            vac = Vacancy.query.filter_by(id=sample.vacancy_id).first()
-            vac_count =0 
-            vac_count +=1
-            link = 'NULL'
-    prof_id = profstandards
+            
+            vacancy = Vacancy.query.filter_by(id=sample.vacancy_id)
+            count +=1
+            
+    return vacancy.name
 
 
-    obj = {'profstandard_id': prof_id, 'name':prof_name, 'count': vac_count, 'link_diagram':link}
-    return link#render_template('search.html', title='search', obj=obj)
+    # arguments = request.args
+    # profstandards = arguments.getlist('prof')
+    # region = arguments.get('region')
+    # source = arguments.get('source')
+    # sdate = arguments.get('sdate')
+    # edate = arguments.get('edate')
+
+    # for pid in profstandards:
+    #     profstandard = Profstandard.query.get(id)
+    #     prof_name = profstandard.name
+    #     class_vacancy = ClassificatedVacancy.query.filter_by(profstandard_id = pid).all()
+    #     for sample in class_vacancy:
+    #         vac = Vacancy.query.filter_by(id=sample.vacancy_id).first()
+    #         vac_count =0 
+    #         vac_count +=1
+    #         link = 'NULL'
+    # prof_id = profstandards
+
+
+    # obj = {'profstandard_id': prof_id, 'name':prof_name, 'count': vac_count, 'link_diagram':link}
+    # return str(priofstandards) #render_template('search.html', title='search', obj=obj)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug = True)
