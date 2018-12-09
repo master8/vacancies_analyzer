@@ -12,7 +12,6 @@ migrate = Migrate(app, db)
 
 from models import Profstandard, Source, Region
 
-from models import ClassificatedVacancy
 
 # @app.route('/')
 # def hello_world():
