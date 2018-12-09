@@ -27,7 +27,11 @@
                             <div class="uk-form-label">You may select multiple professions</div>
                             <div class="uk-form-controls uk-list">
                                 {% for profession in professions %}
-                                    <label><input class="uk-checkbox" type="checkbox" value="{{ profession.id }}" name="prof"> {{ profession.name }}</label><br>
+                                    <label><input class="uk-checkbox"
+                                            {% if profession.is_support == False %}
+                                                  disabled
+                                            {% endif %}
+                                                  type="checkbox" value="{{ profession.id }}" name="prof"> {{ profession.name }}</label><br>
                                 {% endfor %}
                             </div>
                         </div>
@@ -41,10 +45,9 @@
                             <label class="uk-form-label" for="form-stacked_select">Region</label>
                             <div class="uk-form-controls">
                                 <select name="region" class="uk-select uk-form-width-medium" id="form-stacked_select">
-                                    <option>Москва</option>
-                                    <option>Санкт-Петербург</option>
-                                    <option>Челябинск</option>
-                                    <option>Казань</option>
+                                    {% for region in regions %}
+                                        <option value="{{ region.id }}">{{ region.name }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                         </div>
@@ -57,8 +60,13 @@
                         <div class="uk-margin">
                             <div class="uk-form-label">Source</div>
                             <div class="uk-form-controls">
-                                <label><input class="uk-radio" type="radio" value="hh" name="source" checked> HeadHunter</label><br>
-                                <label><input class="uk-radio" type="radio" disabled value="sj" name="source"> Superjob</label>
+                                {% for source in sources %}
+                                    <label><input class="uk-radio"
+                                            {% if source.is_support == False %}
+                                                  disabled
+                                            {% endif %}
+                                                  type="radio" value="{{ source.id }}" name="source"> {{ source.name }}</label><br>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
