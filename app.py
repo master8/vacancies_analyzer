@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 import seaborn as sns
 import numpy as np
+from datetime import datetime
 
 from config import Config
 
@@ -44,6 +45,9 @@ def search():
     sdate = request.args.get('sdate')
     edate = request.args.get('edate')
 
+    dt_sdate = datetime.strptime(sdate,"%Y-%m-%d")
+    dt_edate = datetime.strptime(edate,"%Y-%m-%d")
+
     period = 'from: ' + str(sdate)+' to: '+str(edate) #месяц - день - год
 
     prof_id_list = request.args.getlist('prof')
@@ -57,7 +61,11 @@ def search():
 
         class_vacancy = ClassificatedVacancy.query.filter_by(profstandard_id = prof_id)
         for sample in class_vacancy:
-            vacancy = Vacancy.query.filter_by(id=sample.vacancy_id).filter_by(region_id = reg_id).filter_by(source_id = source_id)
+            vacancy = Vacancy.query.filter_by(id=sample.vacancy_id)\
+                .filter(Vacancy.create_date <= dt_edate)\
+                .filter(Vacancy.create_date >= dt_sdate)\
+                .filter_by(region_id = reg_id)\
+                .filter_by(source_id = source_id)
             for i in vacancy:
                 count +=1
 
