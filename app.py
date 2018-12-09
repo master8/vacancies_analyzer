@@ -26,10 +26,47 @@ def home():
     return render_template('index.html', title='home', professions=professions, regions=regions, sources=sources)
 
 
-@app.route('/analyze')
-def analyze():
-    pr = Profstandard.query.get(14)
-    return 'analyze results ' + str(request.args) + ' ' + pr.name
+@app.route('/search')
+def search():
+
+    region = 'Москва'
+    source = 'HeadHunter'
+    period = '12.08.2018 - 23.10.2018'
+
+    professions = [
+        {
+            'profstandard_id': 14,
+            'code': '06.086',
+            'name': 'Программист',
+            'count': 35
+        },
+        {
+            'profstandard_id': 4,
+            'code': '06.060',
+            'name': 'Системный аналитик',
+            'count': 11
+        },
+        {
+            'profstandard_id': 5,
+            'code': '06.076',
+            'name': 'Менеджер по информационным технологиям',
+            'count': 5
+        }
+    ]
+    diagram_link = '../static/diagram/test_diagram.svg'
+
+    return render_template('results.html',
+                           title='results',
+                           region=region,
+                           source=source,
+                           period=period,
+                           professions=professions,
+                           diagram_link=diagram_link)
+
+
+@app.route('/profession')
+def profession():
+    return 'profession ' + str(request.args['id'])
 
 
 if __name__ == '__main__':
