@@ -25,14 +25,25 @@
 
                     <div class="uk-margin">
                         <div class="uk-form-label">You may select multiple professions</div>
-                        <div class="uk-form-controls uk-list">
-                            {% for profession in professions %}
-                                <label><input class="uk-checkbox"
-                                        {% if profession.is_support == False %}
-                                              disabled
-                                        {% endif %}
-                                              type="checkbox" value="{{ profession.id }}" name="prof"> {{ profession.name }}</label><br>
-                            {% endfor %}
+                        <div class="uk-form-controls uk-list uk-margin-top">
+                            <div class="uk-overflow-auto">
+                                <table class="uk-table uk-table-middle uk-table-divider">
+                                    <tbody>
+                                        {% for profession in professions %}
+                                            <tr>
+                                                <td class="uk-table-shrink">
+                                                    <input class="uk-checkbox"
+                                                            {% if profession.is_support == False %}
+                                                           disabled
+                                                            {% endif %}
+                                                           type="checkbox" value="{{ profession.id }}" name="prof">
+                                                </td>
+                                                <td class="uk-text-truncate uk-table-expand">{{ profession.name }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
