@@ -10,7 +10,9 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-from models import Profstandard, Vacancy, ClassificatedVacancy
+from models import Profstandard, Source, Region
+
+from models import ClassificatedVacancy
 
 # @app.route('/')
 # def hello_world():
