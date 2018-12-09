@@ -13,11 +13,6 @@ migrate = Migrate(app, db)
 from models import Profstandard, Source, Region
 
 
-# @app.route('/')
-# def hello_world():
-#     user = {'username': 'Michael'}
-#     return render_template('index.html', title="Hello", user=user)
-
 @app.route('/')
 def home():
     professions = Profstandard.query.all()
