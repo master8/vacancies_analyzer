@@ -113,6 +113,5 @@ def analyze():
 def search(sdate,edate,profstandards = list(),regions = list()):
     pass
 
-
 if __name__ == '__main__':
-app.run()
+    app.run()
