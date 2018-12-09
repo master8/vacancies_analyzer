@@ -44,7 +44,13 @@ def search():
             vacancy = Vacancy.query.filter_by(id=sample.vacancy_id)
             count +=1
             
-    return vacancy.name
+    return render_template('results.html',
+                           title='results',
+                           region=region,
+                           source=source,
+                           period=period,
+                           professions=professions,
+                           diagram_link=diagram_link)
 
 
     # arguments = request.args
