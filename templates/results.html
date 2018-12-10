@@ -12,7 +12,7 @@
 <div class="uk-padding">
     <div class="uk-card uk-card-default uk-card-body">
         <h1 class="uk-text-center">Search vacancies results</h1>
-        <p class="uk-text-center">Region: <b>{{ region }}</b> Source: <b>{{ source }}</b> Period: <b>{{ period }}</b></p>
+        <p class="uk-text-center">Region: <b>{{ region.name }}</b> Source: <b>{{ source.name }}</b> Period: <b>{{ period }}</b></p>
         <a class="uk-button uk-button-default uk-align-right" href="/">Home</a>
     </div>
 </div>
@@ -34,7 +34,7 @@
                                 <tr>
                                     <td class="uk-text-nowrap">{{ profession.code }}</td>
                                     <td class="uk-table-link">
-                                        <a class="uk-link-reset" href="/profession?id={{ profession.profstandard_id }}">
+                                        <a class="uk-link-reset" href="/profession?id={{ profession.profstandard_id }}&region={{ region.id }}&source={{ source.id }}&sdate={{ sdate }}&edate={{ edate }}">
                                             {{ profession.name }}
                                         </a>
                                     </td>

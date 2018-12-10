@@ -33,10 +33,10 @@ def profession():
 @app.route('/search')
 def search():
     reg_id = request.args.get('region')
-    region = Region.query.get(reg_id).name
+    region = Region.query.get(reg_id)
 
     source_id = request.args.get('source')
-    source = Source.query.get(source_id).name
+    source = Source.query.get(source_id)
 
     sdate = request.args.get('sdate')
     edate = request.args.get('edate')
@@ -50,24 +50,20 @@ def search():
     professions = []
 
     for prof_id in prof_id_list:
-        count = 0
 
-        class_vacancy = ClassificatedVacancy.query.filter_by(profstandard_id=prof_id)
-        for sample in class_vacancy:
-            vacancy = Vacancy.query.filter_by(id=sample.vacancy_id) \
-                .filter(Vacancy.create_date <= dt_edate) \
-                .filter(Vacancy.create_date >= dt_sdate) \
-                .filter_by(region_id=reg_id) \
-                .filter_by(source_id=source_id)
-            for i in vacancy:
-                count += 1
+        vacancy = Vacancy.query\
+            .filter(ClassificatedVacancy.profstandard_id == prof_id) \
+            .filter(Vacancy.id == ClassificatedVacancy.vacancy_id) \
+            .filter(Vacancy.create_date <= dt_edate) \
+            .filter(Vacancy.create_date >= dt_sdate) \
+            .filter_by(region_id=reg_id) \
+            .filter_by(source_id=source_id)
 
-        prof_dict = {}
         prof_dict = {
             'profstandard_id': prof_id,
             'code': Profstandard.query.get(prof_id).code,
             'name': Profstandard.query.get(prof_id).name,
-            'count': count
+            'count': vacancy.count()
         }
         professions.append(prof_dict)
 
@@ -87,7 +83,9 @@ def search():
                            source=source,
                            period=period,
                            professions=professions,
-                           diagram_link=diagram_link)
+                           diagram_link=diagram_link,
+                           sdate=request.args['sdate'],
+                           edate=request.args['edate'])
 
 
 def plot_search(professions):
