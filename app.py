@@ -27,33 +27,54 @@ def home():
 
 @app.route('/profession')
 def profession():
-    vacancies = [
-        {
-            'id':1,
-            'name': 'jjeoifwjefiyowe ejfiowf efoiejff',
-            'probability': '0.8'
-        },
-        {
-            'id': 2,
-            'name': 'jjeoifwjefiyowe ejfiowf efoiejff',
-            'probability': '0.8'
-        },
-        {
-            'id': 3,
-            'name': 'jjeoifwjefiyowe ejfiowf efoiejff',
-            'probability': '0.8'
-        },
-        {
-            'id': 4,
-            'name': 'jjeoifwjefiyowe ejfiowf efoiejff',
-            'probability': '0.8'
+
+    reg_id = request.args.get('region')
+
+    source_id = request.args.get('source')
+    prof_id = request.args.get('id')
+    sdate = request.args.get('sdate')
+    edate = request.args.get('edate')
+    dt_sdate = datetime.strptime(sdate, "%Y-%m-%d")
+    dt_edate = datetime.strptime(edate, "%Y-%m-%d")
+
+    vacancy = Vacancy.query\
+            .filter(ClassificatedVacancy.profstandard_id == prof_id) \
+            .filter(Vacancy.id == ClassificatedVacancy.vacancy_id) \
+            .filter(Vacancy.create_date <= dt_edate) \
+            .filter(Vacancy.create_date >= dt_sdate) \
+            .filter_by(region_id=reg_id) \
+            .filter_by(source_id=source_id)\
+            .order_by(ClassificatedVacancy.probability).all()
+
+    length = len(vacancy)
+    best_vacancies = []
+    worst_vacancies = []
+
+    for i in (0,1,2,3,4): #FIXME 2 часа ночи
+        worst_vacancy = {
+            'id':vacancy[i].id,
+            'name':vacancy[i].name ,
+            'probability': ClassificatedVacancy.query.filter(ClassificatedVacancy.vacancy_id == vacancy[i].id)\
+                            .filter(ClassificatedVacancy.profstandard_id == prof_id).first().probability
         }
-    ]
+        worst_vacancies.append(worst_vacancy)
+
+    for i in (length-1,length-2,length-3,length-4,length-5):
+        best_vacancy = {
+            'id':vacancy[i].id,
+            'name':vacancy[i].name ,
+            'probability': ClassificatedVacancy.query.filter(ClassificatedVacancy.vacancy_id == vacancy[i].id)\
+                            .filter(ClassificatedVacancy.profstandard_id == prof_id).first().probability
+        }
+        best_vacancies.append(best_vacancy)
+
+
+
     return render_template('profession.html',
                            title='profession',
-                           best_vacancies=vacancies,
-                           worst_vacancies=vacancies,
-                           profession='Программист')
+                           best_vacancies=best_vacancies,
+                           worst_vacancies=worst_vacancies,
+                           profession=Profstandard.query.get(prof_id).name)
 
 
 @app.route('/vacancy')

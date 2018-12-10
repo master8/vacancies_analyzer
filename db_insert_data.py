@@ -6,7 +6,7 @@ from models import Vacancy
 from models import ClassificatedVacancy
 from datetime import datetime
 
-# Накатывать на чистую базу
+#Накатывать на чистую базу
 
 regions = pd.read_csv('data/regions.csv')
 
