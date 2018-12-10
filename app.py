@@ -3,7 +3,9 @@ from flask import render_template
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 import seaborn as sns
+
 import numpy as np
+import os
 from datetime import datetime
 
 from config import Config
@@ -44,7 +46,6 @@ def search():
 
     sdate = request.args.get('sdate')
     edate = request.args.get('edate')
-
     dt_sdate = datetime.strptime(sdate,"%Y-%m-%d")
     dt_edate = datetime.strptime(edate,"%Y-%m-%d")
 
@@ -69,7 +70,7 @@ def search():
             for i in vacancy:
                 count +=1
 
-
+        prof_dict = {}
         prof_dict = {
             'profstandard_id': prof_id,
             'code': Profstandard.query.get(prof_id).code,
@@ -88,7 +89,7 @@ def search():
         }]
 
     diagram_link = plot_search(professions)
-
+    
     return render_template('results.html',
                            title='results',
                            region=region,
@@ -102,20 +103,28 @@ def search():
 def plot_search(professions):
     t = []
     num = []
+
     for i in professions:
-        t.append(i['code'])
+        t.append(str(i['code']))
         num.append(i['count'])
     x = np.array(t)
     y = np.array(num)
 
-    diagram = sns.barplot(x=x, y=y, palette="rocket")
+    diagram = sns.barplot(x=x, y=y)
+    diagram.clear()
+    diagram = sns.barplot(x=x, y=y)
     dia = diagram.get_figure()
-    dia.savefig('./static/diagram/test_diagram.svg')
     
+    dia.savefig('./static/diagram/test_diagram.svg')   
     diagram_link = '../static/diagram/test_diagram.svg'
-    #diagram_link = 'test_diagram.svg'
+
     return diagram_link
 
+@app.after_request
+def add_header(response):
+    response.headers['X-UA-Compatible'] = 'IE=Edge,chrome=1'
+    response.headers['Cache-Control'] = 'public, max-age=0'
+    return response
 
 
 if __name__ == '__main__':
