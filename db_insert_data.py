@@ -3,10 +3,30 @@ from app import db
 from models import Region
 from models import Profstandard
 from models import Vacancy
+from models import Source
 from models import ClassificatedVacancy
 from datetime import datetime
 
 #Накатывать на чистую базу
+
+first_source = Source(id=1,name='HeadHunter',is_support=True)
+second_source = Source(id=2,name='SuperJob',is_support=False)
+
+db.session.add(first_source)
+db.session.add(second_source)
+
+db.session.commit()
+
+class Source(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), index=True, unique=True)
+    is_support = db.Column(db.Boolean)
+
+    vacancies = db.relationship('Vacancy', backref ='source', lazy ='dynamic')
+
+    def __repr__(self):
+        return '<Source {}>'.format(self.name)
+
 
 regions = pd.read_csv('data/regions.csv')
 
