@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ title }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../static/css/uikit.min.css" />
+    <script src="../static/js/uikit.min.js"></script>
+    <script src="../static/js/uikit-icons.min.js"></script>
+</head>
+<body>
+<div class="uk-padding">
+    <div class="uk-card uk-card-default uk-card-body">
+        <h1 class="uk-text-center">Statistic for searched vacancies</h1>
+        <p class="uk-text-center">Profession: <b>{{ profession }}</b></p>
+        <a class="uk-button uk-button-default uk-align-right" href="/">Home</a>
+    </div>
+</div>
+<div class="uk-padding uk-padding-remove-top">
+    <div class="uk-child-width-expand@s" uk-grid>
+        <div>
+            <div class="uk-card uk-card-default uk-card-body">
+                <div class="uk-overflow-auto">
+                    <h3>Top best classification probability</h3>
+                    <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+                        <thead>
+                            <tr>
+                                <th class="uk-table-shrink">Probability</th>
+                                <th class="uk-table-expand">Vacancy title</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vacancy in best_vacancies %}
+                                <tr>
+                                    <td class="uk-text-nowrap">{{ vacancy.probability }}</td>
+                                    <td class="uk-table-link">
+                                        <a class="uk-link-reset" href="/vacancy?id={{ vacancy.id }}">
+                                            {{ vacancy.name }}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="uk-card uk-card-secondary uk-card-body">
+                <div class="uk-overflow-auto">
+                    <h3>Top worst classification probability</h3>
+                    <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+                        <thead>
+                            <tr>
+                                <th class="uk-table-shrink">Probability</th>
+                                <th class="uk-table-expand">Vacancy title</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vacancy in worst_vacancies %}
+                                <tr>
+                                    <td class="uk-text-nowrap">{{ vacancy.probability }}</td>
+                                    <td class="uk-table-link">
+                                        <a class="uk-link-reset" href="/vacancy?id={{ vacancy.id }}">
+                                            {{ vacancy.name }}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

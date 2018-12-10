@@ -27,7 +27,38 @@ def home():
 
 @app.route('/profession')
 def profession():
-    return 'profession ' + request.args['id']
+    vacancies = [
+        {
+            'id':1,
+            'name': 'jjeoifwjefiyowe ejfiowf efoiejff',
+            'probability': '0.8'
+        },
+        {
+            'id': 2,
+            'name': 'jjeoifwjefiyowe ejfiowf efoiejff',
+            'probability': '0.8'
+        },
+        {
+            'id': 3,
+            'name': 'jjeoifwjefiyowe ejfiowf efoiejff',
+            'probability': '0.8'
+        },
+        {
+            'id': 4,
+            'name': 'jjeoifwjefiyowe ejfiowf efoiejff',
+            'probability': '0.8'
+        }
+    ]
+    return render_template('profession.html',
+                           title='profession',
+                           best_vacancies=vacancies,
+                           worst_vacancies=vacancies,
+                           profession='Программист')
+
+
+@app.route('/vacancy')
+def vacancy():
+    return 'vacancy ' + str(request.args['id'])
 
 
 @app.route('/search')
