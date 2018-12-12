@@ -100,7 +100,7 @@ def profession():
         .filter(Vacancy.create_date >= dt_sdate) \
         .filter_by(region_id=reg_id) \
         .filter_by(source_id=source_id) \
-        .order_by(ClassificatedVacancy.probability).all()
+        .order_by(ClassificatedVacancy.probability)
 
     best_vacancies = []
     worst_vacancies = []
