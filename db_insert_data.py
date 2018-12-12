@@ -17,18 +17,6 @@ db.session.add(second_source)
 
 db.session.commit()
 
-
-class Source(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), index=True, unique=True)
-    is_support = db.Column(db.Boolean)
-
-    vacancies = db.relationship('Vacancy', backref='source', lazy='dynamic')
-
-    def __repr__(self):
-        return '<Source {}>'.format(self.name)
-
-
 regions = pd.read_csv('data/regions.csv')
 
 for index, region in regions.iterrows():

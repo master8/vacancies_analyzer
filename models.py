@@ -31,7 +31,7 @@ class ClassifiedVacancy(db.Model):
     probability = db.Column(db.Float)
 
     def __repr__(self):
-        return '<ClassificatedVacancy {}>'.format(self.name)
+        return '<ClassifiedVacancy {}>'.format(self.name)
 
 
 # class VacancyPart(db.Model):
@@ -96,7 +96,7 @@ class Profstandard(db.Model):
     is_support = db.Column(db.Boolean)
 
     # generals = db.relationship('General', backref='profstandard', lazy='dynamic')
-    vacancies = db.relationship('ClassificatedVacancy', backref ='profstandard', lazy ='dynamic')
+    vacancies = db.relationship('ClassifiedVacancy', backref ='profstandard', lazy ='dynamic')
 
     def __repr__(self):
         return '<Profstandard {}>'.format(self.name)
