@@ -18,43 +18,43 @@ class Vacancy(db.Model):
     name = db.Column(db.String(64))
     create_date = db.Column(db.DateTime, index=True)
 
-    # vacancy_part = db.relationship('VacancyPart', backref='vacancy', lazy='dynamic')
+    vacancy_part = db.relationship('VacancyPart', backref='vacancy', lazy='dynamic')
 
     def __repr__(self):
         return '<Vacancy {}>'.format(self.name)
 
 
-class ClassificatedVacancy(db.Model):
+class ClassifiedVacancy(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     vacancy_id = db.Column(db.Integer, db.ForeignKey('vacancy.id'))
     profstandard_id = db.Column(db.Integer, db.ForeignKey('profstandard.id'))
     probability = db.Column(db.Float)
 
     def __repr__(self):
-        return '<ClassificatedVacancy {}>'.format(self.name)
+        return '<ClassifiedVacancy {}>'.format(self.name)
 
 
-# class VacancyPart(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     vac_id = db.Column(db.Integer, db.ForeignKey('vacancy.id'))
-#     competence = db.Column(db.Integer, db.ForeignKey('competence.id'))
-#     similarity = db.Column(db.Float)
-#     text = db.Column(db.Text) #? длина части вакансии или формат
-#     requirements_id = db.Column(db.Integer, db.ForeignKey('requirements.id'))
+class VacancyPart(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    vac_id = db.Column(db.Integer, db.ForeignKey('vacancy.id'))
+    competence_id = db.Column(db.Integer, db.ForeignKey('competence.id'))
+    similarity = db.Column(db.Float)
+    text = db.Column(db.Text) 
+    requirement_id = db.Column(db.Integer, db.ForeignKey('requirement.id'))
 
-#     competences = db.relationship('Competence', backref ='vac_part', lazy ='dynamic')
+    competences = db.relationship('Competence', backref ='vac_part', lazy ='dynamic')
 
-#     def __repr__(self):
-#         return '<VacancyPart {}>'.format(self.text)
+    def __repr__(self):
+        return '<VacancyPart {}>'.format(self.text)
 
-# class Requirements(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(64), index=True, unique=True)
+class Requirement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), index=True, unique=True)
 
-#     vacancies = db.relationship('VacancyPart', backref ='requirement', lazy ='dynamic') #хз так или нет
+    vacancies = db.relationship('VacancyPart', backref ='requirement', lazy ='dynamic') #хз так или нет
 
-#     def __repr__(self):
-#         return '<Requirements {}>'.format(self.name)
+    def __repr__(self):
+        return '<Requirement {}>'.format(self.name)
 
 # class Competence(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
@@ -91,12 +91,12 @@ class ClassificatedVacancy(db.Model):
 
 class Profstandard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.Float, unique=True)
+    code = db.Column(db.String(64), unique=True)
     name = db.Column(db.String(128), index=True, unique=True)
     is_support = db.Column(db.Boolean)
 
     # generals = db.relationship('General', backref='profstandard', lazy='dynamic')
-    vacancies = db.relationship('ClassificatedVacancy', backref ='profstandard', lazy ='dynamic')
+    vacancies = db.relationship('ClassifiedVacancy', backref ='profstandard', lazy ='dynamic')
 
     def __repr__(self):
         return '<Profstandard {}>'.format(self.name)

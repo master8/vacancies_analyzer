@@ -14,9 +14,9 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-from models import Profstandard, Source, Region, Vacancy, ClassificatedVacancy
+from models import Profstandard, Source, Region, Vacancy, ClassifiedVacancy
 
-
+ 
 @app.route('/')
 def home():
     professions = Profstandard.query.all()
@@ -38,13 +38,13 @@ def profession():
     dt_edate = datetime.strptime(edate, "%Y-%m-%d")
 
     vacancy = Vacancy.query\
-            .filter(ClassificatedVacancy.profstandard_id == prof_id) \
-            .filter(Vacancy.id == ClassificatedVacancy.vacancy_id) \
+            .filter(ClassifiedVacancy.profstandard_id == prof_id) \
+            .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
             .filter(Vacancy.create_date <= dt_edate) \
             .filter(Vacancy.create_date >= dt_sdate) \
             .filter_by(region_id=reg_id) \
             .filter_by(source_id=source_id)\
-            .order_by(ClassificatedVacancy.probability).all()
+            .order_by(ClassifiedVacancy.probability).all()
 
     length = len(vacancy)
     best_vacancies = []
@@ -54,8 +54,8 @@ def profession():
         worst_vacancy = {
             'id':vacancy[i].id,
             'name':vacancy[i].name ,
-            'probability': ClassificatedVacancy.query.filter(ClassificatedVacancy.vacancy_id == vacancy[i].id)\
-                            .filter(ClassificatedVacancy.profstandard_id == prof_id).first().probability
+            'probability': ClassifiedVacancy.query.filter(ClassifiedVacancy.vacancy_id == vacancy[i].id)\
+                            .filter(ClassifiedVacancy.profstandard_id == prof_id).first().probability
         }
         worst_vacancies.append(worst_vacancy)
 
@@ -63,8 +63,8 @@ def profession():
         best_vacancy = {
             'id':vacancy[i].id,
             'name':vacancy[i].name ,
-            'probability': ClassificatedVacancy.query.filter(ClassificatedVacancy.vacancy_id == vacancy[i].id)\
-                            .filter(ClassificatedVacancy.profstandard_id == prof_id).first().probability
+            'probability': ClassifiedVacancy.query.filter(ClassifiedVacancy.vacancy_id == vacancy[i].id)\
+                            .filter(ClassifiedVacancy.profstandard_id == prof_id).first().probability
         }
         best_vacancies.append(best_vacancy)
 
@@ -104,8 +104,8 @@ def search():
     for prof_id in prof_id_list:
 
         vacancy = Vacancy.query\
-            .filter(ClassificatedVacancy.profstandard_id == prof_id) \
-            .filter(Vacancy.id == ClassificatedVacancy.vacancy_id) \
+            .filter(ClassifiedVacancy.profstandard_id == prof_id) \
+            .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
             .filter(Vacancy.create_date <= dt_edate) \
             .filter(Vacancy.create_date >= dt_sdate) \
             .filter_by(region_id=reg_id) \

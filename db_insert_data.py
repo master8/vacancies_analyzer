@@ -4,7 +4,7 @@ from models import Region
 from models import Profstandard
 from models import Vacancy
 from models import Source
-from models import ClassificatedVacancy
+from models import ClassifiedVacancy
 from datetime import datetime
 
 #Накатывать на чистую базу
@@ -67,7 +67,7 @@ for index, vacancy in classified_vacancies.iterrows():
 
     labels = vacancy['labels'].split(',')
     for label in list(map(str.strip, labels)):
-        value = ClassificatedVacancy(
+        value = ClassifiedVacancy(
             vacancy_id=vacancy['vacancy_id'],
             profstandard_id=label,
             probability=vacancy['p' + str(label)]
