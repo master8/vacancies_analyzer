@@ -4,25 +4,26 @@ from models import Region
 from models import Profstandard
 from models import Vacancy
 from models import Source
-from models import ClassificatedVacancy
+from models import ClassifiedVacancy
 from datetime import datetime
 
-#Накатывать на чистую базу
+# Накатывать на чистую базу
 
-first_source = Source(id=1,name='HeadHunter',is_support=True)
-second_source = Source(id=2,name='SuperJob',is_support=False)
+first_source = Source(id=1, name='HeadHunter', is_support=True)
+second_source = Source(id=2, name='SuperJob', is_support=False)
 
 db.session.add(first_source)
 db.session.add(second_source)
 
 db.session.commit()
 
+
 class Source(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), index=True, unique=True)
     is_support = db.Column(db.Boolean)
 
-    vacancies = db.relationship('Vacancy', backref ='source', lazy ='dynamic')
+    vacancies = db.relationship('Vacancy', backref='source', lazy='dynamic')
 
     def __repr__(self):
         return '<Source {}>'.format(self.name)
@@ -36,7 +37,6 @@ for index, region in regions.iterrows():
 
 db.session.commit()
 
-
 profstandards = pd.read_csv('data/profstandards.csv', dtype='str')
 profstandards['id'] = profstandards['id'].astype('int')
 profstandards['is_support'] = profstandards['is_support'].apply(lambda v: v == 'True')
@@ -46,7 +46,6 @@ for index, pr in profstandards.iterrows():
     db.session.add(value)
 
 db.session.commit()
-
 
 vacancies = pd.read_csv('data/vacancies.csv')
 
@@ -60,14 +59,13 @@ for index, vacancy in vacancies.iterrows():
 
 db.session.commit()
 
-
 classified_vacancies = pd.read_csv('data/classified_vacancies.csv')
 
 for index, vacancy in classified_vacancies.iterrows():
 
     labels = vacancy['labels'].split(',')
     for label in list(map(str.strip, labels)):
-        value = ClassificatedVacancy(
+        value = ClassifiedVacancy(
             vacancy_id=vacancy['vacancy_id'],
             profstandard_id=label,
             probability=vacancy['p' + str(label)]

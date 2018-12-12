@@ -24,7 +24,7 @@ class Vacancy(db.Model):
         return '<Vacancy {}>'.format(self.name)
 
 
-class ClassificatedVacancy(db.Model):
+class ClassifiedVacancy(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     vacancy_id = db.Column(db.Integer, db.ForeignKey('vacancy.id'))
     profstandard_id = db.Column(db.Integer, db.ForeignKey('profstandard.id'))

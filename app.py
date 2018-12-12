@@ -14,7 +14,7 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-from models import Profstandard, Source, Region, Vacancy, ClassificatedVacancy
+from models import Profstandard, Source, Region, Vacancy, ClassifiedVacancy
 
 
 @app.route('/')
@@ -46,8 +46,8 @@ def search():
 
     for prof_id in prof_id_list:
         vacancy = Vacancy.query \
-            .filter(ClassificatedVacancy.profstandard_id == prof_id) \
-            .filter(Vacancy.id == ClassificatedVacancy.vacancy_id) \
+            .filter(ClassifiedVacancy.profstandard_id == prof_id) \
+            .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
             .filter(Vacancy.create_date <= dt_edate) \
             .filter(Vacancy.create_date >= dt_sdate) \
             .filter_by(region_id=reg_id) \
@@ -93,14 +93,14 @@ def profession():
     dt_sdate = datetime.strptime(sdate, "%Y-%m-%d")
     dt_edate = datetime.strptime(edate, "%Y-%m-%d")
 
-    query = db.session.query(Vacancy, ClassificatedVacancy) \
-        .filter(ClassificatedVacancy.profstandard_id == prof_id) \
-        .filter(Vacancy.id == ClassificatedVacancy.vacancy_id) \
+    query = db.session.query(Vacancy, ClassifiedVacancy) \
+        .filter(ClassifiedVacancy.profstandard_id == prof_id) \
+        .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
         .filter(Vacancy.create_date <= dt_edate) \
         .filter(Vacancy.create_date >= dt_sdate) \
         .filter_by(region_id=reg_id) \
         .filter_by(source_id=source_id) \
-        .order_by(ClassificatedVacancy.probability)
+        .order_by(ClassifiedVacancy.probability)
 
     best_vacancies = []
     worst_vacancies = []
