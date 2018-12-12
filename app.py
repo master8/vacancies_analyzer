@@ -93,7 +93,7 @@ def profession():
     dt_sdate = datetime.strptime(sdate, "%Y-%m-%d")
     dt_edate = datetime.strptime(edate, "%Y-%m-%d")
 
-    vacancies = Vacancy.query \
+    query = db.session.query(Vacancy, ClassificatedVacancy) \
         .filter(ClassificatedVacancy.profstandard_id == prof_id) \
         .filter(Vacancy.id == ClassificatedVacancy.vacancy_id) \
         .filter(Vacancy.create_date <= dt_edate) \
@@ -105,21 +105,19 @@ def profession():
     best_vacancies = []
     worst_vacancies = []
 
-    for vacancy in vacancies[:10]:
+    for vacancy, classified_vacancy in query[:10]:
         worst_vacancy = {
             'id': vacancy.id,
             'name': vacancy.name,
-            'probability': str(ClassificatedVacancy.query.filter(ClassificatedVacancy.vacancy_id == vacancy.id) \
-                               .filter(ClassificatedVacancy.profstandard_id == prof_id).first().probability)[:6]
+            'probability': str(classified_vacancy.probability)[:6]
         }
         worst_vacancies.append(worst_vacancy)
 
-    for vacancy in reversed(vacancies[-10:]):
+    for vacancy, classified_vacancy in reversed(query[-10:]):
         best_vacancy = {
             'id': vacancy.id,
             'name': vacancy.name,
-            'probability': str(ClassificatedVacancy.query.filter(ClassificatedVacancy.vacancy_id == vacancy.id) \
-                               .filter(ClassificatedVacancy.profstandard_id == prof_id).first().probability)[:6]
+            'probability': str(classified_vacancy.probability)[:6]
         }
         best_vacancies.append(best_vacancy)
 
