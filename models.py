@@ -34,7 +34,7 @@ class Function(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True, unique=True)
     code = db.Column(db.String(64))
-    general_function_id = db.Column(db.Integer, db.ForeignKey('generalfunction.id'))
+    general_function_id = db.Column(db.Integer, db.ForeignKey('general_function.id'))
     qualification_level = db.Column(db.Integer)
 
     parts = db.relationship('ProfstandardPart', backref='function', lazy='dynamic')
@@ -58,7 +58,7 @@ class ProfstandardPart(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.Text)
-    part_type_id = db.Column(db.Integer, db.ForeignKey('proftandardparttype.id'))
+    part_type_id = db.Column(db.Integer, db.ForeignKey('profstandard_part_type.id'))
     function_id = db.Column(db.Integer, db.ForeignKey('function.id'))
 
     matched_parts = db.relationship('MatchPart', backref='competence', lazy='dynamic')
@@ -121,7 +121,7 @@ class VacancyPart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     vacancy_id = db.Column(db.Integer, db.ForeignKey('vacancy.id'))
     text = db.Column(db.Text)
-    type_id = db.Column(db.Integer, db.ForeignKey('vacancyparttype.id'))
+    type_id = db.Column(db.Integer, db.ForeignKey('vacancy_part_type.id'))
 
     matching = db.relationship('MatchPart', backref='vacancy_part', lazy='dynamic')
 
@@ -143,8 +143,8 @@ class VacancyPartType(db.Model):
 class MatchPart(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    vacancy_part_id = db.Column(db.Integer, db.ForeignKey('vacancypart.id'))
-    profstandard_part_id = db.Column(db.Integer, db.ForeignKey('profstandardpart.id'))
+    vacancy_part_id = db.Column(db.Integer, db.ForeignKey('vacancy_part.id'))
+    profstandard_part_id = db.Column(db.Integer, db.ForeignKey('profstandard_part.id'))
     similarity = db.Column(db.Float)
     enriched_text = db.Column(db.Text)
 
