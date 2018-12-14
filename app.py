@@ -15,6 +15,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 from models import Profstandard, Source, Region, Vacancy, ClassifiedVacancy
+from models import GeneralFunction, Function, ProfstandardPart, MatchPart, VacancyPart
 
 
 @app.route('/')
@@ -108,7 +109,7 @@ def profession():
     for vacancy, classified_vacancy in query[:10]:
         worst_vacancy = {
             'id': vacancy.id,
-            'name': vacancy.name + 'govno',
+            'name': vacancy.name,
             'probability': str(classified_vacancy.probability)[:6]
         }
         worst_vacancies.append(worst_vacancy)
@@ -116,26 +117,34 @@ def profession():
     for vacancy, classified_vacancy in reversed(query[-10:]):
         best_vacancy = {
             'id': vacancy.id,
-            'name': vacancy.name + 'govno',
+            'name': vacancy.name,
             'probability': str(classified_vacancy.probability)[:6]
         }
         best_vacancies.append(best_vacancy)
 
+    leafs = [
+        {
+            'similarity': 0.3543,
+            'vacancy_part': 'ggwp'
+        }
+
+    ]
+
     parts = [
         {
-            'similarity': 0.4353,
+            'weight': 0.4353,
             'standard_part': 'Внутренние нормативные документы, регламентирующие требования к программному коду, порядок отражения изменений в системе контроля версий',
-            'vacancy_part': 'Автоматизация процессов, установка обновлений операционной системы и критических обновлений для ПО Oracle'
+            'vacancy_part': leafs
         },
         {
-            'similarity': 0.4353,
+            'weight': 0.4353,
             'standard_part': 'Внутренние нормативные документы, регламентирующие требования к программному коду, порядок отражения изменений в системе контроля версий',
-            'vacancy_part': 'Автоматизация процессов, установка обновлений операционной системы и критических обновлений для ПО Oracle'
+            'vacancy_part': leafs
         },
         {
-            'similarity': 0.4353,
+            'weight': 0.4353,
             'standard_part': 'Внутренние нормативные документы, регламентирующие требования к программному коду, порядок отражения изменений в системе контроля версий',
-            'vacancy_part': 'Автоматизация процессов, установка обновлений операционной системы и критических обновлений для ПО Oracle'
+            'vacancy_part': leafs
         }
     ]
 
@@ -180,10 +189,11 @@ def profession():
         },
         {
             'weight': 35.345,
-            'name': 'Руководство продажами организации, формирование сбытовой политики в части инфокоммуникационных систем и/или их составляющих',
+            'name': 'Руководство продажами организации, формирование бытовой политики в части инфокоммуникационных систем и/или их составляющих',
             'functions': functions
         }
     ]
+    general_functions = general_function_tree(prof_id,query)
 
     return render_template('profession.html',
                            title='profession',
@@ -191,6 +201,63 @@ def profession():
                            worst_vacancies=worst_vacancies,
                            profession=Profstandard.query.get(prof_id).name,
                            general_functions=general_functions)
+
+
+def general_function_tree(prof_id,vacancies):
+    tree = []
+    query = GeneralFunction.query.filter_by(profstandard_id = prof_id)
+    for each in query:
+        function, function_weight = function_branch(each.id, vacancies)
+        general_function_branch = {
+            'weight': function_weight,
+            'name': each.name,
+            'functions': function
+        }
+        tree.append(general_function_branch)
+    return tree
+
+def function_branch(general_id,vacancies):
+    branch = []
+    weight = 0
+    query = Function.query.filter_by(general_function_id = general_id)
+    for each in query:
+        part, vacancy_weight = parts_vacancies_leafs(each.id, vacancies)
+        function_parts_branch ={
+            'weight': vacancy_weight,
+            'name': each.name,
+            'parts': part
+        }
+        branch.append(function_parts_branch)
+        weight += vacancy_weight
+    return branch,weight
+
+def parts_vacancies_leafs(function_id, vacancies):
+    leaf = []
+    query = ProfstandardPart.query.filter_by(function_id = function_id)
+    weight = 0
+    for each in query:
+        vacancy = matching_leafs(each.id, 2)  # TODO get 2 from vacancies
+        leaf_parts = {
+            'weight': len(vacancy),
+            'standard_part': each.text,
+            'vacancy_part': vacancy
+        }
+        leaf.append(leaf_parts)
+        weight +=len(vacancy)
+
+    return leaf, weight
+
+def matching_leafs(profstandard_part_id, vacancy_part_id):
+    leaf = []
+    query = MatchPart.query.filter_by(profstandard_part_id=profstandard_part_id)
+    for each in query:
+        leaf_vacancies = {
+            'similarity': each.similarity,
+            'vacancy_part' : VacancyPart.query.filter(VacancyPart.vacancy_id == vacancy_part_id).text #FIXME чет ломается
+        }
+        leaf.append(leaf_vacancies)
+    return leaf
+
 
 
 @app.route('/vacancy')

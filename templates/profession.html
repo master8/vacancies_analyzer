@@ -92,25 +92,34 @@
                             {% for function in general_function.functions %}
                                 <li>
                                     <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
-                                    <div class="uk-accordion-content uk-margin-medium-right">
-                                        <table class="uk-table uk-table-small uk-table-divider">
-                                            <thead>
-                                                <tr>
-                                                    <th class="uk-table-shrink">Similarity</th>
-                                                    <th class="uk-table-expand">Standard part</th>
-                                                    <th class="uk-table-expand">Vacancy part</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
+                                    <div class="uk-accordion-content uk-margin-medium-left">
+                                        <h4>Function parts:</h4>
+                                        <ul uk-accordion>
                                             {% for part in function.parts %}
-                                                <tr>
-                                                    <td>{{ part.similarity }}</td>
-                                                    <td>{{ part.standard_part }}</td>
-                                                    <td>{{ part.vacancy_part }}</td>
-                                                </tr>
+                                                <li>
+                                                    <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
+                                                    <div class="uk-accordion-content uk-margin-large-left">
+
+                                                        <table class="uk-table uk-table-small uk-table-divider">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th class="uk-table-shrink">Similarity</th>
+                                                                    <th class="uk-table-expand">Vacancy part</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            {% for vacancy in part.vacancy_part %}
+                                                                <tr>
+                                                                    <td>{{ vacancy.similarity }}</td>
+                                                                    <td>{{ vacancy.vacancy_part }}</td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </li>
                                             {% endfor %}
-                                            </tbody>
-                                        </table>
+                                        </ul>
                                     </div>
                                 </li>
                             {% endfor %}
