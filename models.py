@@ -32,7 +32,7 @@ class GeneralFunction(db.Model):
 class Function(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128), index=True, unique=True)
+    name = db.Column(db.String(128), index=True)
     code = db.Column(db.String(64))
     general_function_id = db.Column(db.Integer, db.ForeignKey('general_function.id'))
     qualification_level = db.Column(db.Integer)
