@@ -78,5 +78,61 @@ for index, vacancy in classified_vacancies.iterrows():
 db.session.commit()
 
 
-# np.array(st[st.code == '06.001'].id)[0] useful
+vacancies_parts = pd.read_csv('data/t_vacancies_parts.csv')
 
+for index, part in vacancies_parts.iterrows():
+    value = VacancyPart(id=part['id'], vacancy_id=part['vacancy_id'], text=part['text'], type_id=part['type_id'])
+    db.session.add(value)
+
+db.session.commit()
+
+
+general_functions = pd.read_csv('data/d_standards_general_functions.csv')
+
+for index, function in general_functions.iterrows():
+    value = GeneralFunction(id=function['id'],
+                            code=function['code'],
+                            profstandard_id=function['profstandard_id'],
+                            name=function['name'],
+                            qualification_level=function['qualification_level'])
+    db.session.add(value)
+
+db.session.commit()
+
+
+functions = pd.read_csv('data/d_standards_functions.csv')
+
+for index, function in functions.iterrows():
+    value = Function(id=function['id'],
+                     name=function['name'],
+                     code=function['code'],
+                     general_function_id=function['general_function_id'],
+                     qualification_level=function['qualification_level'])
+    db.session.add(value)
+
+db.session.commit()
+
+
+standards_parts = pd.read_csv('data/d_standards_parts.csv')
+
+for index, part in standards_parts.iterrows():
+    value = ProfstandardPart(id=part['id'],
+                             text=part['text'],
+                             part_type_id=part['part_type_id'],
+                             function_id=part['function_id'])
+    db.session.add(value)
+
+db.session.commit()
+
+
+match_parts = pd.read_csv('data/t_match_parts.csv')
+
+for index, part in match_parts.iterrows():
+    value = MatchPart(id=part['id'],
+                      vacancy_part_id=part['vacancy_part_id'],
+                      profstandard_part_id=part['profstandard_part_id'],
+                      similarity=part['similarity'],
+                      enriched_text=part['enriched_text'])
+    db.session.add(value)
+
+db.session.commit()
