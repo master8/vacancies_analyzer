@@ -40,11 +40,11 @@ for index, type in standards_parts_types.iterrows():
 db.session.commit()
 
 
-profstandards = pd.read_csv('data/d_standards.csv', dtype='str')
-profstandards['id'] = profstandards['id'].astype('int')
-profstandards['is_support'] = profstandards['is_support'].apply(lambda v: v == 'True')
+standards = pd.read_csv('data/d_standards.csv', dtype='str')
+standards['id'] = standards['id'].astype('int')
+standards['is_support'] = standards['is_support'].apply(lambda v: v == 'True')
 
-for index, pr in profstandards.iterrows():
+for index, pr in standards.iterrows():
     value = Profstandard(id=pr['id'], name=pr['name'], code=pr['code'], is_support=pr['is_support'])
     db.session.add(value)
 
@@ -76,3 +76,7 @@ for index, vacancy in classified_vacancies.iterrows():
         db.session.add(value)
 
 db.session.commit()
+
+
+# np.array(st[st.code == '06.001'].id)[0] useful
+
