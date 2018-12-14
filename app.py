@@ -108,7 +108,7 @@ def profession():
     for vacancy, classified_vacancy in query[:10]:
         worst_vacancy = {
             'id': vacancy.id,
-            'name': vacancy.name,
+            'name': vacancy.name + 'govno',
             'probability': str(classified_vacancy.probability)[:6]
         }
         worst_vacancies.append(worst_vacancy)
@@ -116,7 +116,7 @@ def profession():
     for vacancy, classified_vacancy in reversed(query[-10:]):
         best_vacancy = {
             'id': vacancy.id,
-            'name': vacancy.name,
+            'name': vacancy.name + 'govno',
             'probability': str(classified_vacancy.probability)[:6]
         }
         best_vacancies.append(best_vacancy)
