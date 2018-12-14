@@ -81,37 +81,41 @@
 </div>
 <div class="uk-padding uk-padding-remove-top">
     <div class="uk-card uk-card-default uk-card-body">
+        <h3>General functions:</h3>
         <ul uk-accordion>
             {% for general_function in general_functions %}
                 <li>
                     <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
-                    <ul class="uk-accordion-content" uk-accordion>
-                        {% for function in general_function.functions %}
-                            <li>
-                                <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
-                                <div class="uk-accordion-content">
-                                    <table class="uk-table uk-table-small uk-table-divider">
-                                        <thead>
-                                            <tr>
-                                                <th class="uk-table-shrink">Similarity</th>
-                                                <th class="uk-table-expand">Standard part</th>
-                                                <th class="uk-table-expand">Vacancy part</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                        {% for part in function.parts %}
-                                            <tr>
-                                                <td>{{ part.similarity }}</td>
-                                                <td>{{ part.standard_part }}</td>
-                                                <td>{{ part.vacancy_part }}</td>
-                                            </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    <div class="uk-accordion-content uk-margin-large-left">
+                        <h3>Functions:</h3>
+                        <ul uk-accordion>
+                            {% for function in general_function.functions %}
+                                <li>
+                                    <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
+                                    <div class="uk-accordion-content uk-margin-medium-right">
+                                        <table class="uk-table uk-table-small uk-table-divider">
+                                            <thead>
+                                                <tr>
+                                                    <th class="uk-table-shrink">Similarity</th>
+                                                    <th class="uk-table-expand">Standard part</th>
+                                                    <th class="uk-table-expand">Vacancy part</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for part in function.parts %}
+                                                <tr>
+                                                    <td>{{ part.similarity }}</td>
+                                                    <td>{{ part.standard_part }}</td>
+                                                    <td>{{ part.vacancy_part }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </li>
             {% endfor %}
         </ul>
