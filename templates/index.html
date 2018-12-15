@@ -64,8 +64,8 @@
                     </div>
 
                     <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
-                        <label class="uk-form-label">Start date<input type="date" name="sdate" class="uk-input"/></label>
-                        <label class="uk-form-label">End date<input type="date" name="edate" class="uk-input"/></label>
+                        <label class="uk-form-label">Start date<input type="date" name="sdate" class="uk-input"value="2017-01-01"></label>
+                        <label class="uk-form-label">End date<input type="date" name="edate" class="uk-input" value="2018-12-17"></label>
                     </div>
 
                     <div class="uk-margin">
@@ -76,7 +76,7 @@
                                         {% if source.is_support == False %}
                                               disabled
                                         {% else %}
-                                              enabled
+                                              checked
                                         {% endif %}
                                               type="radio" value="{{ source.id }}" name="source"> {{ source.name }}</label><br>
 
