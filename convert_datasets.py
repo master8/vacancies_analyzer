@@ -22,4 +22,16 @@ vr.to_csv('data/u_vacancies_parts_t.csv', index=False)
 p = pd.read_csv('data/u_standards_parts_t.csv')
 v = pd.read_csv('data/u_vacancies_parts_t.csv')
 s = pd.DataFrame()
+co = pd.read_csv('sim.csv')
+
+s['profstandard_part_id'] = co.id_profstandard_part.apply(lambda x: np.array(p[p.ind == x].id)[0])
+s['vacancy_part_id'] = co.id_vacancy_part.apply(lambda x: np.array(vr[vr.ind == x].id)[0])
+s['similarity'] = co.sc
+s['enriched_text'] = co.prof_text
+t = pd.DataFrame()
+t['vacancy_part_id'] = s.vacancy_part_id
+t['profstandard_part_id'] = s.profstandard_part_id
+t['similarity'] = s.similarity
+t['enriched_text'] = s.enriched_text
+t.to_csv('data/t_match_parts.csv', index=False)
 
