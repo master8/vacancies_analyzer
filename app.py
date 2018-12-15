@@ -3,6 +3,7 @@ from flask import render_template
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 import seaborn as sns
+from collections import defaultdict
 
 import numpy as np
 from datetime import datetime
@@ -122,7 +123,25 @@ def profession():
         }
         best_vacancies.append(best_vacancy)
 
-    general_functions = general_function_tree(prof_id, query)
+    query = db.session.query(MatchPart, VacancyPart) \
+        .filter(MatchPart.vacancy_part_id == VacancyPart.id) \
+        .filter(VacancyPart.vacancy_id == Vacancy.id) \
+        .filter(ClassifiedVacancy.profstandard_id == prof_id) \
+        .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
+        .filter(Vacancy.create_date <= dt_edate) \
+        .filter(Vacancy.create_date >= dt_sdate) \
+        .filter(Vacancy.region_id == reg_id) \
+        .filter(Vacancy.source_id == source_id)
+
+    matched_parts = defaultdict(list)
+
+    for match_part, vacancy_part in query:
+        matched_parts[match_part.profstandard_part_id].append({
+            'similarity': match_part.similarity,
+            'vacancy_part': vacancy_part.text
+        })
+
+    general_functions = general_function_tree(prof_id, matched_parts)
 
     return render_template('profession.html',
                            title='profession',
@@ -132,11 +151,11 @@ def profession():
                            general_functions=general_functions)
 
 
-def general_function_tree(prof_id, vacancies):
+def general_function_tree(prof_id, matched_parts):
     tree = []
     query = GeneralFunction.query.filter_by(profstandard_id=prof_id)
     for each in query:
-        functions, function_weight = function_branch(each.id, vacancies)
+        functions, function_weight = function_branch(each.id, matched_parts)
         general_function_branch = {
             'weight': function_weight,
             'name': each.name,
@@ -146,12 +165,12 @@ def general_function_tree(prof_id, vacancies):
     return tree
 
 
-def function_branch(general_id, vacancies):
+def function_branch(general_id, matched_parts):
     branch = []
     weight = 0
     query = Function.query.filter_by(general_function_id=general_id)
     for each in query:
-        parts, vacancy_weight = parts_vacancies_leafs(each.id, vacancies)
+        parts, vacancy_weight = parts_vacancies_leafs(each.id, matched_parts)
         function_parts_branch = {
             'weight': vacancy_weight,
             'name': each.name,
@@ -162,41 +181,22 @@ def function_branch(general_id, vacancies):
     return branch, weight
 
 
-def parts_vacancies_leafs(function_id, vacancies):
+def parts_vacancies_leafs(function_id, matched_parts):
     leaf = []
     query = ProfstandardPart.query.filter_by(function_id=function_id)
     weight = 0
     for each in query:
-        matched_parts = matching_leafs(each.id, vacancies)
-        parts_weight = len(matched_parts)
+        vacancy_parts = matched_parts[each.id]
+        parts_weight = len(vacancy_parts)
         leaf_parts = {
             'weight': parts_weight,
             'standard_part': each.text,
-            'vacancy_parts': matched_parts
+            'vacancy_parts': vacancy_parts
         }
         leaf.append(leaf_parts)
         weight += parts_weight
 
     return leaf, weight
-
-
-def matching_leafs(profstandard_part_id, vacancies):
-    leaf = []
-
-    for vacancy, _ in vacancies:
-        query = db.session.query(MatchPart, VacancyPart)\
-            .filter(MatchPart.profstandard_part_id == profstandard_part_id)\
-            .filter(MatchPart.vacancy_part_id == VacancyPart.id)\
-            .filter(VacancyPart.vacancy_id == vacancy.id)
-
-        for match_part, vacancy_part in query:
-            leaf_vacancies = {
-                'similarity': match_part.similarity,
-                'vacancy_part': vacancy_part.text
-            }
-            leaf.append(leaf_vacancies)
-
-    return leaf
 
 
 @app.route('/vacancy')
