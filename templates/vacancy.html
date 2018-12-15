@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ title }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../static/css/uikit.min.css" />
+    <script src="../static/js/uikit.min.js"></script>
+    <script src="../static/js/uikit-icons.min.js"></script>
+</head>
+<body>
+<div class="uk-padding">
+    <div class="uk-child-width-expand@s" uk-grid>
+        <div>
+            <div class="uk-card uk-card-default uk-card-body">
+                <article class="uk-article">
+
+                    <h1 class="uk-article-title"><a class="uk-link-reset" href="{{ vacancy.link }}">{{ vacancy.name }}</a></h1>
+                    <p class="uk-article-meta">{{ vacancy.create_date }}, {{ vacancy.region.name }}</p>
+                    <div>
+                        {{ vacancy.text |safe }}
+                    </div>
+
+                </article>
+            </div>
+        </div>
+        <div>
+            <div class="uk-card uk-card-secondary uk-card-body uk-child-width-expand@s">
+                <h3>Parts</h3>
+                <ul class="uk-list uk-list-divider">
+                    {% for part in vacancy.vacancy_part %}
+                        <li>{{ part.text }} <span class="uk-label uk-label-danger">{{ VacancyPartType.query.get(part.type_id).name }}</span></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
