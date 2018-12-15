@@ -47,6 +47,11 @@ def search():
 
     professions = []
 
+    total = Vacancy.query.filter_by(region_id=reg_id) \
+            .filter(Vacancy.create_date <= dt_edate) \
+            .filter(Vacancy.create_date >= dt_sdate) \
+            .filter_by(source_id=source_id) \
+
     for prof_id in prof_id_list:
         vacancy = Vacancy.query \
             .filter(ClassifiedVacancy.profstandard_id == prof_id) \
@@ -60,7 +65,8 @@ def search():
             'profstandard_id': prof_id,
             'code': Profstandard.query.get(prof_id).code,
             'name': Profstandard.query.get(prof_id).name,
-            'count': vacancy.count()
+            'count': vacancy.count(),
+            'rate' : '33%'
         }
         professions.append(prof_dict)
 
@@ -69,7 +75,8 @@ def search():
             'profstandard_id': 0,
             'code': '',
             'name': 'Профессия не выбрана',
-            'count': 0
+            'count': 0,
+            'rate': 0
         }]
 
     diagram_link = plot_search(professions)
