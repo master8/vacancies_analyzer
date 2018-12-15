@@ -3,6 +3,7 @@ from flask import render_template
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 import seaborn as sns
+import pandas as pd
 from collections import defaultdict
 
 import numpy as np
@@ -142,6 +143,8 @@ def profession():
         })
 
     general_functions = general_function_tree(prof_id, matched_parts)
+    sorting_generals = pd.DataFrame(general_functions)
+    general_functions = sorting_generals.sort_values('weight',ascending=False).to_dict('r')
 
     return render_template('profession.html',
                            title='profession',
@@ -156,6 +159,8 @@ def general_function_tree(prof_id, matched_parts):
     query = GeneralFunction.query.filter_by(profstandard_id=prof_id)
     for each in query:
         functions, function_weight = function_branch(each.id, matched_parts)
+        sorting_functions = pd.DataFrame(functions)
+        functions = sorting_functions.sort_values('weight', ascending=False).to_dict('r')
         general_function_branch = {
             'weight': function_weight,
             'name': each.name,
@@ -171,6 +176,8 @@ def function_branch(general_id, matched_parts):
     query = Function.query.filter_by(general_function_id=general_id)
     for each in query:
         parts, vacancy_weight = parts_vacancies_leafs(each.id, matched_parts)
+        sorting_parts = pd.DataFrame(parts)
+        parts = sorting_parts.sort_values('weight', ascending = False).to_dict('r')
         function_parts_branch = {
             'weight': vacancy_weight,
             'name': each.name,
@@ -187,6 +194,11 @@ def parts_vacancies_leafs(function_id, matched_parts):
     weight = 0
     for each in query:
         vacancy_parts = matched_parts[each.id]
+        sorting_parts = pd.DataFrame(vacancy_parts)
+        if sorting_parts.empty:
+            vacancy_parts = sorting_parts.head(5).to_dict('r')
+        else:
+            vacancy_parts = sorting_parts.head(5).sort_values('similarity',ascending=False).to_dict('r')
         parts_weight = len(vacancy_parts)
         leaf_parts = {
             'weight': parts_weight,
