@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ title }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../static/css/uikit.min.css" />
+    <script src="../static/js/uikit.min.js"></script>
+    <script src="../static/js/uikit-icons.min.js"></script>
+</head>
+<body>
+<div class="uk-padding">
+    <div class="uk-card uk-card-default uk-card-body">
+        <h1 class="uk-text-center">Statistic for searched vacancies</h1>
+        <p class="uk-text-center">Profession: <b>{{ profession }}</b></p>
+        <a class="uk-button uk-button-default uk-align-right" href="/">Home</a>
+    </div>
+</div>
+<div class="uk-padding uk-padding-remove-top">
+    <div class="uk-child-width-expand@s" uk-grid>
+        <div>
+            <div class="uk-card uk-card-default uk-card-body">
+                <div class="uk-overflow-auto">
+                    <h3>Top best classification probability</h3>
+                    <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+                        <thead>
+                            <tr>
+                                <th class="uk-table-shrink">Probability</th>
+                                <th class="uk-table-expand">Vacancy title</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vacancy in best_vacancies %}
+                                <tr>
+                                    <td class="uk-text-nowrap">{{ vacancy.probability }}</td>
+                                    <td class="uk-table-link">
+                                        <a class="uk-link-reset" href="/vacancy?id={{ vacancy.id }}">
+                                            {{ vacancy.name }}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="uk-card uk-card-secondary uk-card-body">
+                <div class="uk-overflow-auto">
+                    <h3>Top worst classification probability</h3>
+                    <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+                        <thead>
+                            <tr>
+                                <th class="uk-table-shrink">Probability</th>
+                                <th class="uk-table-expand">Vacancy title</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vacancy in worst_vacancies %}
+                                <tr>
+                                    <td class="uk-text-nowrap">{{ vacancy.probability }}</td>
+                                    <td class="uk-table-link">
+                                        <a class="uk-link-reset" href="/vacancy?id={{ vacancy.id }}">
+                                            {{ vacancy.name }}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="uk-padding uk-padding-remove-top">
+    <div class="uk-card uk-card-primary uk-card-body">
+        <h2 class="uk-text-center">Matching. Tree of professional standard</h2>
+    </div>
+</div>
+<div class="uk-padding uk-padding-remove-top">
+    <div class="uk-card uk-card-default uk-card-body">
+        <h3>General functions:</h3>
+        <ul uk-accordion>
+            {% for general_function in general_functions %}
+                <li>
+                    <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
+                    <div class="uk-accordion-content uk-margin-large-left">
+                        <h3>Functions:</h3>
+                        <ul uk-accordion>
+                            {% for function in general_function.functions %}
+                                <li>
+                                    <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
+                                    <div class="uk-accordion-content uk-margin-medium-left">
+                                        <h4>Function parts:</h4>
+                                        <ul uk-accordion>
+                                            {% for part in function.parts %}
+                                                <li>
+                                                    <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
+                                                    <div class="uk-accordion-content uk-margin-large-left">
+
+                                                        <table class="uk-table uk-table-small uk-table-divider">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th class="uk-table-shrink">Similarity</th>
+                                                                    <th class="uk-table-expand">Vacancy part</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            {% for vacancy in part.vacancy_parts %}
+                                                                <tr>
+                                                                    <td>{{ vacancy.similarity }}</td>
+                                                                    <td>{{ vacancy.vacancy_part }}</td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+</body>
+</html>
