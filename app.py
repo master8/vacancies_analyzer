@@ -46,11 +46,13 @@ def search():
     prof_id_list = request.args.getlist('prof')
 
     professions = []
-
-    total = Vacancy.query.filter_by(region_id=reg_id) \
+    total = Vacancy.query \
+            .filter(ClassifiedVacancy.profstandard_id.in_(prof_id_list)) \
+            .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
             .filter(Vacancy.create_date <= dt_edate) \
             .filter(Vacancy.create_date >= dt_sdate) \
-            .filter_by(source_id=source_id) \
+            .filter_by(region_id=reg_id) \
+            .filter_by(source_id=source_id).count()
 
     for prof_id in prof_id_list:
         vacancy = Vacancy.query \
@@ -61,12 +63,14 @@ def search():
             .filter_by(region_id=reg_id) \
             .filter_by(source_id=source_id)
 
+
+        rate = vacancy.count()*100/total
         prof_dict = {
             'profstandard_id': prof_id,
             'code': Profstandard.query.get(prof_id).code,
             'name': Profstandard.query.get(prof_id).name,
             'count': vacancy.count(),
-            'rate' : '33%'
+            'rate' : str(round(rate,2))+'%'
         }
         professions.append(prof_dict)
 
@@ -89,7 +93,8 @@ def search():
                            professions=professions,
                            diagram_link=diagram_link,
                            sdate=request.args['sdate'],
-                           edate=request.args['edate'])
+                           edate=request.args['edate'],
+                           total = total)
 
 
 @app.route('/profession')
