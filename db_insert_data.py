@@ -68,12 +68,12 @@ classified_vacancies = pd.read_csv('data/t_classified_vacancies.csv')
 
 for index, vacancy in classified_vacancies.iterrows():
 
-    labels = vacancy['labels'].split(',')
+    labels = vacancy['predict_labels'].split(',')  # or labels
     for label in list(map(str.strip, labels)):
         value = ClassifiedVacancy(
             vacancy_id=vacancy['vacancy_id'],
             profstandard_id=label,
-            probability=vacancy['p' + str(label)]
+            probability=vacancy[str(label)]  # or 'p' + ...
         )
         db.session.add(value)
 

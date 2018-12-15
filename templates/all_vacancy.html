@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ title }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../static/css/uikit.min.css" />
+    <script src="../static/js/uikit.min.js"></script>
+    <script src="../static/js/uikit-icons.min.js"></script>
+</head>
+<body>
+<div class="uk-padding">
+    <div class="uk-card uk-card-default uk-card-body">
+        <div class="uk-overflow-auto">
+            <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+                <thead>
+                    <tr>
+                        <th class="uk-table-shrink">Probability</th>
+                        <th class="uk-table-expand">Vacancy title</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vacancy, classified in vacancies %}
+                        <tr>
+                            <td class="uk-text-nowrap">{{ classified.probability|round(4, 'floor') }}</td>
+                            <td class="uk-table-link">
+                                <a class="uk-link-reset" href="/vacancy?id={{ vacancy.id }}">
+                                    {{ vacancy.name }}
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
