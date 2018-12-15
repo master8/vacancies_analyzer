@@ -112,7 +112,7 @@ def profession():
         worst_vacancy = {
             'id': vacancy.id,
             'name': vacancy.name,
-            'probability': str(classified_vacancy.probability)[:6]
+            'probability': classified_vacancy.probability
         }
         worst_vacancies.append(worst_vacancy)
 
@@ -120,7 +120,7 @@ def profession():
         best_vacancy = {
             'id': vacancy.id,
             'name': vacancy.name,
-            'probability': str(classified_vacancy.probability)[:6]
+            'probability': classified_vacancy.probability
         }
         best_vacancies.append(best_vacancy)
 
@@ -151,7 +151,12 @@ def profession():
                            best_vacancies=best_vacancies,
                            worst_vacancies=worst_vacancies,
                            profession=Profstandard.query.get(prof_id).name,
-                           general_functions=general_functions)
+                           general_functions=general_functions,
+                           profession_id=prof_id,
+                           region=source_id,
+                           source=reg_id,
+                           sdate=request.args['sdate'],
+                           edate=request.args['edate'])
 
 
 def general_function_tree(prof_id, matched_parts):
@@ -215,6 +220,31 @@ def parts_vacancies_leafs(function_id, matched_parts):
 def vacancy():
     vacancy = Vacancy.query.get(request.args['id'])
     return render_template('vacancy.html', vacancy=vacancy, VacancyPartType=VacancyPartType)
+
+
+@app.route('/vacancies')
+def all_vacancy():
+    reg_id = request.args.get('region')
+    source_id = request.args.get('source')
+    profession_id = request.args.get('prof')
+
+    sdate = request.args.get('sdate')
+    edate = request.args.get('edate')
+    dt_sdate = datetime.strptime(sdate, "%Y-%m-%d")
+    dt_edate = datetime.strptime(edate, "%Y-%m-%d")
+
+    vacancies = db.session.query(Vacancy, ClassifiedVacancy) \
+        .filter(ClassifiedVacancy.profstandard_id == profession_id) \
+        .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
+        .filter(Vacancy.create_date <= dt_edate) \
+        .filter(Vacancy.create_date >= dt_sdate) \
+        .filter_by(region_id=reg_id) \
+        .filter_by(source_id=source_id) \
+        .order_by(ClassifiedVacancy.probability)
+
+    vacancies = reversed(vacancies.all())
+
+    return render_template('all_vacancy.html', vacancies=vacancies)
 
 
 def plot_search(professions):
