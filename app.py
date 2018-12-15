@@ -222,11 +222,11 @@ def function_branch(general_id, vacancies):
     weight = 0
     query = Function.query.filter_by(general_function_id=general_id)
     for each in query:
-        part, vacancy_weight = parts_vacancies_leafs(each.id, vacancies)
+        parts, vacancy_weight = parts_vacancies_leafs(each.id, vacancies)
         function_parts_branch = {
             'weight': vacancy_weight,
             'name': each.name,
-            'parts': part
+            'parts': parts
         }
         branch.append(function_parts_branch)
         weight += vacancy_weight
@@ -238,27 +238,35 @@ def parts_vacancies_leafs(function_id, vacancies):
     query = ProfstandardPart.query.filter_by(function_id=function_id)
     weight = 0
     for each in query:
-        vacancy = matching_leafs(each.id, 2)  # TODO get 2 from vacancies
+        matched_parts = matching_leafs(each.id, vacancies)
+        parts_weight = len(matched_parts)
         leaf_parts = {
-            'weight': len(vacancy),
+            'weight': parts_weight,
             'standard_part': each.text,
-            'vacancy_part': vacancy
+            'vacancy_parts': matched_parts
         }
         leaf.append(leaf_parts)
-        weight += len(vacancy)
+        weight += parts_weight
 
     return leaf, weight
 
 
-def matching_leafs(profstandard_part_id, vacancy_part_id):
+def matching_leafs(profstandard_part_id, vacancies):
     leaf = []
-    query = MatchPart.query.filter_by(profstandard_part_id=profstandard_part_id)
-    for each in query:
-        leaf_vacancies = {
-            'similarity': each.similarity,
-            'vacancy_part': VacancyPart.query.get(vacancy_part_id).text  # FIXME тут фильтрация по другому полю
-        }
-        leaf.append(leaf_vacancies)
+
+    for vacancy, _ in vacancies:
+        query = db.session.query(MatchPart, VacancyPart)\
+            .filter(MatchPart.profstandard_part_id == profstandard_part_id)\
+            .filter(MatchPart.vacancy_part_id == VacancyPart.id)\
+            .filter(VacancyPart.vacancy_id == vacancy.id)
+
+        for match_part, vacancy_part in query:
+            leaf_vacancies = {
+                'similarity': match_part.similarity,
+                'vacancy_part': vacancy_part.text
+            }
+            leaf.append(leaf_vacancies)
+
     return leaf
 
 
