@@ -3,8 +3,10 @@ from flask import render_template
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 import seaborn as sns
+sns.set(style="whitegrid")
 import pandas as pd
 from collections import defaultdict
+import matplotlib.pyplot as plt
 
 import numpy as np
 from datetime import datetime
@@ -146,6 +148,25 @@ def profession():
     sorting_generals = pd.DataFrame(general_functions)
     general_functions = sorting_generals.sort_values('weight',ascending=False).to_dict('r')
 
+    classified_vacancies = db.session.query(ClassifiedVacancy) \
+        .filter(ClassifiedVacancy.profstandard_id == prof_id) \
+        .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
+        .filter(Vacancy.create_date <= dt_edate) \
+        .filter(Vacancy.create_date >= dt_sdate) \
+        .filter(Vacancy.region_id == reg_id) \
+        .filter(Vacancy.source_id == source_id)
+
+    vacancies_id = list(map(lambda x: x.vacancy_id, classified_vacancies.all()))
+
+    count_labels = defaultdict(int)
+
+    for row in ClassifiedVacancy.query.filter(ClassifiedVacancy.vacancy_id.in_(vacancies_id)):
+
+        if str(row.profstandard_id) != prof_id:
+            count_labels[row.profstandard_id] += 1
+
+    diagram_link = plot_stat(count_labels)
+
     return render_template('profession.html',
                            title='profession',
                            best_vacancies=best_vacancies,
@@ -156,7 +177,8 @@ def profession():
                            region=source_id,
                            source=reg_id,
                            sdate=request.args['sdate'],
-                           edate=request.args['edate'])
+                           edate=request.args['edate'],
+                           diagram_link=diagram_link)
 
 
 def general_function_tree(prof_id, matched_parts):
@@ -264,6 +286,27 @@ def plot_search(professions):
 
     dia.savefig('./static/diagram/test_diagram.svg')
     diagram_link = '../static/diagram/test_diagram.svg'
+
+    return diagram_link
+
+
+def plot_stat(count_labels):
+    t = []
+    num = []
+
+    for key, value in count_labels.items():
+        t.append(Profstandard.query.get(key).name)
+        num.append(value)
+    x = np.array(t)
+    y = np.array(num)
+
+    diagram = sns.barplot(x=y, y=x)
+    diagram.clear()
+    diagram = sns.barplot(x=y, y=x)
+    dia = diagram.get_figure()
+
+    dia.savefig('./static/diagram/test_diagram2.svg')
+    diagram_link = '../static/diagram/test_diagram2.svg'
 
     return diagram_link
 
