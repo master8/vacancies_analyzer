@@ -16,7 +16,7 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-from models import Profstandard, Source, Region, Vacancy, ClassifiedVacancy
+from models import Profstandard, Source, Region, Vacancy, ClassifiedVacancy, VacancyPartType
 from models import GeneralFunction, Function, ProfstandardPart, MatchPart, VacancyPart
 
 
@@ -227,7 +227,8 @@ def parts_vacancies_leafs(function_id, matched_parts):
 
 @app.route('/vacancy')
 def vacancy():
-    return 'vacancy ' + str(request.args['id'])
+    vacancy = Vacancy.query.get(request.args['id'])
+    return render_template('vacancy.html', vacancy=vacancy, VacancyPartType=VacancyPartType)
 
 
 def plot_search(professions):

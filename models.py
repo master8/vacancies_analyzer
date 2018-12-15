@@ -108,6 +108,8 @@ class Vacancy(db.Model):
     source_id = db.Column(db.Integer, db.ForeignKey('source.id'))
     name = db.Column(db.String(128))
     create_date = db.Column(db.DateTime, index=True)
+    text = db.Column(db.Text)
+    link = db.Column(db.String(128))
 
     vacancy_part = db.relationship('VacancyPart', backref='vacancy', lazy='dynamic')
     classification = db.relationship('ClassifiedVacancy', backref='vacancy', lazy='dynamic')
