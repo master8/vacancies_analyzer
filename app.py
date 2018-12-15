@@ -193,7 +193,7 @@ def profession():
             'functions': functions
         }
     ]
-    general_functions = general_function_tree(prof_id,query)
+    general_functions = general_function_tree(prof_id, query)
 
     return render_template('profession.html',
                            title='profession',
@@ -203,37 +203,39 @@ def profession():
                            general_functions=general_functions)
 
 
-def general_function_tree(prof_id,vacancies):
+def general_function_tree(prof_id, vacancies):
     tree = []
-    query = GeneralFunction.query.filter_by(profstandard_id = prof_id)
+    query = GeneralFunction.query.filter_by(profstandard_id=prof_id)
     for each in query:
-        function, function_weight = function_branch(each.id, vacancies)
+        functions, function_weight = function_branch(each.id, vacancies)
         general_function_branch = {
             'weight': function_weight,
             'name': each.name,
-            'functions': function
+            'functions': functions
         }
         tree.append(general_function_branch)
     return tree
 
-def function_branch(general_id,vacancies):
+
+def function_branch(general_id, vacancies):
     branch = []
     weight = 0
-    query = Function.query.filter_by(general_function_id = general_id)
+    query = Function.query.filter_by(general_function_id=general_id)
     for each in query:
         part, vacancy_weight = parts_vacancies_leafs(each.id, vacancies)
-        function_parts_branch ={
+        function_parts_branch = {
             'weight': vacancy_weight,
             'name': each.name,
             'parts': part
         }
         branch.append(function_parts_branch)
         weight += vacancy_weight
-    return branch,weight
+    return branch, weight
+
 
 def parts_vacancies_leafs(function_id, vacancies):
     leaf = []
-    query = ProfstandardPart.query.filter_by(function_id = function_id)
+    query = ProfstandardPart.query.filter_by(function_id=function_id)
     weight = 0
     for each in query:
         vacancy = matching_leafs(each.id, 2)  # TODO get 2 from vacancies
@@ -243,9 +245,10 @@ def parts_vacancies_leafs(function_id, vacancies):
             'vacancy_part': vacancy
         }
         leaf.append(leaf_parts)
-        weight +=len(vacancy)
+        weight += len(vacancy)
 
     return leaf, weight
+
 
 def matching_leafs(profstandard_part_id, vacancy_part_id):
     leaf = []
@@ -253,11 +256,10 @@ def matching_leafs(profstandard_part_id, vacancy_part_id):
     for each in query:
         leaf_vacancies = {
             'similarity': each.similarity,
-            'vacancy_part' : VacancyPart.query.get(vacancy_part_id).text #FIXME тут фильтрация по другому полю
+            'vacancy_part': VacancyPart.query.get(vacancy_part_id).text  # FIXME тут фильтрация по другому полю
         }
         leaf.append(leaf_vacancies)
     return leaf
-
 
 
 @app.route('/vacancy')
