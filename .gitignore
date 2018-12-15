@@ -241,3 +241,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+static/diagram/test_diagram.svg
