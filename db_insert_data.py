@@ -129,7 +129,7 @@ match_parts = pd.read_csv('data/t_match_parts.csv')
 
 for index, part in match_parts.iterrows():
     value = MatchPart(id=part['id'],
-                      vacancy_part_id=part['id_vacancy_part'], #я уже исправил
+                      vacancy_part_id=part['vacancy_part_id'],
                       profstandard_part_id=part['profstandard_part_id'],
                       similarity=part['similarity'],
                       enriched_text=part['enriched_text'])
