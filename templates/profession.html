@@ -32,7 +32,7 @@
                         <tbody>
                             {% for vacancy in best_vacancies %}
                                 <tr>
-                                    <td class="uk-text-nowrap">{{ vacancy.probability }}</td>
+                                    <td class="uk-text-nowrap">{{ vacancy.probability|round(4, 'floor') }}</td>
                                     <td class="uk-table-link">
                                         <a class="uk-link-reset" href="/vacancy?id={{ vacancy.id }}">
                                             {{ vacancy.name }}
@@ -42,6 +42,7 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                    <a class="uk-button uk-button-default" href="/vacancies?prof={{ profession_id }}&region={{ region }}&source={{ source }}&sdate={{ sdate }}&edate={{ edate }}">all vacancy</a>
                 </div>
             </div>
         </div>
@@ -59,7 +60,7 @@
                         <tbody>
                             {% for vacancy in worst_vacancies %}
                                 <tr>
-                                    <td class="uk-text-nowrap">{{ vacancy.probability }}</td>
+                                    <td class="uk-text-nowrap">{{ vacancy.probability|round(4, 'floor') }}</td>
                                     <td class="uk-table-link">
                                         <a class="uk-link-reset" href="/vacancy?id={{ vacancy.id }}">
                                             {{ vacancy.name }}
@@ -111,7 +112,7 @@
                                                             <tbody>
                                                             {% for vacancy in part.vacancy_parts %}
                                                                 <tr>
-                                                                    <td>{{ vacancy.similarity }}</td>
+                                                                    <td>{{ vacancy.similarity|round(2, 'floor') }}</td>
                                                                     <td>{{ vacancy.vacancy_part }}</td>
                                                                 </tr>
                                                             {% endfor %}
