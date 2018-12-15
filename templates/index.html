@@ -75,8 +75,11 @@
                                 <label><input class="uk-radio"
                                         {% if source.is_support == False %}
                                               disabled
+                                        {% else %}
+                                              enabled
                                         {% endif %}
                                               type="radio" value="{{ source.id }}" name="source"> {{ source.name }}</label><br>
+
                             {% endfor %}
                         </div>
                     </div>
