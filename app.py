@@ -253,7 +253,7 @@ def matching_leafs(profstandard_part_id, vacancy_part_id):
     for each in query:
         leaf_vacancies = {
             'similarity': each.similarity,
-            'vacancy_part' : VacancyPart.query.filter(VacancyPart.vacancy_id == vacancy_part_id).text #FIXME чет ломается
+            'vacancy_part' : VacancyPart.query.get(vacancy_part_id).text #FIXME тут фильтрация по другому полю
         }
         leaf.append(leaf_vacancies)
     return leaf
