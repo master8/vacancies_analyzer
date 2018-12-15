@@ -138,77 +138,91 @@ def profession():
 
     for match_part, vacancy_part in query:
         matched_parts[match_part.profstandard_part_id].append({
-            'similarity': match_part.similarity,
+            'similarity': round(match_part.similarity,3),
             'vacancy_part': vacancy_part.text
         })
 
-    general_functions = general_function_tree(prof_id, matched_parts)
+    general_functions, count = general_function_tree(prof_id, matched_parts)
     sorting_generals = pd.DataFrame(general_functions)
     general_functions = sorting_generals.sort_values('weight',ascending=False).to_dict('r')
+
 
     return render_template('profession.html',
                            title='profession',
                            best_vacancies=best_vacancies,
                            worst_vacancies=worst_vacancies,
                            profession=Profstandard.query.get(prof_id).name,
-                           general_functions=general_functions)
+                           general_functions=general_functions,
+                           count = count)
 
 
 def general_function_tree(prof_id, matched_parts):
     tree = []
     query = GeneralFunction.query.filter_by(profstandard_id=prof_id)
+    parts = 0
     for each in query:
-        functions, function_weight = function_branch(each.id, matched_parts)
+        functions, function_weight, parts_count = function_branch(each.id, matched_parts)
         sorting_functions = pd.DataFrame(functions)
         functions = sorting_functions.sort_values('weight', ascending=False).to_dict('r')
         general_function_branch = {
-            'weight': function_weight,
+            'weight': round(function_weight,2),
             'name': each.name,
-            'functions': functions
+            'functions': functions,
+            'count':parts_count
         }
         tree.append(general_function_branch)
-    return tree
+        parts += parts_count
+    return tree, parts
 
 
 def function_branch(general_id, matched_parts):
     branch = []
     weight = 0
+    counts = 0
     query = Function.query.filter_by(general_function_id=general_id)
     for each in query:
-        parts, vacancy_weight = parts_vacancies_leafs(each.id, matched_parts)
+        parts, vacancy_weight, parts_count = parts_vacancies_leafs(each.id, matched_parts)
         sorting_parts = pd.DataFrame(parts)
         parts = sorting_parts.sort_values('weight', ascending = False).to_dict('r')
         function_parts_branch = {
-            'weight': vacancy_weight,
+            'weight': round(vacancy_weight,2),
             'name': each.name,
-            'parts': parts
+            'parts': parts,
+            'count':parts_count
         }
         branch.append(function_parts_branch)
         weight += vacancy_weight
-    return branch, weight
+        counts += parts_count
+    return branch, weight, counts
 
 
 def parts_vacancies_leafs(function_id, matched_parts):
     leaf = []
     query = ProfstandardPart.query.filter_by(function_id=function_id)
     weight = 0
+    count = 0
     for each in query:
+        parts_weight = 0
+        parts_count = 0
         vacancy_parts = matched_parts[each.id]
         sorting_parts = pd.DataFrame(vacancy_parts)
         if sorting_parts.empty:
             vacancy_parts = sorting_parts.head(5).to_dict('r')
         else:
             vacancy_parts = sorting_parts.head(5).sort_values('similarity',ascending=False).to_dict('r')
-        parts_weight = len(vacancy_parts)
+            parts_weight = sorting_parts.similarity.sum()
+            parts_count = len(vacancy_parts)
         leaf_parts = {
-            'weight': parts_weight,
+            'weight': round(parts_weight,2),
             'standard_part': each.text,
-            'vacancy_parts': vacancy_parts
+            'vacancy_parts': vacancy_parts,
+            'count':parts_count
         }
         leaf.append(leaf_parts)
         weight += parts_weight
+        count += parts_count
 
-    return leaf, weight
+    return leaf, weight, count
 
 
 @app.route('/vacancy')
