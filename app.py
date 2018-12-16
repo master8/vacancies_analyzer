@@ -19,7 +19,7 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-from models import Profstandard, Source, Region, Vacancy, ClassifiedVacancy, VacancyPartType
+from models import Profstandard, Source, Region, Vacancy, ClassifiedVacancy, VacancyPartType, ProfstandardPost
 from models import GeneralFunction, Function, ProfstandardPart, MatchPart, VacancyPart
 
 
@@ -160,6 +160,24 @@ def profession():
     sorting_generals = pd.DataFrame(general_functions)
     general_functions = sorting_generals.sort_values('weight', ascending=False).to_dict('r')
 
+    posts = defaultdict(list)
+    general_functions_by_level = defaultdict(list)
+
+    for post in ProfstandardPost.query.filter_by(profstandard_id=prof_id):
+        posts[post.qualification_level].append(post)
+
+    for function in general_functions:
+        general_functions_by_level[function['level']].append(function)
+
+    branches = []
+
+    for key, value in general_functions_by_level.items():
+        branches.append({
+            'level': key,
+            'posts': posts[key],
+            'general_functions': value
+        })
+
     classified_vacancies = db.session.query(ClassifiedVacancy) \
         .filter(ClassifiedVacancy.profstandard_id == prof_id) \
         .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
@@ -184,7 +202,7 @@ def profession():
                            best_vacancies=best_vacancies,
                            worst_vacancies=worst_vacancies,
                            profession=Profstandard.query.get(prof_id).name,
-                           general_functions=general_functions,
+                           branches=branches,
                            count=count,
                            profession_id=prof_id,
                            region=source_id,
