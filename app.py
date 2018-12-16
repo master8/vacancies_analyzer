@@ -328,6 +328,7 @@ def plot_stat(count_labels):
     diagram = sns.barplot(x=y, y=x)
     diagram.clear()
     diagram = sns.barplot(x=y, y=x)
+    # plt.tight_layout(rect=[0, 0, 0.5, 0])
     dia = diagram.get_figure()
 
     dia.savefig('./static/diagram/test_diagram2.svg')
