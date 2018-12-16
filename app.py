@@ -246,11 +246,11 @@ def parts_vacancies_leafs(function_id, matched_parts):
         vacancy_parts = matched_parts[each.id]
         sorting_parts = pd.DataFrame(vacancy_parts)
         if sorting_parts.empty:
-            vacancy_parts = sorting_parts.head(5).to_dict('r')
+            vacancy_parts = sorting_parts.to_dict('r')
         else:
-            vacancy_parts = sorting_parts.head(5).sort_values('similarity', ascending=False).to_dict('r')
-            parts_weight = sorting_parts.similarity.sum()
             parts_count = len(vacancy_parts)
+            parts_weight = sorting_parts.similarity.sum()
+            vacancy_parts = sorting_parts.sort_values('similarity', ascending=False).to_dict('r')[:5]
         leaf_parts = {
             'weight': round(parts_weight, 2),
             'standard_part': each.text,
