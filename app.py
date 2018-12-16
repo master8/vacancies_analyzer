@@ -7,7 +7,6 @@ import seaborn as sns
 sns.set(style="whitegrid")
 import pandas as pd
 from collections import defaultdict
-import matplotlib.pyplot as plt
 
 import numpy as np
 from datetime import datetime
