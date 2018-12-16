@@ -207,7 +207,8 @@ def general_function_tree(prof_id, matched_parts):
             'weight': round(function_weight, 2),
             'name': each.name,
             'functions': functions,
-            'count': parts_count
+            'count': parts_count,
+            'level': each.qualification_level
         }
         tree.append(general_function_branch)
         parts += parts_count
