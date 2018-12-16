@@ -82,24 +82,25 @@
 </div>
 <div class="uk-padding uk-padding-remove-top">
     <div class="uk-card uk-card-default uk-card-body">
-        <h3>General functions:</h3>
+        <h3>General functions: {{ count }}</h3>
         <ul uk-accordion>
             {% for general_function in general_functions %}
                 <li>
                     <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
                     <div class="uk-accordion-content uk-margin-large-left">
-                        <h3>Functions:</h3>
+                        <h3>Functions: {{ general_function.count }}</h3>
                         <ul uk-accordion>
                             {% for function in general_function.functions %}
                                 <li>
                                     <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
                                     <div class="uk-accordion-content uk-margin-medium-left">
-                                        <h4>Function parts:</h4>
+                                        <h4>Function parts: {{ function.count }}</h4>
                                         <ul uk-accordion>
                                             {% for part in function.parts %}
                                                 <li>
                                                     <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
                                                     <div class="uk-accordion-content uk-margin-large-left">
+                                                         <h5>Parts: {{ part.count }}</h5>
 
                                                         <table class="uk-table uk-table-small uk-table-divider">
                                                             <thead>
