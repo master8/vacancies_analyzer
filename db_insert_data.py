@@ -50,7 +50,7 @@ for index, pr in standards.iterrows():
 
 db.session.commit()
 
-vacancies = pd.read_csv('data/t_vacancies.csv')
+vacancies = pd.read_csv('data/t_all_vacancies.csv')
 
 for index, vacancy in vacancies.iterrows():
     value = Vacancy(id=vacancy['id'],
@@ -64,7 +64,9 @@ for index, vacancy in vacancies.iterrows():
 
 db.session.commit()
 
-classified_vacancies = pd.read_csv('data/t_classified_vacancies.csv')
+classified_vacancies = pd.read_csv('data/u_predict.csv')
+classified_vacancies = classified_vacancies[classified_vacancies.predict_labels.notna()]
+classified_vacancies['predict_labels'] = classified_vacancies['predict_labels'].astype('str')
 
 for index, vacancy in classified_vacancies.iterrows():
 

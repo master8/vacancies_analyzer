@@ -248,3 +248,4 @@ static/diagram/test_diagram.svg
 /static/diagram/test_diagram2.svg
 /data/t_all_vacancies.csv
 /app.db
+/data/u_predict.csv
