@@ -17,8 +17,41 @@
     </div>
 </div>
 <div class="uk-padding uk-padding-remove-top">
-    <div class="uk-card uk-card-default uk-card-body uk-child-width-expand@s">
-        <img class="uk-height-large" src="{{ diagram_link }}?cache=none" uk-svg>
+    <div class="uk-child-width-expand@s" uk-grid>
+        <div>
+            <div class="uk-card uk-card-default uk-card-body">
+                <div class="uk-overflow-auto">
+                    <h3>Intersection with other professions</h3>
+                    <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+                        <thead>
+                            <tr>
+                                <th class="uk-table-shrink">Code</th>
+                                <th class="uk-table-expand">Profession name</th>
+                                <th class="uk-table-shrink">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in professions %}
+                                <tr>
+                                    <td class="uk-text-nowrap">{{ p.profession.code }}</td>
+                                    <td class="uk-table-link">
+                                        <a class="uk-link-reset" href="/profession?id={{ p.profession.profstandard_id }}&region={{ region.id }}&source={{ source.id }}&sdate={{ sdate }}&edate={{ edate }}">
+                                            {{ p.profession.name }}
+                                        </a>
+                                    </td>
+                                    <td class="uk-text-nowrap">{{ p.count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="uk-card uk-card-default uk-card-body uk-child-width-expand@s">
+                <img class="uk-height-large" src="{{ diagram_link }}?cache=none" uk-svg>
+            </div>
+        </div>
     </div>
 </div>
 <div class="uk-padding uk-padding-remove-top">
@@ -98,7 +131,7 @@
                             {% for function in general_function.functions %}
                                 <li>
                                     <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
-                                    <div class="uk-accordion-content uk-margin-medium-left">
+                                    <div class="uk-accordion-content uk-margin-large-left">
                                         <h4>Function parts: {{ function.count }}</h4>
                                         <ul uk-accordion>
                                             {% for part in function.parts %}

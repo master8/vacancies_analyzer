@@ -177,7 +177,7 @@ def profession():
         if str(row.profstandard_id) != prof_id:
             count_labels[row.profstandard_id] += 1
 
-    diagram_link = plot_stat(count_labels)
+    diagram_link, professions = plot_stat(count_labels)
 
     return render_template('profession.html',
                            title='profession',
@@ -191,7 +191,8 @@ def profession():
                            source=reg_id,
                            sdate=request.args['sdate'],
                            edate=request.args['edate'],
-                           diagram_link=diagram_link)
+                           diagram_link=diagram_link,
+                           professions=professions)
 
 
 def general_function_tree(prof_id, matched_parts):
@@ -318,23 +319,28 @@ def plot_search(professions):
 def plot_stat(count_labels):
     t = []
     num = []
+    professions = []
 
     for key, value in count_labels.items():
-        t.append(Profstandard.query.get(key).name)
+        profession = Profstandard.query.get(key)
+        professions.append({
+            'profession': profession,
+            'count': value
+        })
+        t.append('| ' + profession.code)
         num.append(value)
-    x = np.array(t)
+    x = np.array(t, dtype=str)
     y = np.array(num)
 
     diagram = sns.barplot(x=y, y=x)
     diagram.clear()
     diagram = sns.barplot(x=y, y=x)
-    # plt.tight_layout(rect=[0, 0, 0.5, 0])
     dia = diagram.get_figure()
 
     dia.savefig('./static/diagram/test_diagram2.svg')
     diagram_link = '../static/diagram/test_diagram2.svg'
 
-    return diagram_link
+    return diagram_link, professions
 
 
 @app.after_request
