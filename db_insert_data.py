@@ -118,11 +118,12 @@ db.session.commit()
 standards_parts = pd.read_csv('data/d_standards_parts.csv')
 
 for index, part in standards_parts.iterrows():
-    value = ProfstandardPart(id=part['id'],
-                             text=part['text'],
-                             part_type_id=part['part_type_id'],
-                             function_id=part['function_id'])
-    db.session.add(value)
+    if part['part_type_id'] != 1:
+        value = ProfstandardPart(id=part['id'],
+                                 text=part['text'],
+                                 part_type_id=part['part_type_id'],
+                                 function_id=part['function_id'])
+        db.session.add(value)
 
 db.session.commit()
 
