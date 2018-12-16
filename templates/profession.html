@@ -114,60 +114,74 @@
     </div>
 </div>
 <div class="uk-padding uk-padding-remove-top">
-    <div class="uk-card uk-card-primary uk-card-body">
+    <div class="uk-card uk-card-secondary uk-card-body">
         <h2 class="uk-text-center">Matching. Tree of professional standard</h2>
     </div>
 </div>
 <div class="uk-padding uk-padding-remove-top">
     <div class="uk-card uk-card-default uk-card-body">
-        <h3>General functions: {{ count }}</h3>
-        <ul uk-accordion>
-            {% for general_function in general_functions %}
-                <li>
-                    <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
-                    <div class="uk-accordion-content uk-margin-large-left">
-                        <h3>Functions: {{ general_function.count }}</h3>
-                        <ul uk-accordion>
-                            {% for function in general_function.functions %}
-                                <li>
-                                    <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
-                                    <div class="uk-accordion-content uk-margin-large-left">
-                                        <h4>Function parts: {{ function.count }}</h4>
-                                        <ul uk-accordion>
-                                            {% for part in function.parts %}
-                                                <li>
-                                                    <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
-                                                    <div class="uk-accordion-content uk-margin-large-left">
-                                                         <h5>Parts: {{ part.count }}</h5>
+        <h3 class="uk-article-meta">General functions: {{ count }}</h3>
+        {% for branch in branches %}
+            <div class="uk-grid-divider uk-child-width-expand@s" uk-grid>
+                <div class="uk-width-1-6@m">
+                    <h4>Level {{ branch.level }}</h4>
+                    <ul class="uk-list">
+                        {% for post in branch.posts %}
+                            <li>{{ post.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div>
+                    <ul uk-accordion>
+                        {% for general_function in branch.general_functions %}
+                            <li class="uk-open">
+                                <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
+                                <div class="uk-accordion-content uk-margin-large-left">
+                                    <h3 class="uk-article-meta">Functions: {{ general_function.count }}</h3>
+                                    <ul uk-accordion>
+                                        {% for function in general_function.functions %}
+                                            <li>
+                                                <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
+                                                <div class="uk-accordion-content uk-margin-large-left">
+                                                    <h4 class="uk-article-meta">Function parts: {{ function.count }}</h4>
+                                                    <ul uk-accordion>
+                                                        {% for part in function.parts %}
+                                                            <li>
+                                                                <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
+                                                                <div class="uk-accordion-content uk-margin-large-left">
+                                                                     <h5 class="uk-article-meta">Parts: {{ part.count }}</h5>
 
-                                                        <table class="uk-table uk-table-small uk-table-divider">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th class="uk-table-shrink">Similarity</th>
-                                                                    <th class="uk-table-expand">Vacancy part</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                            {% for vacancy in part.vacancy_parts %}
-                                                                <tr>
-                                                                    <td>{{ vacancy.similarity|round(2, 'floor') }}</td>
-                                                                    <td>{{ vacancy.vacancy_part }}</td>
-                                                                </tr>
-                                                            {% endfor %}
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
+                                                                    <table class="uk-table uk-table-small uk-table-divider">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th class="uk-table-shrink">Similarity</th>
+                                                                                <th class="uk-table-expand">Vacancy part</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                        {% for vacancy in part.vacancy_parts %}
+                                                                            <tr>
+                                                                                <td>{{ vacancy.similarity|round(2, 'floor') }}</td>
+                                                                                <td>{{ vacancy.vacancy_part }}</td>
+                                                                            </tr>
+                                                                        {% endfor %}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
     </div>
 </div>
 </body>
