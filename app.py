@@ -314,6 +314,32 @@ def all_vacancy():
     return render_template('all_vacancy.html', vacancies=vacancies)
 
 
+@app.route('/split/vacancies')
+def split_vacancies():
+    reg_id = request.args.get('region')
+    source_id = request.args.get('source')
+    profession_id = request.args.get('prof')
+
+    sdate = request.args.get('sdate')
+    edate = request.args.get('edate')
+    dt_sdate = datetime.strptime(sdate, "%Y-%m-%d")
+    dt_edate = datetime.strptime(edate, "%Y-%m-%d")
+
+    vacancies = db.session.query(Vacancy, ClassifiedVacancy) \
+        .filter(ClassifiedVacancy.profstandard_id == profession_id) \
+        .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
+        .filter(Vacancy.create_date <= dt_edate) \
+        .filter(Vacancy.create_date >= dt_sdate) \
+        .filter_by(region_id=reg_id) \
+        .filter_by(source_id=source_id) \
+        .filter(VacancyPart.vacancy_id == Vacancy.id) \
+        .order_by(ClassifiedVacancy.probability)
+
+    vacancies = reversed(vacancies.all())
+
+    return render_template('all_vacancy.html', vacancies=vacancies)
+
+
 def plot_search(professions):
     t = []
     num = []
