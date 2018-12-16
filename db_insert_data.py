@@ -138,3 +138,14 @@ for index, part in match_parts.iterrows():
     db.session.add(value)
 
 db.session.commit()
+
+
+standards_posts = pd.read_csv('data/d_standard_posts.csv')
+
+for index, post in standards_posts.iterrows():
+    value = ProfstandardPost(name=post['name'],
+                             profstandard_id=post['profstandard_id'],
+                             qualification_level=post['level'])
+    db.session.add(value)
+
+db.session.commit()

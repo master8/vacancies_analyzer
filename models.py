@@ -154,10 +154,15 @@ class MatchPart(db.Model):
         return '<MatchPart {}>'.format(self.enriched_text)
 
 
+class ProfstandardPost(db.Model):
 
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128), index=True, unique=True)
+    profstandard_id = db.Column(db.Integer, db.ForeignKey('profstandard.id'))
+    qualification_level = db.Column(db.Integer)
 
-
-
+    def __repr__(self):
+        return '<ProfstandardPost {}>'.format(self.name)
 
 
 
