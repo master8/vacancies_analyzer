@@ -31,8 +31,8 @@ def home():
     return render_template('index.html', title='home', professions=professions, regions=regions, sources=sources)
 
 
-@app.route('/search')
-def search():
+@app.route('/results')
+def results():
     reg_id = request.args.get('region')
     region = Region.query.get(reg_id)
 
