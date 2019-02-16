@@ -12,8 +12,8 @@
 <form action="/results" method="get" class="uk-form-stacked">
     <div class="uk-padding">
         <div class="uk-card uk-card-default uk-card-body">
-            <h1 class="uk-text-center">Vacancies Analyzer</h1>
-            <p class="uk-text-center">Analysis of all vacancies based on selected period, region and data source.</p>
+            <h1 class="uk-text-center">Анализатор вакансий</h1>
+            <p class="uk-text-center">Анализирует вакансии по времени, региону, источнику и профессии.</p>
             <button class="uk-button uk-button-primary uk-align-center" type="submit">Analyze</button>
         </div>
     </div>
@@ -21,10 +21,10 @@
         <div class="uk-child-width-expand@s" uk-grid>
             <div class="uk-width-2-3@m">
                 <div class="uk-card uk-card-default uk-card-body">
-                    <legend class="uk-legend">Professions</legend>
+                    <legend class="uk-legend">Профессии</legend>
 
                     <div class="uk-margin">
-                        <div class="uk-form-label">You may select multiple professions</div>
+                        <div class="uk-form-label">Вы можете выбрать несколько профессий</div>
                         <div class="uk-form-controls uk-list uk-margin-top">
                             <div class="uk-overflow-auto">
                                 <table class="uk-table uk-table-middle uk-table-divider">
@@ -50,10 +50,10 @@
             </div>
             <div>
                 <div class="uk-card uk-card-secondary uk-card-body">
-                    <legend class="uk-legend">Other parameters</legend>
+                    <legend class="uk-legend">Другие параметры</legend>
 
                     <div class="uk-margin">
-                        <label class="uk-form-label" for="form-stacked_select">Region</label>
+                        <label class="uk-form-label" for="form-stacked_select">Регион</label>
                         <div class="uk-form-controls">
                             <select name="region" class="uk-select uk-form-width-medium" id="form-stacked_select">
                                 {% for region in regions %}
@@ -64,12 +64,12 @@
                     </div>
 
                     <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
-                        <label class="uk-form-label">Start date<input type="date" name="sdate" class="uk-input"value="2017-01-01"></label>
-                        <label class="uk-form-label">End date<input type="date" name="edate" class="uk-input" value="2018-12-17"></label>
+                        <label class="uk-form-label">Начало<input type="date" name="sdate" class="uk-input"value="2017-01-01"></label>
+                        <label class="uk-form-label">Конец<input type="date" name="edate" class="uk-input" value="2018-12-17"></label>
                     </div>
 
                     <div class="uk-margin">
-                        <div class="uk-form-label">Source</div>
+                        <div class="uk-form-label">Источник</div>
                         <div class="uk-form-controls">
                             {% for source in sources %}
                                 <label><input class="uk-radio"

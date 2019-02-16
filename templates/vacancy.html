@@ -26,7 +26,7 @@
         </div>
         <div>
             <div class="uk-card uk-card-secondary uk-card-body uk-child-width-expand@s">
-                <h3>Parts</h3>
+                <h3>Части</h3>
                 <ul class="uk-list uk-list-divider">
                     {% for part in vacancy.vacancy_part %}
                         <li>{{ part.text }} <span class="uk-label uk-label-danger">{{ VacancyPartType.query.get(part.type_id).name }}</span></li>
