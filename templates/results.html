@@ -11,8 +11,8 @@
 <body>
 <div class="uk-padding">
     <div class="uk-card uk-card-default uk-card-body">
-        <h1 class="uk-text-center">Search vacancies results</h1>
-        <p class="uk-text-center">Region: <b>{{ region.name }}</b> Source: <b>{{ source.name }}</b> Period: <b>{{ period }}</b></p>
+        <h1 class="uk-text-center">Результат поиска вакансий</h1>
+        <p class="uk-text-center">Регион: <b>{{ region.name }}</b> Источник: <b>{{ source.name }}</b> Период: <b>{{ period }}</b></p>
         <a class="uk-button uk-button-default uk-align-right" href="/">Home</a>
     </div>
 </div>
@@ -24,10 +24,10 @@
                     <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
                         <thead>
                             <tr>
-                                <th class="uk-table-shrink">Code</th>
-                                <th class="uk-table-expand">Profession title</th>
-                                <th class="uk-table-shrink">Count</th>
-                                <th class="uk-table-shrink">Rate</th>
+                                <th class="uk-table-shrink">Код</th>
+                                <th class="uk-table-expand">Название</th>
+                                <th class="uk-table-shrink">Количество</th>
+                                <th class="uk-table-shrink">Частота</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -45,7 +45,7 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                    <h3 class="uk-align-right">Total: {{ total }}</h3>
+                    <h3 class="uk-align-right">Итого: {{ total }}</h3>
                 </div>
             </div>
         </div>

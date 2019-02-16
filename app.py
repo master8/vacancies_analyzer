@@ -2,14 +2,10 @@ from flask import Flask, request
 from flask import render_template
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-import seaborn as sns
-
-sns.set(style="whitegrid")
-import pandas as pd
 from collections import defaultdict
 import matplotlib.pyplot as plt
+import pandas as pd
 
-import numpy as np
 from datetime import datetime
 
 from config import Config
@@ -19,9 +15,10 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-from models import Profstandard, Source, Region, Vacancy, ClassifiedVacancy, VacancyPartType, ProfstandardPost
-from models import GeneralFunction, Function, ProfstandardPart, MatchPart, VacancyPart
+from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Profstandard,\
+    Source, Region, Vacancy, ClassifiedVacancy
 
+from handlers import general_function_tree, plot_search, plot_stat
 
 @app.route('/')
 def home():
@@ -31,8 +28,8 @@ def home():
     return render_template('index.html', title='home', professions=professions, regions=regions, sources=sources)
 
 
-@app.route('/search')
-def search():
+@app.route('/results')
+def results():
     reg_id = request.args.get('region')
     region = Region.query.get(reg_id)
 
@@ -44,7 +41,7 @@ def search():
     dt_sdate = datetime.strptime(sdate, "%Y-%m-%d")
     dt_edate = datetime.strptime(edate, "%Y-%m-%d")
 
-    period = 'from: ' + str(sdate) + ' to: ' + str(edate)  # месяц - день - год
+    period = 'C: ' + str(sdate) + ' По: ' + str(edate)  # месяц - день - год
 
     prof_id_list = request.args.getlist('prof')
 
@@ -118,7 +115,6 @@ def profession():
         .filter_by(region_id=reg_id) \
         .filter_by(source_id=source_id) \
         .order_by(ClassifiedVacancy.probability)
-
     best_vacancies = []
     worst_vacancies = []
 
@@ -159,7 +155,6 @@ def profession():
     general_functions, count = general_function_tree(prof_id, matched_parts)
     sorting_generals = pd.DataFrame(general_functions)
     general_functions = sorting_generals.sort_values('weight', ascending=False).to_dict('r')
-
     posts = defaultdict(list)
     general_functions_by_level = defaultdict(list)
 
@@ -213,76 +208,6 @@ def profession():
                            professions=professions)
 
 
-def general_function_tree(prof_id, matched_parts):
-    tree = []
-    query = GeneralFunction.query.filter_by(profstandard_id=prof_id)
-    parts = 0
-    for each in query:
-        functions, function_weight, parts_count = function_branch(each.id, matched_parts)
-        sorting_functions = pd.DataFrame(functions)
-        functions = sorting_functions.sort_values('weight', ascending=False).to_dict('r')
-        general_function_branch = {
-            'weight': round(function_weight, 2),
-            'name': each.name,
-            'functions': functions,
-            'count': parts_count,
-            'level': each.qualification_level
-        }
-        tree.append(general_function_branch)
-        parts += parts_count
-    return tree, parts
-
-
-def function_branch(general_id, matched_parts):
-    branch = []
-    weight = 0
-    counts = 0
-    query = Function.query.filter_by(general_function_id=general_id)
-    for each in query:
-        parts, vacancy_weight, parts_count = parts_vacancies_leafs(each.id, matched_parts)
-        sorting_parts = pd.DataFrame(parts)
-        parts = sorting_parts.sort_values('weight', ascending=False).to_dict('r')
-        function_parts_branch = {
-            'weight': round(vacancy_weight, 2),
-            'name': each.name,
-            'parts': parts,
-            'count': parts_count
-        }
-        branch.append(function_parts_branch)
-        weight += vacancy_weight
-        counts += parts_count
-    return branch, weight, counts
-
-
-def parts_vacancies_leafs(function_id, matched_parts):
-    leaf = []
-    query = ProfstandardPart.query.filter_by(function_id=function_id)
-    weight = 0
-    count = 0
-    for each in query:
-        parts_weight = 0
-        parts_count = 0
-        vacancy_parts = matched_parts[each.id]
-        sorting_parts = pd.DataFrame(vacancy_parts)
-        if sorting_parts.empty:
-            vacancy_parts = sorting_parts.to_dict('r')
-        else:
-            parts_count = len(vacancy_parts)
-            parts_weight = sorting_parts.similarity.sum()
-            vacancy_parts = sorting_parts.sort_values('similarity', ascending=False).to_dict('r')[:5]
-        leaf_parts = {
-            'weight': round(parts_weight, 2),
-            'standard_part': each.text,
-            'vacancy_parts': vacancy_parts,
-            'count': parts_count
-        }
-        leaf.append(leaf_parts)
-        weight += parts_weight
-        count += parts_count
-
-    return leaf, weight, count
-
-
 @app.route('/vacancy')
 def vacancy():
     vacancy = Vacancy.query.get(request.args['id'])
@@ -308,9 +233,7 @@ def all_vacancy():
         .filter_by(region_id=reg_id) \
         .filter_by(source_id=source_id) \
         .order_by(ClassifiedVacancy.probability)
-
     vacancies = reversed(vacancies.all())
-
     return render_template('all_vacancy.html', vacancies=vacancies)
 
 
@@ -340,52 +263,7 @@ def split_vacancies():
     return render_template('all_vacancy.html', vacancies=vacancies)
 
 
-def plot_search(professions):
-    t = []
-    num = []
 
-    for i in professions:
-        t.append(str(i['code']))
-        num.append(i['count'])
-    x = np.array(t)
-    y = np.array(num)
-
-    diagram = sns.barplot(x=x, y=y)
-    diagram.clear()
-    diagram = sns.barplot(x=x, y=y)
-    dia = diagram.get_figure()
-
-    dia.savefig('./static/diagram/test_diagram.svg')
-    diagram_link = '../static/diagram/test_diagram.svg'
-
-    return diagram_link
-
-
-def plot_stat(count_labels):
-    t = []
-    num = []
-    professions = []
-
-    for key, value in count_labels.items():
-        profession = Profstandard.query.get(key)
-        professions.append({
-            'profession': profession,
-            'count': value
-        })
-        t.append('| ' + profession.code)
-        num.append(value)
-    x = np.array(t, dtype=str)
-    y = np.array(num)
-
-    diagram = sns.barplot(x=y, y=x)
-    diagram.clear()
-    diagram = sns.barplot(x=y, y=x)
-    dia = diagram.get_figure()
-
-    dia.savefig('./static/diagram/test_diagram2.svg')
-    diagram_link = '../static/diagram/test_diagram2.svg'
-
-    return diagram_link, professions
 
 
 @app.after_request
