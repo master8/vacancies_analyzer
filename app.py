@@ -22,10 +22,11 @@ from handlers import general_function_tree, plot_search, plot_stat
 
 @app.route('/')
 def home():
+    now = str(datetime.now().date())
     professions = Profstandard.query.all()
     regions = Region.query.all()
     sources = Source.query.all()
-    return render_template('index.html', title='home', professions=professions, regions=regions, sources=sources)
+    return render_template('index.html', title='home', professions=professions, regions=regions, sources=sources, now=now)
 
 
 @app.route('/results')
