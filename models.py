@@ -4,7 +4,7 @@ from app import db
 class Profstandard(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(64), unique=True)
+    code = db.Column(db.String(64), unique=True, index=True)
     name = db.Column(db.String(128), index=True, unique=True)
     is_support = db.Column(db.Boolean)
 
@@ -19,7 +19,7 @@ class GeneralFunction(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(64))
-    profstandard_id = db.Column(db.Integer, db.ForeignKey('profstandard.id'))
+    profstandard_id = db.Column(db.Integer, db.ForeignKey('profstandard.id'), index=True)
     name = db.Column(db.String(128), index=True, unique=True)
     qualification_level = db.Column(db.Integer)
 
@@ -34,7 +34,7 @@ class Function(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True)
     code = db.Column(db.String(64))
-    general_function_id = db.Column(db.Integer, db.ForeignKey('general_function.id'))
+    general_function_id = db.Column(db.Integer, db.ForeignKey('general_function.id'), index=True)
     qualification_level = db.Column(db.Integer)
 
     parts = db.relationship('ProfstandardPart', backref='function', lazy='dynamic')
@@ -58,8 +58,8 @@ class ProfstandardPart(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.Text)
-    part_type_id = db.Column(db.Integer, db.ForeignKey('profstandard_part_type.id'))
-    function_id = db.Column(db.Integer, db.ForeignKey('function.id'))
+    part_type_id = db.Column(db.Integer, db.ForeignKey('profstandard_part_type.id'), index=True)
+    function_id = db.Column(db.Integer, db.ForeignKey('function.id'), index=True)
 
     matched_parts = db.relationship('MatchPart', backref='competence', lazy='dynamic')
 
@@ -93,8 +93,8 @@ class Source(db.Model):
 class ClassifiedVacancy(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    vacancy_id = db.Column(db.Integer, db.ForeignKey('vacancy.id'))
-    profstandard_id = db.Column(db.Integer, db.ForeignKey('profstandard.id'))
+    vacancy_id = db.Column(db.Integer, db.ForeignKey('vacancy.id'), index=True)
+    profstandard_id = db.Column(db.Integer, db.ForeignKey('profstandard.id'), index=True)
     probability = db.Column(db.Float)
 
     def __repr__(self):
@@ -104,8 +104,8 @@ class ClassifiedVacancy(db.Model):
 class Vacancy(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    region_id = db.Column(db.Integer, db.ForeignKey('region.id'))
-    source_id = db.Column(db.Integer, db.ForeignKey('source.id'))
+    region_id = db.Column(db.Integer, db.ForeignKey('region.id'), index=True)
+    source_id = db.Column(db.Integer, db.ForeignKey('source.id'), index=True)
     name = db.Column(db.String(128))
     create_date = db.Column(db.DateTime, index=True)
     text = db.Column(db.Text)
@@ -121,9 +121,9 @@ class Vacancy(db.Model):
 class VacancyPart(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    vacancy_id = db.Column(db.Integer, db.ForeignKey('vacancy.id'))
+    vacancy_id = db.Column(db.Integer, db.ForeignKey('vacancy.id'), index=True)
     text = db.Column(db.Text)
-    type_id = db.Column(db.Integer, db.ForeignKey('vacancy_part_type.id'))
+    type_id = db.Column(db.Integer, db.ForeignKey('vacancy_part_type.id'), index=True)
 
     matching = db.relationship('MatchPart', backref='vacancy_part', lazy='dynamic')
 
@@ -145,9 +145,9 @@ class VacancyPartType(db.Model):
 class MatchPart(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    vacancy_part_id = db.Column(db.Integer, db.ForeignKey('vacancy_part.id'))
-    profstandard_part_id = db.Column(db.Integer, db.ForeignKey('profstandard_part.id'))
-    similarity = db.Column(db.Float)
+    vacancy_part_id = db.Column(db.Integer, db.ForeignKey('vacancy_part.id'), index=True)
+    profstandard_part_id = db.Column(db.Integer, db.ForeignKey('profstandard_part.id'), index=True)
+    similarity = db.Column(db.Float, index=True)
     enriched_text = db.Column(db.Text)
 
     def __repr__(self):
@@ -158,7 +158,7 @@ class ProfstandardPost(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True, unique=True)
-    profstandard_id = db.Column(db.Integer, db.ForeignKey('profstandard.id'))
+    profstandard_id = db.Column(db.Integer, db.ForeignKey('profstandard.id'), index=True)
     qualification_level = db.Column(db.Integer)
 
     def __repr__(self):
