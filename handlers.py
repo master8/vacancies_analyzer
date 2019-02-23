@@ -3,11 +3,13 @@ import seaborn as sns
 import pandas as pd
 import codecs
 import os
+from sklearn.feature_extraction.text import TfidfVectorizer
 import pymorphy2
 from collections import Counter
 from string import ascii_lowercase, digits, whitespace
 from models import  Function, ProfstandardPart,  GeneralFunction, Profstandard
 sns.set(style="whitegrid")
+
 
 def general_function_tree(prof_id, matched_parts):
     tree = []
@@ -55,10 +57,12 @@ def parts_vacancies_leafs(function_id, matched_parts):
     query = ProfstandardPart.query.filter_by(function_id=function_id)
     weight = 0
     count = 0
-    monogram = 'none'
     for each in query:
         parts_weight = 0
         parts_count = 0
+
+        top_word = []
+        top_bigram = []
         vacancy_parts = matched_parts[each.id]
         sorting_parts = pd.DataFrame(vacancy_parts)
         if sorting_parts.empty:
@@ -70,12 +74,10 @@ def parts_vacancies_leafs(function_id, matched_parts):
 
             vacancy_parts = sorting_parts.sort_values('similarity', ascending=False).to_dict('r')  #Части
 
-            bag = ''
-            for i in sorting_parts['vacancy_part']:
-                bag += i + ' '
-
-            bag = bag.split(' ')
-            monogram = [i[0] for i in Counter(bag).most_common(5)]
+            # MOST COMMON
+            top_word = common_words(sorting_parts['vacancy_part'], 1)
+            top_bigram = common_words(sorting_parts['vacancy_part'], 2)
+            #
 
 
         leaf_parts = {
@@ -83,13 +85,35 @@ def parts_vacancies_leafs(function_id, matched_parts):
             'standard_part': each.text,
             'vacancy_parts': vacancy_parts, #вакансии
             'count': parts_count,
-            'monogram': monogram,
-            'bigram': each.text
+            'monogram': top_word,
+            'bigram': top_bigram
         }
         leaf.append(leaf_parts)
         weight += parts_weight
         count += parts_count
     return leaf, weight, count
+
+
+def common_words(text, n_gram, topn = 5):
+    lst = []
+    top_word = []
+    tfidf_vec = TfidfVectorizer(ngram_range=(n_gram, n_gram))
+    transformed = tfidf_vec.fit_transform(raw_documents=text.dropna())
+    index_value = {i[1]: i[0] for i in tfidf_vec.vocabulary_.items()}
+    fully_indexed = []
+    for row in transformed:
+        fully_indexed.append({index_value[column]: value for column, value in zip(row.indices, row.data)})
+
+    for i in fully_indexed:
+        for key, value in i.items():
+            lst.append([value, key])
+
+    lst.sort(reverse=True)
+
+    for i in lst[:topn:]:
+        top_word.append(i[1])
+
+    return top_word
 
 
 def plot_search(professions):  #график
