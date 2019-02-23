@@ -252,3 +252,4 @@ static/diagram/test_diagram.svg
 static/Word2Vec/big_word2vec_model_CBOW.wv.vectors.npy
 static/Word2Vec/big_word2vec_model_CBOW.trainables.syn1neg.npy
 static/Word2Vec/big_word2vec_model_CBOW
+*.xml
