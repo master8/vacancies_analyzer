@@ -3,11 +3,11 @@ import seaborn as sns
 import pandas as pd
 import codecs
 import os
-import pymorphy2
-from collections import Counter
-from string import ascii_lowercase, digits, whitespace
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 from models import  Function, ProfstandardPart,  GeneralFunction, Profstandard
 sns.set(style="whitegrid")
+
 
 def general_function_tree(prof_id, matched_parts):
     tree = []
@@ -17,12 +17,24 @@ def general_function_tree(prof_id, matched_parts):
         functions, function_weight, parts_count = function_branch(each.id, matched_parts)
         sorting_functions = pd.DataFrame(functions)
         functions = sorting_functions.sort_values('weight', ascending=False).to_dict('r')
+
+        vacancies_text = []
+
+        for function_text in functions:
+            for text in function_text['texts']:
+                vacancies_text.append(text)
+        vacancies_text = unique(vacancies_text)
+        top_word = common_words(vacancies_text, 1, topn=10)
+        top_bigram = common_words(vacancies_text, 2)
+
         general_function_branch = {
             'weight': round(function_weight, 2),
             'name': each.name,
             'functions': functions,
             'count': parts_count,
-            'level': each.qualification_level
+            'level': each.qualification_level,
+            'monogram': top_word,
+            'bigram': top_bigram
         }
         tree.append(general_function_branch)
         parts += parts_count
@@ -38,11 +50,23 @@ def function_branch(general_id, matched_parts):
         parts, vacancy_weight, parts_count = parts_vacancies_leafs(each.id, matched_parts)
         sorting_parts = pd.DataFrame(parts)
         parts = sorting_parts.sort_values('weight', ascending=False).to_dict('r')
+        vacancies_text = []
+        for part in parts:
+            for vacancy in part['vacancy_parts']:
+                vacancies_text.append(vacancy['vacancy_part'])
+
+        vacancies_text = unique(vacancies_text)
+        top_word = common_words(vacancies_text, 1, topn=10)
+        top_bigram = common_words(vacancies_text, 2)
+
         function_parts_branch = {
             'weight': round(vacancy_weight, 2),
             'name': each.name,
             'parts': parts,
-            'count': parts_count
+            'texts': vacancies_text,
+            'count': parts_count,
+            'monogram': top_word,
+            'bigram': top_bigram
         }
         branch.append(function_parts_branch)
         weight += vacancy_weight
@@ -55,10 +79,12 @@ def parts_vacancies_leafs(function_id, matched_parts):
     query = ProfstandardPart.query.filter_by(function_id=function_id)
     weight = 0
     count = 0
-    monogram = 'none'
     for each in query:
         parts_weight = 0
         parts_count = 0
+
+        top_word = []
+        top_bigram = []
         vacancy_parts = matched_parts[each.id]
         sorting_parts = pd.DataFrame(vacancy_parts)
         if sorting_parts.empty:
@@ -66,30 +92,56 @@ def parts_vacancies_leafs(function_id, matched_parts):
         else:
             parts_count = len(vacancy_parts)
             parts_weight = sorting_parts.similarity.sum()
-            sorting_parts['lemmatized'] = sorting_parts['vacancy_part'].apply(lambda i: process_text(i))
-
             vacancy_parts = sorting_parts.sort_values('similarity', ascending=False).to_dict('r')  #Части
 
-            bag = ''
-            for i in sorting_parts['vacancy_part']:
-                bag += i + ' '
-
-            bag = bag.split(' ')
-            monogram = [i[0] for i in Counter(bag).most_common(5)]
-
+            # MOST COMMON
+            top_word = common_words(sorting_parts['vacancy_part'].dropna(), 1, topn=10)
+            top_bigram = common_words(sorting_parts['vacancy_part'].dropna(), 2)
 
         leaf_parts = {
             'weight': round(parts_weight, 2),
             'standard_part': each.text,
             'vacancy_parts': vacancy_parts, #вакансии
             'count': parts_count,
-            'monogram': monogram,
-            'bigram': each.text
+            'monogram': top_word,
+            'bigram': top_bigram
         }
         leaf.append(leaf_parts)
         weight += parts_weight
         count += parts_count
     return leaf, weight, count
+
+
+def common_words(text, n_gram, topn = 5):
+    lst = []
+    top_word = []
+    tfidf_vec = TfidfVectorizer(ngram_range=(n_gram, n_gram))
+    transformed = tfidf_vec.fit_transform(raw_documents=text)
+    index_value = {i[1]: i[0] for i in tfidf_vec.vocabulary_.items()}
+    fully_indexed = []
+    for row in transformed:
+        fully_indexed.append({index_value[column]: value for column, value in zip(row.indices, row.data)})
+
+    for i in fully_indexed:
+        for key, value in i.items():
+            lst.append([value, key])
+
+    lst.sort(reverse=True)
+    lst = unique(lst)
+
+    for i in lst[:topn:]:
+        if i not in top_word:
+            top_word.append(i[1])
+
+    return top_word
+
+
+def unique(lst):
+    answer = []
+    for i in lst:
+        if i not in answer:
+            answer.append(i)
+    return answer
 
 
 def plot_search(professions):  #график
@@ -135,41 +187,5 @@ def plot_stat(count_labels): #график
     return diagram_link, professions
 
 
-''''''
-morph = pymorphy2.MorphAnalyzer()
 
-cyrillic = u"абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
-
-allowed_characters = ascii_lowercase + digits + cyrillic + whitespace
-
-def complex_preprocess(text, additional_allowed_characters = "+#"):
-    return ''.join([character if character in set(allowed_characters+additional_allowed_characters) else ' ' for character in text.lower()]).split()
-
-def lemmatize(tokens, filter_pos):
-    '''Produce normal forms for russion words using pymorphy2
-    '''
-    lemmas = []
-    tagged_lemmas = []
-    for token in tokens:
-        parsed_token = morph.parse(token)[0]
-        norm = parsed_token.normal_form
-        pos = parsed_token.tag.POS
-        if pos is not None:
-            if pos not in filter_pos:
-                lemmas.append(norm)
-                tagged_lemmas.append(norm + "_" + pos)
-        else:
-            lemmas.append(token)
-            tagged_lemmas.append(token+"_")
-
-    return lemmas, tagged_lemmas
-
-def process_text(full_text, filter_pos=("PREP", "NPRO", "CONJ")):
-    '''Process a single text and return a processed version
-    '''
-    single_line_text = full_text.replace('\n',' ')
-    preprocessed_text = complex_preprocess(single_line_text)
-    lemmatized_text, lemmatized_text_pos_tags = lemmatize(preprocessed_text, filter_pos=filter_pos)
-
-    return lemmatized_text_pos_tags
 

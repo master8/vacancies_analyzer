@@ -144,28 +144,28 @@
                                 <input class="uk-checkbox mode-view" type="checkbox" value="{{ general_function.id }}" name="gf" hidden>
                                 <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
                                 <div class="uk-accordion-content uk-margin-large-left">
-                                    <h3 class="uk-article-meta">Функций: {{ general_function.count }}</h3>
+                                    <h3 class="uk-article-meta">Функций: {{ general_function.count }} <br> Частые слова: {{ general_function.monogram}}.<br> Частые словосочетания: {{ general_function.bigram }} </h3>
                                     <ul uk-accordion>
                                         {% for function in general_function.functions %}
                                             <li>
                                                 <input class="uk-checkbox mode-view" type="checkbox" value="{{ function.id }}" name="f" hidden>
                                                 <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
                                                 <div class="uk-accordion-content uk-margin-large-left">
-                                                    <h4 class="uk-article-meta">Характеристик: {{ function.count }}</h4>
+                                                    <h4 class="uk-article-meta">Характеристик: {{ function.count }} <br> Частые слова: {{ function.monogram}}.<br> Частые словосочетания: {{ function.bigram }}</h4>
                                                     <ul uk-accordion>
                                                         {% for part in function.parts %}
                                                             <li>
                                                                 <input class="uk-checkbox mode-view" type="checkbox" value="{{ part.id }}" name="p" hidden>
                                                                 <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
                                                                 <div class="uk-accordion-content uk-margin-large-left">
-                                                                    <h5 class="uk-article-meta">Частей характористики: {{ part.count }}</h5>
+                                                                     <br class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: {{ part.monogram}}.<br> Частые словосочетания: {{ part.bigram }} </h5>
 
                                                                     <table class="uk-table uk-table-small uk-table-divider">
                                                                         <thead>
                                                                             <tr>
                                                                                 {{ part.lemmatized }}
                                                                                 <th class="uk-table-shrink">Близость</th>
-                                                                                <th class="uk-table-expand">Часть вакансии. Частые слова: {{ part.monogram}}. Частые словосочетания: {{ part.bigram }}</th>
+                                                                                <th class="uk-table-expand">Часть вакансии.</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
