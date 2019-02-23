@@ -15,12 +15,10 @@ from datetime import datetime
 from config import Config
 
 app = Flask(__name__)
-SESSION_TYPE = 'redis'
 app.config.from_object(Config)
+Session(app=app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-
-sess = Session()
 
 from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Profstandard,\
     Source, Region, Vacancy, ClassifiedVacancy
@@ -34,6 +32,20 @@ def home():
     sources = Source.query.all()
     session['test_message'] = random()
     print('session ', session['test_message'])
+    temp = []
+
+    for i in range(0, 2000):
+        temp.append({
+            'id': 'fjowfijwfoiwjfoijwwg',
+            'text': 'classified_vacancies = db.session.query(ClassifiedVacancy) \
+                .filter(ClassifiedVacancy.profstandard_id == prof_id) \
+                .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
+                .filter(Vacancy.create_date <= dt_edate) \
+                .filter(Vacancy.create_date >= dt_sdate) \
+                .filter(Vacancy.region_id == reg_id) \
+                .filter(Vacancy.source_id == source_id)'
+        })
+    session['branches'] = temp
     return render_template('index.html', title='home', professions=professions, regions=regions, sources=sources)
 
 
@@ -203,7 +215,6 @@ def profession():
     diagram_link, professions = plot_stat(count_labels)
 
     print('session ', session['test_message'])
-    # session['branches'] = branches
     return render_template('profession.html',
                            title='profession',
                            best_vacancies=best_vacancies,
@@ -287,5 +298,4 @@ def add_header(response):
 
 
 if __name__ == '__main__':
-    sess.init_app(app)
     app.run(debug=True)
