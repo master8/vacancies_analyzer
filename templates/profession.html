@@ -122,6 +122,10 @@
 </div>
 <div class="uk-padding uk-padding-remove-top">
     <div class="uk-card uk-card-default uk-card-body">
+        <form action="/save" method="post" class="uk-form-stacked">
+            <button class="uk-button uk-button-primary mode-view" type="button" uk-toggle="target: .mode-view">Выбрать элементы</button>
+            <button class="uk-button uk-button-secondary mode-view" type="button" uk-toggle="target: .mode-view" hidden>Отменить изменения</button>
+            <button class="uk-button uk-button-danger mode-view" type="submit"  hidden>Сохранить изменения</button>
         <h3 class="uk-article-meta">Обобщенных функций: {{ count }}</h3>
         {% for branch in branches %}
             <div class="uk-grid-divider uk-child-width-expand@s" uk-grid>
@@ -137,21 +141,24 @@
                     <ul uk-accordion>
                         {% for general_function in branch.general_functions %}
                             <li class="uk-open">
+                                <input class="uk-checkbox mode-view" type="checkbox" value="{{ general_function.id }}" name="gf" hidden>
                                 <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
                                 <div class="uk-accordion-content uk-margin-large-left">
                                     <h3 class="uk-article-meta">Функций: {{ general_function.count }}</h3>
                                     <ul uk-accordion>
                                         {% for function in general_function.functions %}
                                             <li>
+                                                <input class="uk-checkbox mode-view" type="checkbox" value="{{ function.id }}" name="f" hidden>
                                                 <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
                                                 <div class="uk-accordion-content uk-margin-large-left">
                                                     <h4 class="uk-article-meta">Характеристик: {{ function.count }}</h4>
                                                     <ul uk-accordion>
                                                         {% for part in function.parts %}
                                                             <li>
+                                                                <input class="uk-checkbox mode-view" type="checkbox" value="{{ part.id }}" name="p" hidden>
                                                                 <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
                                                                 <div class="uk-accordion-content uk-margin-large-left">
-                                                                     <h5 class="uk-article-meta">Частей характористики: {{ part.count }}</h5>
+                                                                    <h5 class="uk-article-meta">Частей характористики: {{ part.count }}</h5>
 
                                                                     <table class="uk-table uk-table-small uk-table-divider">
                                                                         <thead>
@@ -183,9 +190,11 @@
                             </li>
                         {% endfor %}
                     </ul>
+                    </div>
                 </div>
             </div>
         {% endfor %}
+        </form>
     </div>
 </div>
 </body>

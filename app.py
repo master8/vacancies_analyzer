@@ -1,7 +1,7 @@
 import os
 from random import random
 
-from flask import Flask, request, session
+from flask import Flask, request, session, redirect, url_for
 from flask import render_template
 from flask_session import Session
 from flask_migrate import Migrate
@@ -285,6 +285,11 @@ def split_vacancies():
     vacancies = reversed(vacancies.all())
 
     return render_template('all_vacancy.html', vacancies=vacancies)
+
+
+@app.route('/save', methods=['POST'])
+def save_selection():
+    return redirect('/')
 
 
 
