@@ -263,6 +263,11 @@ def save_selection():
     return redirect('/profession?id=' + request.args.get('prof_id'))
 
 
+@app.route('/selected')
+def selected():
+    return 'Items' + str(session['selected'].general_fun_ids) + '' + str(session['selected'].fun_ids) + '' + str(session['selected'].part_ids)
+
+
 @app.after_request
 def add_header(response):
     response.headers['X-UA-Compatible'] = 'IE=Edge,chrome=1'

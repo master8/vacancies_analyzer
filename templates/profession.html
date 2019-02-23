@@ -126,6 +126,8 @@
             <button class="uk-button uk-button-primary mode-view" type="button" uk-toggle="target: .mode-view">Выбрать элементы</button>
             <button class="uk-button uk-button-secondary mode-view" type="button" uk-toggle="target: .mode-view" hidden>Отменить изменения</button>
             <button class="uk-button uk-button-danger mode-view" type="submit"  hidden>Сохранить изменения</button>
+
+        <a class="uk-button uk-button-default" href="/selected">Посмотреть выбранные</a>
         <h3 class="uk-article-meta">Обобщенных функций: {{ count }}</h3>
         {% for branch in branches %}
             <div class="uk-grid-divider uk-child-width-expand@s" uk-grid>
