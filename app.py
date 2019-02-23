@@ -1,5 +1,9 @@
-from flask import Flask, request
+import os
+from random import random
+
+from flask import Flask, request, session
 from flask import render_template
+from flask_session import Session
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from collections import defaultdict
@@ -11,9 +15,12 @@ from datetime import datetime
 from config import Config
 
 app = Flask(__name__)
+SESSION_TYPE = 'redis'
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+sess = Session()
 
 from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Profstandard,\
     Source, Region, Vacancy, ClassifiedVacancy
@@ -25,6 +32,8 @@ def home():
     professions = Profstandard.query.all()
     regions = Region.query.all()
     sources = Source.query.all()
+    session['test_message'] = random()
+    print('session ', session['test_message'])
     return render_template('index.html', title='home', professions=professions, regions=regions, sources=sources)
 
 
@@ -84,6 +93,7 @@ def results():
 
     diagram_link = plot_search(professions)
 
+    print('session ', session['test_message'])
     return render_template('results.html',
                            title='results',
                            region=region,
@@ -192,6 +202,8 @@ def profession():
 
     diagram_link, professions = plot_stat(count_labels)
 
+    print('session ', session['test_message'])
+    # session['branches'] = branches
     return render_template('profession.html',
                            title='profession',
                            best_vacancies=best_vacancies,
@@ -234,6 +246,7 @@ def all_vacancy():
         .filter_by(source_id=source_id) \
         .order_by(ClassifiedVacancy.probability)
     vacancies = reversed(vacancies.all())
+    print('session ', session['test_message'])
     return render_template('all_vacancy.html', vacancies=vacancies)
 
 
@@ -274,4 +287,5 @@ def add_header(response):
 
 
 if __name__ == '__main__':
+    sess.init_app(app)
     app.run(debug=True)
