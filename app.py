@@ -13,6 +13,9 @@ import pandas as pd
 from datetime import datetime
 
 from config import Config
+from utils import get_date
+
+import json
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -23,6 +26,8 @@ migrate = Migrate(app, db)
 from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Profstandard,\
     Source, Region, Vacancy, ClassifiedVacancy
 
+from dto import Params
+
 from handlers import general_function_tree, plot_search, plot_stat
 
 @app.route('/')
@@ -30,22 +35,6 @@ def home():
     professions = Profstandard.query.all()
     regions = Region.query.all()
     sources = Source.query.all()
-    session['test_message'] = random()
-    print('session ', session['test_message'])
-    temp = []
-
-    for i in range(0, 2000):
-        temp.append({
-            'id': 'fjowfijwfoiwjfoijwwg',
-            'text': 'classified_vacancies = db.session.query(ClassifiedVacancy) \
-                .filter(ClassifiedVacancy.profstandard_id == prof_id) \
-                .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
-                .filter(Vacancy.create_date <= dt_edate) \
-                .filter(Vacancy.create_date >= dt_sdate) \
-                .filter(Vacancy.region_id == reg_id) \
-                .filter(Vacancy.source_id == source_id)'
-        })
-    session['branches'] = temp
     return render_template('index.html', title='home', professions=professions, regions=regions, sources=sources)
 
 
@@ -59,12 +48,14 @@ def results():
 
     sdate = request.args.get('sdate')
     edate = request.args.get('edate')
-    dt_sdate = datetime.strptime(sdate, "%Y-%m-%d")
-    dt_edate = datetime.strptime(edate, "%Y-%m-%d")
+    dt_sdate = get_date(sdate)
+    dt_edate = get_date(edate)
 
     period = 'C: ' + str(sdate) + ' По: ' + str(edate)  # месяц - день - год
 
     prof_id_list = request.args.getlist('prof')
+
+    session['params'] = Params(region, source, dt_sdate, dt_edate, prof_id_list)
 
     professions = []
     total = Vacancy.query \
@@ -105,11 +96,9 @@ def results():
 
     diagram_link = plot_search(professions)
 
-    print('session ', session['test_message'])
     return render_template('results.html',
                            title='results',
-                           region=region,
-                           source=source,
+                           params=session['params'],
                            period=period,
                            professions=professions,
                            diagram_link=diagram_link,
@@ -214,7 +203,6 @@ def profession():
 
     diagram_link, professions = plot_stat(count_labels)
 
-    print('session ', session['test_message'])
     return render_template('profession.html',
                            title='profession',
                            best_vacancies=best_vacancies,
@@ -257,7 +245,6 @@ def all_vacancy():
         .filter_by(source_id=source_id) \
         .order_by(ClassifiedVacancy.probability)
     vacancies = reversed(vacancies.all())
-    print('session ', session['test_message'])
     return render_template('all_vacancy.html', vacancies=vacancies)
 
 
