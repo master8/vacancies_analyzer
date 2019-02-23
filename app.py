@@ -189,9 +189,9 @@ def profession():
 
     diagram_link, professions = plot_stat(count_labels)
 
-    selected = session['selected']
-
-    if session is None:
+    if 'selected' in session:
+        selected = session['selected']
+    else:
         selected = SelectedItems([], [], [])
 
     return render_template('profession.html',
@@ -265,7 +265,10 @@ def save_selection():
 
 @app.route('/selected')
 def selected():
-    return 'Items' + str(session['selected'].general_fun_ids) + '' + str(session['selected'].fun_ids) + '' + str(session['selected'].part_ids)
+    if 'selected' in session:
+        return 'Items' + str(session['selected'].general_fun_ids) + '' + str(session['selected'].fun_ids) + '' + str(session['selected'].part_ids)
+    else:
+        return ''
 
 
 @app.after_request
