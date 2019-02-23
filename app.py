@@ -18,7 +18,7 @@ migrate = Migrate(app, db)
 from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Profstandard,\
     Source, Region, Vacancy, ClassifiedVacancy
 
-from dto import Params
+from dto import Params, SelectedItems
 
 from handlers import general_function_tree, plot_search, plot_stat
 
@@ -189,6 +189,11 @@ def profession():
 
     diagram_link, professions = plot_stat(count_labels)
 
+    selected = session['selected']
+
+    if session is None:
+        selected = SelectedItems([], [], [])
+
     return render_template('profession.html',
                            title='profession',
                            best_vacancies=best_vacancies,
@@ -201,7 +206,8 @@ def profession():
                            sdate=params.start_date,
                            edate=params.end_date,
                            diagram_link=diagram_link,
-                           professions=professions)
+                           professions=professions,
+                           selected=selected)
 
 
 @app.route('/vacancy')
@@ -249,6 +255,11 @@ def split_vacancies():
 
 @app.route('/save', methods=['POST'])
 def save_selection():
+    session['selected'] = SelectedItems(
+        list(map(int, request.form.getlist('gf'))),
+        list(map(int, request.form.getlist('f'))),
+        list(map(int, request.form.getlist('p')))
+    )
     return redirect('/profession?id=' + request.args.get('prof_id'))
 
 

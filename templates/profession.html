@@ -141,21 +141,33 @@
                     <ul uk-accordion>
                         {% for general_function in branch.general_functions %}
                             <li class="uk-open">
-                                <input class="uk-checkbox mode-view" type="checkbox" value="{{ general_function.id }}" name="gf" hidden>
+                                <input class="uk-checkbox mode-view" type="checkbox"
+                                       {% if general_function.id in selected.general_fun_ids %}
+                                           checked
+                                       {% endif %}
+                                       value="{{ general_function.id }}" name="gf" hidden>
                                 <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
                                 <div class="uk-accordion-content uk-margin-large-left">
                                     <h3 class="uk-article-meta">Функций: {{ general_function.count }} <br> Частые слова: {{ general_function.monogram}}.<br> Частые словосочетания: {{ general_function.bigram }} </h3>
                                     <ul uk-accordion>
                                         {% for function in general_function.functions %}
                                             <li>
-                                                <input class="uk-checkbox mode-view" type="checkbox" value="{{ function.id }}" name="f" hidden>
+                                                <input class="uk-checkbox mode-view" type="checkbox"
+                                                       {% if function.id in selected.fun_ids %}
+                                                           checked
+                                                       {% endif %}
+                                                       value="{{ function.id }}" name="f" hidden>
                                                 <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
                                                 <div class="uk-accordion-content uk-margin-large-left">
                                                     <h4 class="uk-article-meta">Характеристик: {{ function.count }} <br> Частые слова: {{ function.monogram}}.<br> Частые словосочетания: {{ function.bigram }}</h4>
                                                     <ul uk-accordion>
                                                         {% for part in function.parts %}
                                                             <li>
-                                                                <input class="uk-checkbox mode-view" type="checkbox" value="{{ part.id }}" name="p" hidden>
+                                                                <input class="uk-checkbox mode-view" type="checkbox"
+                                                                       {% if part.id in selected.part_ids %}
+                                                                           checked
+                                                                       {% endif %}
+                                                                       value="{{ part.id }}" name="p" hidden>
                                                                 <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
                                                                 <div class="uk-accordion-content uk-margin-large-left">
                                                                      <br class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: {{ part.monogram}}.<br> Частые словосочетания: {{ part.bigram }} </h5>

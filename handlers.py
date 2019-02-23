@@ -28,6 +28,7 @@ def general_function_tree(prof_id, matched_parts):
         top_bigram = common_words(vacancies_text, 2)
 
         general_function_branch = {
+            'id': each.id,
             'weight': round(function_weight, 2),
             'name': each.name,
             'functions': functions,
@@ -60,6 +61,7 @@ def function_branch(general_id, matched_parts):
         top_bigram = common_words(vacancies_text, 2)
 
         function_parts_branch = {
+            'id': each.id,
             'weight': round(vacancy_weight, 2),
             'name': each.name,
             'parts': parts,
@@ -99,6 +101,7 @@ def parts_vacancies_leafs(function_id, matched_parts):
             top_bigram = common_words(sorting_parts['vacancy_part'].dropna(), 2)
 
         leaf_parts = {
+            'id': each.id,
             'weight': round(parts_weight, 2),
             'standard_part': each.text,
             'vacancy_parts': vacancy_parts, #вакансии
