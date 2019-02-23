@@ -36,7 +36,7 @@
                                 <tr>
                                     <td class="uk-text-nowrap">{{ p.profession.code }}</td>
                                     <td class="uk-table-link">
-                                        <a class="uk-link-reset" href="/profession?id={{ p.profession.id }}&region={{ region }}&source={{ source }}&sdate={{ sdate }}&edate={{ edate }}">
+                                        <a class="uk-link-reset" href="/profession?id={{ p.profession.id }}">
                                             {{ p.profession.name }}
                                         </a>
                                     </td>
@@ -81,8 +81,8 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                    <a class="uk-button uk-button-default" href="/vacancies?prof={{ profession_id }}&region={{ region }}&source={{ source }}&sdate={{ sdate }}&edate={{ edate }}">Все вакансии</a>
-                    <a class="uk-button uk-button-default" href="/split/vacancies?prof={{ profession_id }}&region={{ region }}&source={{ source }}&sdate={{ sdate }}&edate={{ edate }}">Все разделенные вакансии</a>
+                    <a class="uk-button uk-button-default" href="/vacancies?prof={{ profession_id }}">Все вакансии</a>
+                    <a class="uk-button uk-button-default" href="/split/vacancies?prof={{ profession_id }}">Все разделенные вакансии</a>
                 </div>
             </div>
         </div>
@@ -122,7 +122,7 @@
 </div>
 <div class="uk-padding uk-padding-remove-top">
     <div class="uk-card uk-card-default uk-card-body">
-        <form action="/save" method="post" class="uk-form-stacked">
+        <form action="/save?prof_id={{ profession_id }}" method="post" class="uk-form-stacked">
             <button class="uk-button uk-button-primary mode-view" type="button" uk-toggle="target: .mode-view">Выбрать элементы</button>
             <button class="uk-button uk-button-secondary mode-view" type="button" uk-toggle="target: .mode-view" hidden>Отменить изменения</button>
             <button class="uk-button uk-button-danger mode-view" type="submit"  hidden>Сохранить изменения</button>

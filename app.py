@@ -1,21 +1,13 @@
-import os
-from random import random
-
 from flask import Flask, request, session, redirect, url_for
 from flask import render_template
 from flask_session import Session
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from collections import defaultdict
-import matplotlib.pyplot as plt
 import pandas as pd
-
-from datetime import datetime
 
 from config import Config
 from utils import get_date
-
-import json
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -30,13 +22,13 @@ from dto import Params
 
 from handlers import general_function_tree, plot_search, plot_stat
 
+
 @app.route('/')
 def home():
     professions = Profstandard.query.all()
     regions = Region.query.all()
     sources = Source.query.all()
     return render_template('index.html', title='home', professions=professions, regions=regions, sources=sources)
-
 
 @app.route('/results')
 def results():
@@ -109,22 +101,16 @@ def results():
 
 @app.route('/profession')
 def profession():
-    reg_id = request.args.get('region')
-
-    source_id = request.args.get('source')
+    params = session['params']
     prof_id = request.args.get('id')
-    sdate = request.args.get('sdate')
-    edate = request.args.get('edate')
-    dt_sdate = datetime.strptime(sdate, "%Y-%m-%d")
-    dt_edate = datetime.strptime(edate, "%Y-%m-%d")
 
     query = db.session.query(Vacancy, ClassifiedVacancy) \
         .filter(ClassifiedVacancy.profstandard_id == prof_id) \
         .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
-        .filter(Vacancy.create_date <= dt_edate) \
-        .filter(Vacancy.create_date >= dt_sdate) \
-        .filter_by(region_id=reg_id) \
-        .filter_by(source_id=source_id) \
+        .filter(Vacancy.create_date <= params.end_date) \
+        .filter(Vacancy.create_date >= params.start_date) \
+        .filter_by(region_id=params.region.id) \
+        .filter_by(source_id=params.source.id) \
         .order_by(ClassifiedVacancy.probability)
     best_vacancies = []
     worst_vacancies = []
@@ -150,10 +136,10 @@ def profession():
         .filter(VacancyPart.vacancy_id == Vacancy.id) \
         .filter(ClassifiedVacancy.profstandard_id == prof_id) \
         .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
-        .filter(Vacancy.create_date <= dt_edate) \
-        .filter(Vacancy.create_date >= dt_sdate) \
-        .filter(Vacancy.region_id == reg_id) \
-        .filter(Vacancy.source_id == source_id)
+        .filter(Vacancy.create_date <= params.end_date) \
+        .filter(Vacancy.create_date >= params.start_date) \
+        .filter(Vacancy.region_id == params.region.id) \
+        .filter(Vacancy.source_id == params.source.id)
 
     matched_parts = defaultdict(list)
 
@@ -187,10 +173,10 @@ def profession():
     classified_vacancies = db.session.query(ClassifiedVacancy) \
         .filter(ClassifiedVacancy.profstandard_id == prof_id) \
         .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
-        .filter(Vacancy.create_date <= dt_edate) \
-        .filter(Vacancy.create_date >= dt_sdate) \
-        .filter(Vacancy.region_id == reg_id) \
-        .filter(Vacancy.source_id == source_id)
+        .filter(Vacancy.create_date <= params.end_date) \
+        .filter(Vacancy.create_date >= params.start_date) \
+        .filter(Vacancy.region_id == params.region.id) \
+        .filter(Vacancy.source_id == params.source.id)
 
     vacancies_id = list(map(lambda x: x.vacancy_id, classified_vacancies.all()))
 
@@ -211,10 +197,9 @@ def profession():
                            branches=branches,
                            count=count,
                            profession_id=prof_id,
-                           region=source_id,
-                           source=reg_id,
-                           sdate=request.args['sdate'],
-                           edate=request.args['edate'],
+                           params=params,
+                           sdate=params.start_date,
+                           edate=params.end_date,
                            diagram_link=diagram_link,
                            professions=professions)
 
@@ -227,22 +212,16 @@ def vacancy():
 
 @app.route('/vacancies')
 def all_vacancy():
-    reg_id = request.args.get('region')
-    source_id = request.args.get('source')
+    params = session['params']
     profession_id = request.args.get('prof')
-
-    sdate = request.args.get('sdate')
-    edate = request.args.get('edate')
-    dt_sdate = datetime.strptime(sdate, "%Y-%m-%d")
-    dt_edate = datetime.strptime(edate, "%Y-%m-%d")
 
     vacancies = db.session.query(Vacancy, ClassifiedVacancy) \
         .filter(ClassifiedVacancy.profstandard_id == profession_id) \
         .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
-        .filter(Vacancy.create_date <= dt_edate) \
-        .filter(Vacancy.create_date >= dt_sdate) \
-        .filter_by(region_id=reg_id) \
-        .filter_by(source_id=source_id) \
+        .filter(Vacancy.create_date <= params.end_date) \
+        .filter(Vacancy.create_date >= params.start_date) \
+        .filter_by(region_id=params.region.id) \
+        .filter_by(source_id=params.source.id) \
         .order_by(ClassifiedVacancy.probability)
     vacancies = reversed(vacancies.all())
     return render_template('all_vacancy.html', vacancies=vacancies)
@@ -250,22 +229,16 @@ def all_vacancy():
 
 @app.route('/split/vacancies')
 def split_vacancies():
-    reg_id = request.args.get('region')
-    source_id = request.args.get('source')
+    params = session['params']
     profession_id = request.args.get('prof')
-
-    sdate = request.args.get('sdate')
-    edate = request.args.get('edate')
-    dt_sdate = datetime.strptime(sdate, "%Y-%m-%d")
-    dt_edate = datetime.strptime(edate, "%Y-%m-%d")
 
     vacancies = db.session.query(Vacancy, ClassifiedVacancy) \
         .filter(ClassifiedVacancy.profstandard_id == profession_id) \
         .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
-        .filter(Vacancy.create_date <= dt_edate) \
-        .filter(Vacancy.create_date >= dt_sdate) \
-        .filter_by(region_id=reg_id) \
-        .filter_by(source_id=source_id) \
+        .filter(Vacancy.create_date <= params.end_date) \
+        .filter(Vacancy.create_date >= params.start_date) \
+        .filter_by(region_id=params.region.id) \
+        .filter_by(source_id=params.source.id) \
         .filter(VacancyPart.vacancy_id == Vacancy.id) \
         .order_by(ClassifiedVacancy.probability)
 
@@ -276,10 +249,7 @@ def split_vacancies():
 
 @app.route('/save', methods=['POST'])
 def save_selection():
-    return redirect('/')
-
-
-
+    return redirect('/profession?id=' + request.args.get('prof_id'))
 
 
 @app.after_request
