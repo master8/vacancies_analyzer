@@ -254,3 +254,4 @@ static/Word2Vec/big_word2vec_model_CBOW.trainables.syn1neg.npy
 static/Word2Vec/big_word2vec_model_CBOW
 /flask_session/
 *.xml
+*.svg

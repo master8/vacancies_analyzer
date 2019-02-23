@@ -116,8 +116,13 @@ def common_words(text, n_gram, topn = 5):
     lst = []
     top_word = []
     tfidf_vec = TfidfVectorizer(ngram_range=(n_gram, n_gram))
-    transformed = tfidf_vec.fit_transform(raw_documents=text)
-    index_value = {i[1]: i[0] for i in tfidf_vec.vocabulary_.items()}
+    try:
+        transformed = tfidf_vec.fit_transform(raw_documents=text)
+        index_value = {i[1]: i[0] for i in tfidf_vec.vocabulary_.items()}
+    except ValueError:
+        transformed = []
+        index_value = {}
+
     fully_indexed = []
     for row in transformed:
         fully_indexed.append({index_value[column]: value for column, value in zip(row.indices, row.data)})
