@@ -22,8 +22,8 @@
             {% for branch in branches %}
                 <div class="uk-card uk-card-default uk-card-body uk-margin-top">
                     <div>
-                        <h4>Уровень {{ branch.level }}</h4>
-                        <ul class="uk-list uk-text-small uk-text-right">
+                        <h4><a class="uk-margin-right" uk-icon="icon: chevron-down" uk-toggle="target: #toggle-{{ branch.level }}"></a>Уровень {{ branch.level }}</h4>
+                        <ul class="uk-list uk-text-small" id="toggle-{{ branch.level }}" hidden>
                             {% for post in branch.posts %}
                                 <li>{{ post.name }}</li>
                             {% endfor %}
