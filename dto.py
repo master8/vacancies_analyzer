@@ -20,11 +20,13 @@ class Params:
 
 class SelectedItems:
     def __init__(self,
+                 profession_id,
                  general_fun_ids,
                  fun_ids,
                  part_ids) -> None:
         super().__init__()
 
+        self.profession_id = profession_id
         self.general_fun_ids = general_fun_ids
         self.fun_ids = fun_ids
         self.part_ids = part_ids

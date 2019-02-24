@@ -28,6 +28,8 @@ def home():
     professions = Profstandard.query.all()
     regions = Region.query.all()
     sources = Source.query.all()
+    if 'selected' in session:
+        session.pop('selected')
     return render_template('index.html', title='home', professions=professions, regions=regions, sources=sources)
 
 @app.route('/results')
@@ -192,7 +194,7 @@ def profession():
     if 'selected' in session:
         selected = session['selected']
     else:
-        selected = SelectedItems([], [], [])
+        selected = SelectedItems(0, [], [], [])
 
     return render_template('profession.html',
                            title='profession',
@@ -255,12 +257,14 @@ def split_vacancies():
 
 @app.route('/save', methods=['POST'])
 def save_selection():
+    profession_id = request.args.get('prof_id')
     session['selected'] = SelectedItems(
+        profession_id,
         list(map(int, request.form.getlist('gf'))),
         list(map(int, request.form.getlist('f'))),
         list(map(int, request.form.getlist('p')))
     )
-    return redirect('/profession?id=' + request.args.get('prof_id'))
+    return redirect('/selected')
 
 
 @app.route('/selected')
