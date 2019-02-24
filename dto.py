@@ -30,3 +30,8 @@ class SelectedItems:
         self.general_fun_ids = general_fun_ids
         self.fun_ids = fun_ids
         self.part_ids = part_ids
+
+class Selected:
+    def __init__(self) -> None:
+        super().__init__()
+        self.items = {}

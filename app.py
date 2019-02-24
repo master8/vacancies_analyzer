@@ -18,7 +18,7 @@ migrate = Migrate(app, db)
 from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Profstandard,\
     Source, Region, Vacancy, ClassifiedVacancy
 
-from dto import Params, SelectedItems
+from dto import Params, SelectedItems, Selected
 
 from handlers import general_function_tree, plot_search, plot_stat
 
@@ -28,46 +28,56 @@ def home():
     professions = Profstandard.query.all()
     regions = Region.query.all()
     sources = Source.query.all()
-    if 'selected' in session:
-        session.pop('selected')
+
+    if 'params' in session:
+        session.pop('params')
+
+    session['selected'] = Selected()
+
     return render_template('index.html', title='home', professions=professions, regions=regions, sources=sources)
+
 
 @app.route('/results')
 def results():
-    reg_id = request.args.get('region')
-    region = Region.query.get(reg_id)
 
-    source_id = request.args.get('source')
-    source = Source.query.get(source_id)
+    if 'params' in session:
+        params = session['params']
+    else:
+        reg_id = request.args.get('region')
+        region = Region.query.get(reg_id)
 
-    sdate = request.args.get('sdate')
-    edate = request.args.get('edate')
-    dt_sdate = get_date(sdate)
-    dt_edate = get_date(edate)
+        source_id = request.args.get('source')
+        source = Source.query.get(source_id)
 
-    period = 'C: ' + str(sdate) + ' По: ' + str(edate)  # месяц - день - год
+        sdate = request.args.get('sdate')
+        edate = request.args.get('edate')
+        dt_sdate = get_date(sdate)
+        dt_edate = get_date(edate)
 
-    prof_id_list = request.args.getlist('prof')
+        prof_id_list = request.args.getlist('prof')
 
-    session['params'] = Params(region, source, dt_sdate, dt_edate, prof_id_list)
+        params = Params(region, source, dt_sdate, dt_edate, prof_id_list)
+        session['params'] = params
+
+    period = 'C: ' + str(params.start_date) + ' По: ' + str(params.end_date)  # месяц - день - год
 
     professions = []
     total = Vacancy.query \
-        .filter(ClassifiedVacancy.profstandard_id.in_(prof_id_list)) \
+        .filter(ClassifiedVacancy.profstandard_id.in_(params.profession_ids)) \
         .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
-        .filter(Vacancy.create_date <= dt_edate) \
-        .filter(Vacancy.create_date >= dt_sdate) \
-        .filter_by(region_id=reg_id) \
-        .filter_by(source_id=source_id).count()
+        .filter(Vacancy.create_date <= params.end_date) \
+        .filter(Vacancy.create_date >= params.start_date) \
+        .filter_by(region_id=params.region.id) \
+        .filter_by(source_id=params.source.id).count()
 
-    for prof_id in prof_id_list:
+    for prof_id in params.profession_ids:
         vacancy = Vacancy.query \
             .filter(ClassifiedVacancy.profstandard_id == prof_id) \
             .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
-            .filter(Vacancy.create_date <= dt_edate) \
-            .filter(Vacancy.create_date >= dt_sdate) \
-            .filter_by(region_id=reg_id) \
-            .filter_by(source_id=source_id)
+            .filter(Vacancy.create_date <= params.end_date) \
+            .filter(Vacancy.create_date >= params.start_date) \
+            .filter_by(region_id=params.region.id) \
+            .filter_by(source_id=params.source.id)
 
         rate = vacancy.count() * 100 / total
         prof_dict = {
@@ -92,12 +102,10 @@ def results():
 
     return render_template('results.html',
                            title='results',
-                           params=session['params'],
+                           params=params,
                            period=period,
                            professions=professions,
                            diagram_link=diagram_link,
-                           sdate=request.args['sdate'],
-                           edate=request.args['edate'],
                            total=total)
 
 
@@ -191,10 +199,10 @@ def profession():
 
     diagram_link, professions = plot_stat(count_labels)
 
-    if 'selected' in session:
-        selected = session['selected']
+    if 'selected' in session and prof_id in session['selected'].items:
+        selected = session['selected'][prof_id]
     else:
-        selected = SelectedItems(0, [], [], [])
+        selected = SelectedItems(prof_id, [], [], [])
 
     return render_template('profession.html',
                            title='profession',
@@ -258,7 +266,7 @@ def split_vacancies():
 @app.route('/save', methods=['POST'])
 def save_selection():
     profession_id = request.args.get('prof_id')
-    session['selected'] = SelectedItems(
+    session['selected'].items[profession_id] = SelectedItems(
         profession_id,
         list(map(int, request.form.getlist('gf'))),
         list(map(int, request.form.getlist('f'))),
@@ -270,7 +278,9 @@ def save_selection():
 @app.route('/selected')
 def selected():
     if 'selected' in session:
-        return 'Items' + str(session['selected'].general_fun_ids) + '' + str(session['selected'].fun_ids) + '' + str(session['selected'].part_ids)
+        params = session['params']
+        period = 'C: ' + str(params.start_date) + ' По: ' + str(params.end_date)  # месяц - день - год
+        return render_template('selected.html', selected_items=session['selected'].items.values(), params=params, period=period)
     else:
         return ''
 

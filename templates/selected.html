@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ title }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../static/css/uikit.min.css" />
+    <script src="../static/js/uikit.min.js"></script>
+    <script src="../static/js/uikit-icons.min.js"></script>
+</head>
+<body>
+<div class="uk-padding">
+    <div class="uk-card uk-card-default uk-card-body">
+        <h1 class="uk-text-center">Выбранные части</h1>
+        <p class="uk-text-center">Регион: <b>{{ params.region.name }}</b> Источник: <b>{{ params.source.name }}</b> Период: <b>{{ period }}</b></p>
+        <a class="uk-button uk-button-default uk-align-right" href="/results">Результаты поиска</a>
+    </div>
+</div>
+<div class="uk-padding uk-padding-remove-top">
+    <div class="uk-child-width-expand@s" uk-grid>
+        <div>
+            <div class="uk-card uk-card-default uk-card-body">
+                {% for selected in selected_items %}
+                    <h2>Профессия: {{ selected.profession_id }}</h2>
+                    <h4>Обобщённые функции:</h4>
+                    <ul class="uk-list">
+                        {% for gf in selected.general_fun_ids %}
+                            <li>{{ gf }}</li>
+                        {% endfor %}
+                    </ul>
+                    <h4>Функции:</h4>
+                    <ul class="uk-list">
+                        {% for f in selected.fun_ids %}
+                            <li>{{ f }}</li>
+                        {% endfor %}
+                    </ul>
+                    <h4>Части:</h4>
+                    <ul class="uk-list">
+                        {% for p in selected.part_ids %}
+                            <li>{{ p }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
