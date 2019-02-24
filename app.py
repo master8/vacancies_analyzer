@@ -314,6 +314,7 @@ def selected():
         general_functions = sorting_generals.sort_values('weight', ascending=False).to_dict('r')
         posts = defaultdict(list)
         general_functions_by_level = defaultdict(list)
+        just_selected_by_level = defaultdict(list)
 
         for post in ProfstandardPost.query.filter_by(profstandard_id=prof_id):
             posts[post.qualification_level].append(post)
@@ -321,17 +322,20 @@ def selected():
         for function in general_functions:
             general_functions_by_level[function['level']].append(function)
 
+        for item in just_selected:
+            just_selected_by_level[item['level']].append(item)
+            if item['level'] not in general_functions_by_level:
+                general_functions_by_level[item['level']] = []
+
         branches = []
 
         for key, value in general_functions_by_level.items():
-
-            if len(value) > 0:
-                branches.append({
-                    'level': key,
-                    'posts': posts[key],
-                    'general_functions': value
-                })
-
+            branches.append({
+                'level': key,
+                'posts': posts[key],
+                'general_functions': value,
+                'just_selected': just_selected_by_level[key]
+            })
 
 
 

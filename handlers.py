@@ -72,7 +72,7 @@ def function_branch(general_id, matched_parts, selected: SelectedItems = None):
             parts = sorting_parts.sort_values('weight', ascending=False).to_dict('r')
 
         if selected is not None and each.id not in selected.fun_ids and len(parts) > 0:
-            selected_parts.append(parts)
+            selected_parts = selected_parts + parts
 
         if selected is None or each.id in selected.fun_ids:
 

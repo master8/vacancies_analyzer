@@ -17,87 +17,135 @@
     </div>
 </div>
 <div class="uk-padding uk-padding-remove-top">
-    <div class="uk-card uk-card-default uk-card-body">
-        <h3 class="uk-article-meta">Обобщенных функций: {{ count }}</h3>
-        {% for branch in branches %}
-            <div class="uk-grid-divider uk-child-width-expand@s" uk-grid>
-                <div class="uk-width-1-6@m">
-                    <h4>Уровень {{ branch.level }}</h4>
-                    <ul class="uk-list">
-                        {% for post in branch.posts %}
-                            <li>{{ post.name }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                <div>
-                    <ul uk-accordion>
-                        {% for general_function in branch.general_functions %}
-                            <li class="uk-open">
-                                <input class="uk-checkbox mode-view" type="checkbox"
-                                       {% if general_function.id in selected.general_fun_ids %}
-                                           checked
-                                       {% endif %}
-                                       value="{{ general_function.id }}" name="gf" hidden>
-                                <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
-                                <div class="uk-accordion-content uk-margin-large-left">
-                                    <h3 class="uk-article-meta">Функций: {{ general_function.count }} <br> Частые слова: {{ general_function.monogram}}.<br> Частые словосочетания: {{ general_function.bigram }} </h3>
-                                    <ul uk-accordion>
-                                        {% for function in general_function.functions %}
-                                            <li>
-                                                <input class="uk-checkbox mode-view" type="checkbox"
-                                                       {% if function.id in selected.fun_ids %}
-                                                           checked
-                                                       {% endif %}
-                                                       value="{{ function.id }}" name="f" hidden>
-                                                <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
-                                                <div class="uk-accordion-content uk-margin-large-left">
-                                                    <h4 class="uk-article-meta">Характеристик: {{ function.count }} <br> Частые слова: {{ function.monogram}}.<br> Частые словосочетания: {{ function.bigram }}</h4>
-                                                    <ul uk-accordion>
-                                                        {% for part in function.parts %}
-                                                            <li>
-                                                                <input class="uk-checkbox mode-view" type="checkbox"
-                                                                       {% if part.id in selected.part_ids %}
-                                                                           checked
-                                                                       {% endif %}
-                                                                       value="{{ part.id }}" name="p" hidden>
-                                                                <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
-                                                                <div class="uk-accordion-content uk-margin-large-left">
-                                                                     <br class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: {{ part.monogram}}.<br> Частые словосочетания: {{ part.bigram }} </h5>
-
-                                                                    <table class="uk-table uk-table-small uk-table-divider">
-                                                                        <thead>
-                                                                            <tr>
-                                                                                {{ part.lemmatized }}
-                                                                                <th class="uk-table-shrink">Близость</th>
-                                                                                <th class="uk-table-expand">Часть вакансии.</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                        {% for vacancy in part.vacancy_parts[:5] %}
-                                                                            <tr>
-                                                                                <td>{{ vacancy.similarity|round(2, 'floor') }}</td>
-                                                                                <td>{{ vacancy.vacancy_part }}</td>
-                                                                              <!--  <td>{{ vacancy.lemmatized }}</td> -->
-                                                                            </tr>
-                                                                        {% endfor %}
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                            </li>
-                                                        {% endfor %}
-                                                    </ul>
-                                                </div>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
+    <div class="uk-child-width-expand@s" uk-grid>
+        <div>
+            <div class="uk-card uk-card-default uk-card-body">
+                <h3 class="uk-article-meta">Обобщенных функций: {{ count }}</h3>
+                {% for branch in branches %}
+                    <div class="uk-grid-divider uk-child-width-expand@s" uk-grid>
+                        <div class="uk-width-1-6@m">
+                            <h4>Уровень {{ branch.level }}</h4>
+                            <ul class="uk-list">
+                                {% for post in branch.posts %}
+                                    <li>{{ post.name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div>
+                            <ul uk-accordion>
+                                {% for general_function in branch.general_functions %}
+                                    <li class="uk-open">
+                                        <input class="uk-checkbox mode-view" type="checkbox"
+                                               {% if general_function.id in selected.general_fun_ids %}
+                                                   checked
+                                               {% endif %}
+                                               value="{{ general_function.id }}" name="gf" hidden>
+                                        <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
+                                        <div class="uk-accordion-content uk-margin-large-left">
+                                            <h3 class="uk-article-meta">Функций: {{ general_function.count }} <br> Частые слова: {{ general_function.monogram}}.<br> Частые словосочетания: {{ general_function.bigram }} </h3>
+                                            <ul uk-accordion>
+                                                {% for function in general_function.functions %}
+                                                    <li>
+                                                        <input class="uk-checkbox mode-view" type="checkbox"
+                                                               {% if function.id in selected.fun_ids %}
+                                                                   checked
+                                                               {% endif %}
+                                                               value="{{ function.id }}" name="f" hidden>
+                                                        <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
+                                                        <div class="uk-accordion-content uk-margin-large-left">
+                                                            <h4 class="uk-article-meta">Характеристик: {{ function.count }} <br> Частые слова: {{ function.monogram}}.<br> Частые словосочетания: {{ function.bigram }}</h4>
+                                                            <ul uk-accordion>
+                                                                {% for part in function.parts %}
+                                                                    <li>
+                                                                        <input class="uk-checkbox mode-view" type="checkbox"
+                                                                               {% if part.id in selected.part_ids %}
+                                                                                   checked
+                                                                               {% endif %}
+                                                                               value="{{ part.id }}" name="p" hidden>
+                                                                        <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
+                                                                        <div class="uk-accordion-content uk-margin-large-left">
+                                                                             <br class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: {{ part.monogram}}.<br> Частые словосочетания: {{ part.bigram }} </h5>
+                                                                            </table>
+                                                                        </div>
+                                                                    </li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </div>
+                                                    </li>
+                                                {% endfor %}
+                                                {% for part in general_function.selected_parts %}
+                                                    <li>
+                                                        <input class="uk-checkbox mode-view" type="checkbox"
+                                                               {% if part.id in selected.part_ids %}
+                                                                   checked
+                                                               {% endif %}
+                                                               value="{{ part.id }}" name="p" hidden>
+                                                        <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
+                                                        <div class="uk-accordion-content uk-margin-large-left">
+                                                             <br class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: {{ part.monogram}}.<br> Частые словосочетания: {{ part.bigram }} </h5>
+                                                        </div>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                                {% for just_selected in branch.just_selected %}
+                                    {% for function in just_selected.functions %}
+                                        <li>
+                                            <input class="uk-checkbox mode-view" type="checkbox"
+                                                   {% if function.id in selected.fun_ids %}
+                                                       checked
+                                                   {% endif %}
+                                                   value="{{ function.id }}" name="f" hidden>
+                                            <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
+                                            <div class="uk-accordion-content uk-margin-large-left">
+                                                <h4 class="uk-article-meta">Характеристик: {{ function.count }} <br> Частые слова: {{ function.monogram}}.<br> Частые словосочетания: {{ function.bigram }}</h4>
+                                                <ul uk-accordion>
+                                                    {% for part in function.parts %}
+                                                        <li>
+                                                            <input class="uk-checkbox mode-view" type="checkbox"
+                                                                   {% if part.id in selected.part_ids %}
+                                                                       checked
+                                                                   {% endif %}
+                                                                   value="{{ part.id }}" name="p" hidden>
+                                                            <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
+                                                            <div class="uk-accordion-content uk-margin-large-left">
+                                                                 <br class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: {{ part.monogram}}.<br> Частые словосочетания: {{ part.bigram }} </h5>
+                                                                </table>
+                                                            </div>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for just_selected in branch.just_selected %}
+                                    {% for part in just_selected.parts %}
+                                        <li>
+                                            <input class="uk-checkbox mode-view" type="checkbox"
+                                                   {% if part.id in selected.part_ids %}
+                                                       checked
+                                                   {% endif %}
+                                                   value="{{ part.id }}" name="p" hidden>
+                                            <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
+                                            <div class="uk-accordion-content uk-margin-large-left">
+                                                 <br class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: {{ part.monogram}}.<br> Частые словосочетания: {{ part.bigram }} </h5>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endfor %}
+                </form>
             </div>
-        {% endfor %}
-        </form>
+        </div>
+        <div>
+
+        </div>
     </div>
 </div>
 </body>
