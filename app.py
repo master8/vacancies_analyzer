@@ -199,10 +199,10 @@ def profession():
 
     diagram_link, professions = plot_stat(count_labels)
 
-    if 'selected' in session and prof_id in session['selected'].items:
-        selected = session['selected'].items[prof_id]
+    if 'selected' in session and int(prof_id) in session['selected'].items:
+        selected = session['selected'].items[int(prof_id)]
     else:
-        selected = SelectedItems(prof_id, [], [], [])
+        selected = SelectedItems(int(prof_id), [], [], [])
 
     return render_template('profession.html',
                            title='profession',
