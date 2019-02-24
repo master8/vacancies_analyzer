@@ -22,8 +22,8 @@
             {% for branch in branches %}
                 <div class="uk-card uk-card-default uk-card-body uk-margin-top">
                     <div>
-                        <h4><a class="uk-margin-right" uk-icon="icon: chevron-down" uk-toggle="target: #toggle-{{ branch.level }}"></a>Уровень {{ branch.level }}</h4>
-                        <ul class="uk-list uk-text-small" id="toggle-{{ branch.level }}" hidden>
+                        <h4><a class="uk-margin-right" uk-icon="icon: chevron-down" uk-toggle="target: #toggle-level-{{ branch.level }}"></a>Уровень {{ branch.level }}</h4>
+                        <ul class="uk-list uk-text-small" id="toggle-level-{{ branch.level }}" hidden>
                             {% for post in branch.posts %}
                                 <li>{{ post.name }}</li>
                             {% endfor %}
@@ -31,21 +31,23 @@
                     </div>
                     <ul uk-accordion>
                         {% for general_function in branch.general_functions %}
-                            <li class="uk-open">
+                            <li>
                                 <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
-                                <div class="uk-accordion-content uk-margin-large-left">
-                                    <h3 class="uk-article-meta">Функций: {{ general_function.count }} <br> Частые слова: <br> {{ general_function.monogram}}.<br> Частые словосочетания: <br> {{ general_function.bigram }} </h3>
-                                    <ul uk-accordion>
+                                <div class="uk-accordion-content uk-margin-medium-left uk-margin-small-top">
+                                    <a uk-icon="icon: table" uk-toggle="target: #toggle-gf-{{ general_function.id }}"></a>
+                                    <h3 class="uk-article-meta uk-margin-small-top" hidden id="toggle-gf-{{ general_function.id }}">Функций: {{ general_function.count }} <br> Частые слова: <br> {{ general_function.monogram}}.<br> Частые словосочетания: <br> {{ general_function.bigram }} </h3>
+                                    <ul uk-accordion class="uk-margin-small-top">
                                         {% for function in general_function.functions %}
                                             <li>
                                                 <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
-                                                <div class="uk-accordion-content uk-margin-large-left">
-                                                    <h4 class="uk-article-meta">Характеристик: {{ function.count }} <br> Частые слова: <br> {{ function.monogram}}.<br> Частые словосочетания: <br> {{ function.bigram }}</h4>
-                                                    <ul uk-accordion>
+                                                <div class="uk-accordion-content uk-margin-medium-left uk-margin-small-top">
+                                                    <a uk-icon="icon: table" uk-toggle="target: #toggle-f-{{ function.id }}"></a>
+                                                    <h4 class="uk-article-meta uk-margin-small-top" id="toggle-f-{{ function.id }}" hidden>Характеристик: {{ function.count }} <br> Частые слова: <br> {{ function.monogram}}.<br> Частые словосочетания: <br> {{ function.bigram }}</h4>
+                                                    <ul uk-accordion class="uk-margin-small-top">
                                                         {% for part in function.parts %}
                                                             <li>
                                                                 <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
-                                                                <div class="uk-accordion-content uk-margin-large-left">
+                                                                <div class="uk-accordion-content">
                                                                      <h5 class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: <br> {{ part.monogram}}.<br> Частые словосочетания: <br> {{ part.bigram }} </h5>
                                                                 </div>
                                                             </li>
@@ -57,7 +59,7 @@
                                         {% for part in general_function.selected_parts %}
                                             <li>
                                                 <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
-                                                <div class="uk-accordion-content uk-margin-large-left">
+                                                <div class="uk-accordion-content">
                                                      <h5 class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: <br> {{ part.monogram}}.<br> Частые словосочетания: <br> {{ part.bigram }} </h5>
                                                 </div>
                                             </li>
@@ -70,13 +72,14 @@
                             {% for function in just_selected.functions %}
                                 <li>
                                     <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
-                                    <div class="uk-accordion-content uk-margin-large-left">
-                                        <h4 class="uk-article-meta">Характеристик: {{ function.count }} <br> Частые слова: <br> {{ function.monogram}}.<br> Частые словосочетания: <br> {{ function.bigram }}</h4>
-                                        <ul uk-accordion>
+                                    <div class="uk-accordion-content uk-margin-medium-left uk-margin-small-top">
+                                        <a uk-icon="icon: table" uk-toggle="target: #toggle-f-{{ function.id }}"></a>
+                                        <h4 class="uk-article-meta uk-margin-small-top" id="toggle-f-{{ function.id }}" hidden>Характеристик: {{ function.count }} <br> Частые слова: <br> {{ function.monogram}}.<br> Частые словосочетания: <br> {{ function.bigram }}</h4>
+                                        <ul uk-accordion class="uk-margin-small-top">
                                             {% for part in function.parts %}
                                                 <li>
                                                     <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
-                                                    <div class="uk-accordion-content uk-margin-large-left">
+                                                    <div class="uk-accordion-content">
                                                          <h5 class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: <br> {{ part.monogram}}.<br> Частые словосочетания: <br> {{ part.bigram }} </h5>
                                                     </div>
                                                 </li>
@@ -90,7 +93,7 @@
                             {% for part in just_selected.parts %}
                                 <li>
                                     <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
-                                    <div class="uk-accordion-content uk-margin-large-left">
+                                    <div class="uk-accordion-content">
                                          <h5 class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: <br> {{ part.monogram}}.<br> Частые словосочетания: <br> {{ part.bigram }} </h5>
                                     </div>
                                 </li>
