@@ -279,75 +279,69 @@ def save_selection():
 def selected():
     if 'selected' in session:
         params = session['params']
+        professions = []
 
-        # prof_id = session['selected'].items.first()
-        prof_id = 1
+        for prof_id in session['selected'].items:
 
-        if 'selected' in session and prof_id in session['selected'].items:
             selected_items = session['selected'].items[prof_id]
-        else:
-            selected_items = SelectedItems(prof_id, [], [], [])
 
+            query = db.session.query(MatchPart, VacancyPart) \
+                .filter(MatchPart.vacancy_part_id == VacancyPart.id) \
+                .filter(VacancyPart.vacancy_id == Vacancy.id) \
+                .filter(ClassifiedVacancy.profstandard_id == prof_id) \
+                .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
+                .filter(Vacancy.create_date <= params.end_date) \
+                .filter(Vacancy.create_date >= params.start_date) \
+                .filter(Vacancy.region_id == params.region.id) \
+                .filter(Vacancy.source_id == params.source.id)
 
+            matched_parts = defaultdict(list)
 
+            for match_part, vacancy_part in query:
+                matched_parts[match_part.profstandard_part_id].append({
+                    'similarity': round(match_part.similarity, 3),
+                    'vacancy_part': vacancy_part.text
+                })
 
-        query = db.session.query(MatchPart, VacancyPart) \
-            .filter(MatchPart.vacancy_part_id == VacancyPart.id) \
-            .filter(VacancyPart.vacancy_id == Vacancy.id) \
-            .filter(ClassifiedVacancy.profstandard_id == prof_id) \
-            .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
-            .filter(Vacancy.create_date <= params.end_date) \
-            .filter(Vacancy.create_date >= params.start_date) \
-            .filter(Vacancy.region_id == params.region.id) \
-            .filter(Vacancy.source_id == params.source.id)
+            general_functions, count, just_selected = general_function_tree(prof_id, matched_parts, selected_items)
+            sorting_generals = pd.DataFrame(general_functions)
+            general_functions = sorting_generals.sort_values('weight', ascending=False).to_dict('r')
+            posts = defaultdict(list)
+            general_functions_by_level = defaultdict(list)
+            just_selected_by_level = defaultdict(list)
 
-        matched_parts = defaultdict(list)
+            for post in ProfstandardPost.query.filter_by(profstandard_id=prof_id):
+                posts[post.qualification_level].append(post)
 
-        for match_part, vacancy_part in query:
-            matched_parts[match_part.profstandard_part_id].append({
-                'similarity': round(match_part.similarity, 3),
-                'vacancy_part': vacancy_part.text
+            for function in general_functions:
+                general_functions_by_level[function['level']].append(function)
+
+            for item in just_selected:
+                just_selected_by_level[item['level']].append(item)
+                if item['level'] not in general_functions_by_level:
+                    general_functions_by_level[item['level']] = []
+
+            branches = []
+
+            for key, value in general_functions_by_level.items():
+                branches.append({
+                    'level': key,
+                    'posts': posts[key],
+                    'general_functions': value,
+                    'just_selected': just_selected_by_level[key]
+                })
+
+            professions.append({
+                'name': Profstandard.query.get(prof_id).name,
+                'branches': branches
             })
-
-        general_functions, count, just_selected = general_function_tree(prof_id, matched_parts, selected_items)
-        sorting_generals = pd.DataFrame(general_functions)
-        general_functions = sorting_generals.sort_values('weight', ascending=False).to_dict('r')
-        posts = defaultdict(list)
-        general_functions_by_level = defaultdict(list)
-        just_selected_by_level = defaultdict(list)
-
-        for post in ProfstandardPost.query.filter_by(profstandard_id=prof_id):
-            posts[post.qualification_level].append(post)
-
-        for function in general_functions:
-            general_functions_by_level[function['level']].append(function)
-
-        for item in just_selected:
-            just_selected_by_level[item['level']].append(item)
-            if item['level'] not in general_functions_by_level:
-                general_functions_by_level[item['level']] = []
-
-        branches = []
-
-        for key, value in general_functions_by_level.items():
-            branches.append({
-                'level': key,
-                'posts': posts[key],
-                'general_functions': value,
-                'just_selected': just_selected_by_level[key]
-            })
-
-
 
         period = 'C: ' + str(params.start_date) + ' По: ' + str(params.end_date)  # месяц - день - год
 
         return render_template('selected.html',
                                params=params,
                                period=period,
-                               branches=branches,
-                               count=count,
-                               profession_id=prof_id,
-                               selected=selected_items)
+                               professions=professions)
     else:
         return ''
 
