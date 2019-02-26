@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="../static/css/uikit.min.css" />
     <script src="../static/js/uikit.min.js"></script>
     <script src="../static/js/uikit-icons.min.js"></script>
+    <style>
+        .layer {
+            overflow: scroll; /* Добавляем полосы прокрутки */
+            height: 600px; /* Высота блока */
+            padding: 5px; /* Поля вокруг текста */
+            overflow-x: hidden;
+            overflow-y: auto;
+            }
+    </style>
 </head>
 <body>
 <div class="uk-padding">
@@ -18,7 +27,8 @@
 </div>
 <div class="uk-padding uk-padding-remove-top">
     <div class="uk-child-width-expand@s" uk-grid>
-        <div>
+        <div class="layer">
+
             {% for profession in professions %}
                 <h3 class="uk-text-center">{{ profession.name }}</h3>
                 {% for branch in profession.branches %}
@@ -106,8 +116,47 @@
                 {% endfor %}
             {% endfor %}
         </div>
-        <div>
-
+        <div class="layer">
+            <div class="uk-card uk-card-secondary uk-card-body" id = "panel">
+                 <button class="uk-button uk-button-primary" onclick="addButton()">Добавить</button>
+            </div>
+            <script>
+                var i = 0 ;
+                var allowSubmit = false ;
+                function addButton() {
+                    var panel = document.getElementById("panel");
+                    var div = document.createElement('div');
+                    if (allowSubmit === false){
+                        var btn = document.createElement('button');
+                        btn.className = "uk-button uk-button-default uk-align-right";
+                        btn.type = "submit";
+                        btn.id = 'submit';
+                        btn.innerHTML = 'Отправить';
+                        panel.appendChild(btn);
+                    }
+                    div.className = "uk-card uk-card-secondary uk-card-body";
+                    div.id = i;
+                    div.innerHTML = '<input class="uk-input uk-form-width-medium" name ="code" type="text" placeholder="Код компетенции">\n' +
+                            '<button class="uk-button uk-button-danger uk-align-right" onclick="del('+i+')">Удалить</button>' +
+                            '<div class="uk-margin">' +
+                            '<textarea class="uk-textarea" rows="5" placeholder="Наименование универсальной компетенции выпускника"></textarea>' +
+                            '</div>'    ;
+                    panel.appendChild(div);
+                    console.log("нажатие");
+                    i+=1;
+                    allowSubmit = true;
+                }
+                function del(n) {
+                    var panel = document.getElementById("panel");
+                    var div = document.getElementById(n);
+                    panel.removeChild(div);
+                    if (panel.childElementCount < 3) {
+                        var sub = document.getElementById('submit');
+                        panel.removeChild(sub);
+                        allowSubmit = false;
+                    }
+                }
+            </script>
         </div>
     </div>
 </div>
