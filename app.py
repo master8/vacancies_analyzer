@@ -20,7 +20,7 @@ from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Pr
 
 from dto import Params, SelectedItems, Selected
 
-from handlers import general_function_tree, plot_search, plot_stat
+from handlers import general_function_tree, plot_search, plot_stat, common_words, unique
 
 
 @app.route('/')
@@ -204,6 +204,14 @@ def profession():
     else:
         selected = SelectedItems(int(prof_id), [], [], [])
 
+    text = []
+    for branch in branches:
+        for gen in branch['general_functions']:
+            for gen_text in gen['gen_text']:
+                text.append(gen_text)
+    text = unique(text)
+    top_words = common_words(text, 1, topn=10)
+    top_bigrams = common_words(text, 2)
     return render_template('profession.html',
                            title='profession',
                            best_vacancies=best_vacancies,
@@ -211,6 +219,8 @@ def profession():
                            profession=Profstandard.query.get(prof_id).name,
                            branches=branches,
                            count=count,
+                           top_words=top_words,
+                           top_bigrams=top_bigrams,
                            profession_id=prof_id,
                            params=params,
                            sdate=params.start_date,

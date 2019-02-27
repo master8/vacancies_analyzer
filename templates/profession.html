@@ -128,7 +128,7 @@
             <button class="uk-button uk-button-danger mode-view" type="submit"  hidden>Сохранить изменения</button>
 
         <a class="uk-button uk-button-default" href="/selected">Посмотреть выбранные</a>
-        <h3 class="uk-article-meta">Обобщенных функций: {{ count }}</h3>
+        <h3 class="uk-article-meta">Обобщенных функций: {{ count }} найдено <br> Частые слова: {{ top_words }} <br> Частые словосочетания: {{ top_bigrams }} </h3>
         {% for branch in branches %}
             <div class="uk-grid-divider uk-child-width-expand@s" uk-grid>
                 <div class="uk-width-1-6@m">
@@ -150,7 +150,7 @@
                                        value="{{ general_function.id }}" name="gf" hidden>
                                 <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
                                 <div class="uk-accordion-content uk-margin-large-left">
-                                    <h3 class="uk-article-meta">Функций: {{ general_function.count }} <br> Частые слова: {{ general_function.monogram}}.<br> Частые словосочетания: {{ general_function.bigram }} </h3>
+                                    <h3 class="uk-article-meta">Функций: {{ general_function.count }} найдено <br> Частые слова: {{ general_function.monogram}}.<br> Частые словосочетания: {{ general_function.bigram }} </h3>
                                     <ul uk-accordion>
                                         {% for function in general_function.functions %}
                                             <li>
@@ -161,7 +161,7 @@
                                                        value="{{ function.id }}" name="f" hidden>
                                                 <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
                                                 <div class="uk-accordion-content uk-margin-large-left">
-                                                    <h4 class="uk-article-meta">Характеристик: {{ function.count }} <br> Частые слова: {{ function.monogram}}.<br> Частые словосочетания: {{ function.bigram }}</h4>
+                                                    <h4 class="uk-article-meta">Характеристик: {{ function.count }} найдено <br> Частые слова: {{ function.monogram}}.<br> Частые словосочетания: {{ function.bigram }}</h4>
                                                     <ul uk-accordion>
                                                         {% for part in function.parts %}
                                                             <li>

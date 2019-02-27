@@ -50,7 +50,8 @@ def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None
                 'level': each.qualification_level,
                 'monogram': top_word,
                 'bigram': top_bigram,
-                'selected_parts': selected_parts
+                'selected_parts': selected_parts,
+                'gen_text':vacancies_text
             }
             tree.append(general_function_branch)
             parts += parts_count
