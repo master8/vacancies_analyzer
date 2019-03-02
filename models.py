@@ -10,19 +10,15 @@ class University(db.Model):
         return '<University {}>'.format(self.name)
 
 
-# class GeneralFunction(db.Model):
-#
-#     id = db.Column(db.Integer, primary_key=True)
-#     code = db.Column(db.String(64))
-#     profstandard_id = db.Column(db.Integer, db.ForeignKey('profstandard.id'))
-#     name = db.Column(db.String(128), index=True, unique=True)
-#     qualification_level = db.Column(db.Integer)
-#
-#     functions = db.relationship('Function', backref='general_function', lazy='dynamic')
-#
-#     def __repr__(self):
-#         return '<GeneralFunction {}>'.format(self.name)
-#
+class EducationProgram(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    university_id = db.Column(db.Integer, db.ForeignKey('university.id'))
+    name = db.Column(db.String(128), index=True, unique=True)
+
+    def __repr__(self):
+        return '<EducationProgram {}>'.format(self.name)
+
 #
 # class Function(db.Model):
 #
