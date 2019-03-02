@@ -4,7 +4,7 @@
     <title>{{ title }}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="../static/css/uikit.min.css" />
+    <link rel="stylesheet" href="../static/css/uikit.min.css"/>
     <script src="../static/js/uikit.min.js"></script>
     <script src="../static/js/uikit-icons.min.js"></script>
 </head>
@@ -13,7 +13,8 @@
     <div class="uk-padding">
         <div class="uk-card uk-card-default uk-card-body">
             <h1 class="uk-text-center">Анализ рабочих программ дисциплин</h1>
-            <p class="uk-text-center">Узнайте, на каких направлениях учат на выбранную вами профессию в различных вузах России</p>
+            <p class="uk-text-center">Узнайте, на каких направлениях учат на выбранную вами профессию в различных вузах
+                России</p>
             <button class="uk-button uk-button-primary uk-align-center" type="submit">Узнать</button>
         </div>
     </div>
@@ -23,29 +24,25 @@
                 <div class="uk-card uk-card-default uk-card-body">
                     <legend class="uk-legend">Университеты</legend>
 
-                    <div class="uk-margin">
-                        <div class="uk-form-label">Вы можете выбрать несколько университетов</div>
-                        <div class="uk-form-controls uk-list uk-margin-top">
-                            <div class="uk-overflow-auto">
-                                <table class="uk-table uk-table-middle uk-table-divider">
-                                    <tbody>
-                                        {% for university in universities %}
-                                            <tr>
-                                                <td class="uk-table-shrink">
-                                                    <input class="uk-checkbox"
-                                                           type="checkbox" value="{{ university.id }}" name="prof">
-                                                </td>
-                                                <td class="uk-text-truncate uk-table-expand">{{ university.name }}</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                    <ul uk-accordion>
+                        {% for university in universities %}
+                        <li>
+                            <a class="uk-accordion-title" href="#">
+                                {{ university.name }}</a>
+                            <div class="uk-accordion-content uk-margin-large-left">
+                                <ul uk-accordion>
+                                    {% for ep in education_program %}
+                                    <li>
+                                        <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ 0 }}</span>
+                                            {{ ep }}</a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
                             </div>
-                        </div>
-                    </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </div>
-            </div>
-            <div>
             </div>
         </div>
     </div>

@@ -28,7 +28,14 @@
             {% for op in education_program %}
                 <li>
                     <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ 0 }}</span> {{ op }}</a>
-                    <h4>Цель дисциплины: изучение методов программирования для овладения знаниями в
+
+                    <div class="uk-accordion-content uk-margin-large-left">
+                        <h3>Дисциплины:</h3>
+                        <ul uk-accordion>
+                            {% for d in disciplines %}
+                                <li>
+                                    <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ 0 }}</span> {{ d }}</a>
+                                    <h4>Цель дисциплины: изучение методов программирования для овладения знаниями в
                                    области технологии программирования; подготовка к осознанному использованию как
                                    языков программирования, так и методов программирования.Особое внимание уделяется
                                    организации самостоятельной работы студентов и ее методическому
@@ -39,12 +46,6 @@
                                    алгоритмов на основе структурного и объектно-ориентированного подхода;закрепление
                                    навыков алгоритмизации и программирования; знакомство с основными структурами
                                    данных и типовыми методами обработки этих структур</h4>
-                    <div class="uk-accordion-content uk-margin-large-left">
-                        <h3>Дисциплины:</h3>
-                        <ul uk-accordion>
-                            {% for d in disciplines %}
-                                <li>
-                                    <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ 0 }}</span> {{ d }}</a>
                                     <div class="uk-accordion-content uk-margin-large-left">
                                         <h3>Компетенции</h3>
                                          <ul uk-accordion>
