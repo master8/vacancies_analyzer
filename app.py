@@ -20,22 +20,20 @@ db = SQLAlchemy(app)
 db.create_all()
 migrate = Migrate(app, db)
 
-from models import University, EducationProgram
+from models import University
 
 
 @app.route('/')
 def home():
     universities = University.query.all()
-    education_program = db.session.query(University, EducationProgram) \
-        .filter(University.id == EducationProgram.university_id)
-    return render_template('index.html', title='home', universities=universities, education_program=education_program)
+    return render_template('index.html', title='home', universities=universities)
 
 
-@app.route('/edprogram')
+@app.route('/education_program')
 def profession():
+    #мне сюда приходит id
     return render_template('education_program.html',
                            title='education program',
-                           education_program=["09.03.01. Информатика и вычислительная техника"],
                            disciplines=["Программирование", "Базы данных", "Алгоритмы и анализ сложности",
                                         "Анализ данных"],
                            zyn=["Знать", "Уметь", "Владеть"],

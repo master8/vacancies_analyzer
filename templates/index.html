@@ -9,7 +9,7 @@
     <script src="../static/js/uikit-icons.min.js"></script>
 </head>
 <body>
-<form action="/edprogram" method="get" class="uk-form-stacked">
+<form action="/education_program" method="get" class="uk-form-stacked">
     <div class="uk-padding">
         <div class="uk-card uk-card-default uk-card-body">
             <h1 class="uk-text-center">Анализ рабочих программ дисциплин</h1>
@@ -30,12 +30,10 @@
                                 {{ university.name }}</a>
                             <div class="uk-accordion-content uk-margin-large-left">
                                 <ul uk-accordion>
-                                    {% for ep in education_program %}
                                     <li>
-                                        <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ 0 }}</span>
-                                            {{ ep }}</a>
+                                        <a class="uk-accordion-title" href="/education_program">
+                                            {{ university.program }}</a>
                                     </li>
-                                    {% endfor %}
                                 </ul>
                             </div>
                         </li>
