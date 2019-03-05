@@ -285,7 +285,7 @@ def save_selection():
     return redirect('/selected')
 
 
-@app.route('/selected')
+@app.route('/selected', methods=["GET", "POST"])
 def selected():
     if 'selected' in session:
         params = session['params']

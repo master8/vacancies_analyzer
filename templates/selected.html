@@ -8,6 +8,17 @@
     <script src="../static/js/uikit.min.js"></script>
     <script src="../static/js/uikit-icons.min.js"></script>
     <style>
+
+        [draggable] {
+          -moz-user-select: none;
+          -khtml-user-select: none;
+          -webkit-user-select: none;
+          user-select: none;
+          /* Required to make elements draggable in old WebKit */
+          -khtml-user-drag: element;
+          -webkit-user-drag: element;
+        }
+
         .layer {
             overflow: scroll; /* Добавляем полосы прокрутки */
             height: 600px; /* Высота блока */
@@ -116,9 +127,10 @@
                 {% endfor %}
             {% endfor %}
         </div>
+        <form action="/selected" method="post" >
         <div class="layer">
             <div class="uk-card uk-card-secondary uk-card-body" id = "panel">
-                 <button class="uk-button uk-button-primary" onclick="addButton()">Добавить</button>
+                 <button class="uk-button uk-button-primary uk-margin-small uk-ma" type="button" onclick="addButton()">Добавить</button>
             </div>
             <script>
                 var i = 0 ;
@@ -131,16 +143,17 @@
                         btn.className = "uk-button uk-button-default uk-align-right";
                         btn.type = "submit";
                         btn.id = 'submit';
-                        btn.innerHTML = 'Отправить';
+                        btn.innerHTML = 'Сохранить';
                         panel.appendChild(btn);
                     }
-                    div.className = "uk-card uk-card-secondary uk-card-body";
+                    div.className = "uk-margin-small-bottom uk-margin-small-top";
                     div.id = i;
-                    div.innerHTML = '<input class="uk-input uk-form-width-medium" name ="code" type="text" placeholder="Код компетенции">\n' +
-                            '<button class="uk-button uk-button-danger uk-align-right" onclick="del('+i+')">Удалить</button>' +
-                            '<div class="uk-margin">' +
-                            '<textarea class="uk-textarea" rows="5" placeholder="Наименование универсальной компетенции выпускника"></textarea>' +
-                            '</div>'    ;
+                    div.attributes = 'uk-grid';
+                    div.style = "";
+                    div.innerHTML =
+                            '<button class="uk-margin-small-right uk-icon-button" onclick="del('+i+')" uk-icon="trash"></button>'+
+                            '<input class="uk-input uk-margin-small-righ uk-form-width-medium" name ="code_'+i+'" type="text" placeholder="Код компетенции">\n' +
+                            '<textarea class="uk-input uk-width-auto@m"  rows="5" name = "codename_'+i+'" placeholder="Наименование универсальной компетенции выпускника"></textarea>';
                     panel.appendChild(div);
                     console.log("нажатие");
                     i+=1;
@@ -156,8 +169,11 @@
                         allowSubmit = false;
                     }
                 }
+
+
             </script>
         </div>
+        </form>
     </div>
 </div>
 </body>
