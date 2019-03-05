@@ -2,6 +2,16 @@ from models import *
 from datetime import datetime
 
 
+class Competence:
+    def __init__(self,
+                 code: str,
+                 name: str ):
+        super().__init__()
+
+        self.code = code
+        self.name = name
+
+
 class Params:
     def __init__(self,
                  region: Region,

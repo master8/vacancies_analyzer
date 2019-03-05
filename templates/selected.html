@@ -23,7 +23,7 @@
             overflow: scroll; /* Добавляем полосы прокрутки */
             height: 600px; /* Высота блока */
             padding: 5px; /* Поля вокруг текста */
-            overflow-x: hidden;
+            overflow-x: auto;
             overflow-y: auto;
             }
     </style>
@@ -132,6 +132,13 @@
         <div class="layer">
             <div class="uk-card uk-card-secondary uk-card-body" id = "panel">
                  <button class="uk-button uk-button-primary uk-margin-small uk-ma" type="button" onclick="addButton()">Добавить</button>
+                {% for competence in competences %}
+                    <div class="uk-margin-small-bottom uk-margin-small-top" id={{competence[0] }}>
+                        <button class="uk-margin-small-right uk-icon-button" onclick="del('{{competence[0]}}')" uk-icon="trash"></button>
+                        <input class="uk-input uk-margin-small-righ uk-form-width-medium" name ="code" type="text" placeholder="Код компетенции" value="{{ competence[0] }}">
+                        <input class="uk-input" style="width: 450px" name = "codename" value="{{ competence[1] }}" placeholder="Наименование универсальной компетенции выпускника">
+                    </div>
+                {% endfor %}
             </div>
             <script>
                 var i = 0 ;
@@ -144,8 +151,9 @@
                         btn.className = "uk-button uk-button-default uk-align-right";
                         btn.type = "submit";
                         btn.id = 'submit';
+                        btn.style = 'margin-top: 10px; margin-bottom:0px; vertical-align:top;'
                         btn.innerHTML = 'Сохранить';
-                        panel.appendChild(btn);
+                        panel.insertBefore(btn, panel.childNodes[0]);
                     }
                     div.className = "uk-margin-small-bottom uk-margin-small-top";
                     div.id = i;
@@ -153,8 +161,8 @@
                     div.style = "";
                     div.innerHTML =
                             '<button class="uk-margin-small-right uk-icon-button" onclick="del('+i+')" uk-icon="trash"></button>'+
-                            '<input class="uk-input uk-margin-small-righ uk-form-width-medium" name ="code" type="text" placeholder="Код компетенции">\n' +
-                            '<textarea class="uk-input uk-width-auto@m"  rows="5" name = "codename" placeholder="Наименование универсальной компетенции выпускника"></textarea>';
+                            '<input class="uk-input uk-margin-small-righ uk-form-width-medium" name ="code" type="text" placeholder="Код компетенции">' +
+                            '<textarea class="uk-input" style="width: 450px"  rows="5" name = "codename" placeholder="Наименование универсальной компетенции выпускника"></textarea>';
                     panel.appendChild(div);
                     console.log("нажатие");
                     i+=1;

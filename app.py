@@ -32,6 +32,9 @@ def home():
     if 'params' in session:
         session.pop('params')
 
+    if 'competence' in session:
+        session.pop('competence')
+
     session['selected'] = Selected()
 
     return render_template('index.html', title='home', professions=professions, regions=regions, sources=sources)
@@ -289,12 +292,14 @@ def save_selection():
 def selected():
 
     if request.method == "POST":
-        feature = request.form.items()
-        for ind, val in feature:
-            print(ind)
-            print (val)
+        codes = request.form.getlist('code')
+        names = request.form.getlist('codename')
 
+        competence = []
 
+        for i in range(len(codes)):
+            competence.append([codes[i], names[i]])
+        session['competence'] = competence
 
     if 'selected' in session:
         params = session['params']
@@ -357,13 +362,23 @@ def selected():
 
         period = 'C: ' + str(params.start_date) + ' По: ' + str(params.end_date)  # месяц - день - год
 
+
         return render_template('selected.html',
                                params=params,
                                period=period,
-                               professions=professions
+                               professions=professions,
+                               competences=session['competence'] if 'competence' in session else []
                                )
     else:
-        return ''
+        params = {"region":{"name":""},"source":{"name":""}}
+        period = ''
+        professions = []
+        return render_template('selected.html',
+                               params=params,
+                               period=period,
+                               professions=professions,
+                               competences=session['competence'] if 'competence' in session else []
+                               )
 
 
 @app.after_request
