@@ -5,6 +5,10 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from collections import defaultdict
 import pandas as pd
+import matplotlib
+
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
 
 from config import Config
 from utils import get_date
@@ -15,8 +19,8 @@ Session(app=app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Profstandard,\
-    Source, Region, Vacancy, ClassifiedVacancy
+from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Profstandard, Source, Region, Vacancy, \
+    ClassifiedVacancy, University, EducationProgram
 
 from dto import Params, SelectedItems, Selected
 
@@ -39,7 +43,6 @@ def home():
 
 @app.route('/results')
 def results():
-
     if 'params' in session:
         params = session['params']
     else:
@@ -354,6 +357,22 @@ def selected():
                                professions=professions)
     else:
         return ''
+
+
+@app.route('/universities')
+def universities():
+    universities = University.query.all()
+    return render_template('universities.html', title='universities', universities=universities)
+
+
+@app.route('/education_program/<id_program>', methods=['GET'])
+def education_program(id_program):
+    profession = "Программист"
+    education_program = list(db.session.query(EducationProgram).filter(EducationProgram.university_id == id_program))
+    return render_template('education_program.html',
+                           title='education program',
+                           education_program=education_program,
+                           profession=profession)
 
 
 @app.after_request
