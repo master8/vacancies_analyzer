@@ -165,6 +165,17 @@ class ProfstandardPost(db.Model):
         return '<ProfstandardPost {}>'.format(self.name)
 
 
+class ProfstandardEducation(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128), index=True, unique=True)
+    profstandard_id = db.Column(db.Integer, db.ForeignKey('profstandard.id'), index=True)
+    qualification_level = db.Column(db.Integer)
+
+    def __repr__(self):
+        return '<ProfstandardEducation {}>'.format(self.name)
+
+
 
 
 
