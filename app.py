@@ -287,6 +287,15 @@ def save_selection():
 
 @app.route('/selected', methods=["GET", "POST"])
 def selected():
+
+    if request.method == "POST":
+        feature = request.form.items()
+        for ind, val in feature:
+            print(ind)
+            print (val)
+
+
+
     if 'selected' in session:
         params = session['params']
         professions = []
@@ -351,7 +360,8 @@ def selected():
         return render_template('selected.html',
                                params=params,
                                period=period,
-                               professions=professions)
+                               professions=professions
+                               )
     else:
         return ''
 

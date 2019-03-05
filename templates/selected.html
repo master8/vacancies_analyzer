@@ -29,6 +29,7 @@
     </style>
 </head>
 <body>
+{{ debug }}
 <div class="uk-padding">
     <div class="uk-card uk-card-default uk-card-body">
         <h1 class="uk-text-center">Выбранные части</h1>
@@ -152,8 +153,8 @@
                     div.style = "";
                     div.innerHTML =
                             '<button class="uk-margin-small-right uk-icon-button" onclick="del('+i+')" uk-icon="trash"></button>'+
-                            '<input class="uk-input uk-margin-small-righ uk-form-width-medium" name ="code_'+i+'" type="text" placeholder="Код компетенции">\n' +
-                            '<textarea class="uk-input uk-width-auto@m"  rows="5" name = "codename_'+i+'" placeholder="Наименование универсальной компетенции выпускника"></textarea>';
+                            '<input class="uk-input uk-margin-small-righ uk-form-width-medium" name ="code" type="text" placeholder="Код компетенции">\n' +
+                            '<textarea class="uk-input uk-width-auto@m"  rows="5" name = "codename" placeholder="Наименование универсальной компетенции выпускника"></textarea>';
                     panel.appendChild(div);
                     console.log("нажатие");
                     i+=1;
