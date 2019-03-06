@@ -163,9 +163,13 @@ class University(db.Model):
 
 class EducationProgram(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    university_id = db.Column(db.Integer(), db.ForeignKey('university.id'))
+    university_id = db.Column(db.Integer())
     name = db.Column(db.String(128))
     annotation = db.Column(db.String(255))
+    know = db.Column(db.String(255))
+    can = db.Column(db.String(255))
+    own = db.Column(db.String(255))
+    themes = db.Column(db.String(255))
 
     def __repr__(self):
         return '<EducationProgram {}>'.format(self.name)

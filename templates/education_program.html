@@ -27,21 +27,22 @@
         <ul uk-accordion>
             {% for op in education_program %}
                 <li>
-                    <a class="uk-accordion-title" href="#">{{ op.name }}</a>
+                    <input type="checkbox"><a class="uk-accordion-title" href="#">{{ op.name }}</a>
 
                     <div class="uk-accordion-content uk-margin-large-left">
                         <h3>Аннотация дисциплины</h3>
-                        <h4>{{ op.annotation }}</h4>
+                        <input type="checkbox"><h4>{{ op.annotation }}</h4>
                         <h3>Знания, умения, навыки</h3>
                         <h4>По окончанию изучения дисциплины выпускник должен:</h4>
                         <ul uk-accordion>
                             <li>
-                                <a class="uk-accordion-title" href="#">Знать:</a>
+                                <input type="checkbox"> <a class="uk-accordion-title" href="#">Знать</a>
                                 <div class="uk-accordion-content uk-margin-large-left">
                                     <ul uk-accordion>
-                                        {% for k in know %}
+                                        {% for k in op.know.split('\n') %}
                                             <li>
-                                                <a class="uk-accordion-title" href="#"> {{ k }}</a>
+                                                <input type="checkbox"> <a class="uk-accordion-title"
+                                                                           href="#"> {{ k.lower() }}</a>
                                             </li>
                                         {% endfor %}
                                     </ul>
@@ -50,12 +51,13 @@
                         </ul>
                         <ul uk-accordion>
                             <li>
-                                <a class="uk-accordion-title" href="#">Уметь:</a>
+                                <input type="checkbox"><a class="uk-accordion-title" href="#">Уметь</a>
                                 <div class="uk-accordion-content uk-margin-large-left">
                                     <ul uk-accordion>
-                                        {% for c in can %}
+                                        {% for c in op.can.split('\n') %}
                                             <li>
-                                                <a class="uk-accordion-title" href="#"> {{ c }}</a>
+                                                <input type="checkbox"> <a class="uk-accordion-title"
+                                                                           href="#"> {{ c.lower() }}</a>
                                             </li>
                                         {% endfor %}
                                     </ul>
@@ -64,12 +66,13 @@
                         </ul>
                         <ul uk-accordion>
                             <li>
-                                <a class="uk-accordion-title" href="#">Владеть:</a>
+                                <input type="checkbox"><a class="uk-accordion-title" href="#">Владеть</a>
                                 <div class="uk-accordion-content uk-margin-large-left">
                                     <ul uk-accordion>
-                                        {% for o in own %}
+                                        {% for o in op.own.split('\n') %}
                                             <li>
-                                                <a class="uk-accordion-title" href="#"> {{ o }}</a>
+                                                <input type="checkbox"> <a class="uk-accordion-title"
+                                                                           href="#"> {{ o.lower() }}</a>
                                             </li>
                                         {% endfor %}
                                     </ul>
@@ -78,12 +81,13 @@
                         </ul>
                         <ul uk-accordion>
                             <li>
-                                <a class="uk-accordion-title" href="#">Структура дисциплины:</a>
+                                <input type="checkbox"><a class="uk-accordion-title" href="#">Структура дисциплины</a>
                                 <div class="uk-accordion-content uk-margin-large-left">
                                     <ul uk-accordion>
-                                        {% for o in own %}
+                                        {% for o in op.themes.split('\n') %}
                                             <li>
-                                                <a class="uk-accordion-title" href="#"> {{ o }}</a>
+                                                <input type="checkbox"><a class="uk-accordion-title"
+                                                                          href="#"> {{ o.lower() }}</a>
                                             </li>
                                         {% endfor %}
                                     </ul>

@@ -374,7 +374,6 @@ def education_program(id_program):
                            education_program=education_program,
                            profession=profession)
 
-
 @app.after_request
 def add_header(response):
     response.headers['X-UA-Compatible'] = 'IE=Edge,chrome=1'
