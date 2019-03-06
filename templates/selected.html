@@ -126,7 +126,7 @@
                     <div class="uk-margin-small-bottom uk-margin-small-top" id={{competence[0] }}>
                         <button class="uk-margin-small-right uk-icon-button" onclick="del('{{competence[0]}}')" uk-icon="trash"></button>
                         <input class="uk-input uk-margin-small-right uk-form-width-medium" name ="code" type="text" placeholder="Код компетенции" value="{{ competence[0] }}">
-                        <input class="uk-input" style="width: 440px" name = "codename" value="{{ competence[1] }}" placeholder="Наименование универсальной компетенции выпускника">
+                        <input class="uk-input" style="width: 430px" name = "codename" value="{{ competence[1] }}" placeholder="Наименование универсальной компетенции выпускника">
                     </div>
                 {% endfor %}
             </div>
@@ -152,7 +152,7 @@
                     div.innerHTML =
                             '<button class="uk-margin-small-right uk-icon-button" onclick="del('+i+')" uk-icon="trash"></button>'+
                             '<input class="uk-input uk-margin-small-right uk-form-width-medium" name ="code" type="text" placeholder="Код компетенции">' +
-                            '<textarea class="uk-input" style="width: 440px"  rows="1" name = "codename" placeholder="Наименование универсальной компетенции выпускника"></textarea>';
+                            '<textarea class="uk-input" style="width: 430px"  rows="1" name = "codename" placeholder="Наименование универсальной компетенции выпускника"></textarea>';
                     panel.appendChild(div);
                     console.log("нажатие");
                     i+=1;
