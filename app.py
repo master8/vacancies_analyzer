@@ -372,7 +372,9 @@ def education_program(id_program):
     return render_template('education_program.html',
                            title='education program',
                            education_program=education_program,
-                           profession=profession)
+                           profession=profession,
+                           standards=['ЗНАТЬ', 'ХОЧУ УМЕТЬ', 'МНЕ НУЖНЫ РАБЫ'])
+
 
 @app.after_request
 def add_header(response):
