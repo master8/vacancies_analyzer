@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ title }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../static/css/uikit.min.css"/>
+    <script src="../static/js/uikit.min.js"></script>
+    <script src="../static/js/uikit-icons.min.js"></script>
+</head>
+<body>
+<form action="/education_program" method="get" class="uk-form-stacked">
+    <div class="uk-padding">
+        <div class="uk-card uk-card-default uk-card-body">
+            <h1 class="uk-text-center">Анализ рабочих программ дисциплин</h1>
+            <p class="uk-text-center">Узнайте, на каких направлениях учат на выбранную вами профессию в различных вузах
+                России</p>
+        </div>
+    </div>
+    <div class="uk-padding uk-padding-remove-top">
+        <div class="uk-child-width-expand@s" uk-grid>
+            <div class="uk-width-2-3@m">
+                <div class="uk-card uk-card-default uk-card-body">
+                    <legend class="uk-legend">Университеты</legend>
+                    <ul uk-accordion>
+                        {% for university in universities %}
+                        <li>
+                            <a class="uk-accordion-title" href="#">
+                                {{ university.name }}</a>
+                            <div class="uk-accordion-content uk-margin-large-left">
+                                <ul uk-accordion>
+                                    <li>
+                                        <a href="/education_program/{{university.id}}" style="text-decoration: none">
+                                            {{ university.program }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+</body>
+</html>

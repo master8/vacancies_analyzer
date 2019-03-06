@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ title }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../static/css/uikit.min.css"/>
+    <script src="../static/js/uikit.min.js"></script>
+    <script src="../static/js/uikit-icons.min.js"></script>
+</head>
+<body>
+<div class="uk-padding">
+    <div class="uk-card uk-card-default uk-card-body">
+        <h1 class="uk-text-center">Образовательная программа</h1>
+        <p class="uk-text-center">Профессия: <b>{{ profession }}</b></p>
+        <a class="uk-button uk-button-default uk-align-right" href="/">Home</a>
+    </div>
+</div>
+
+<div class="uk-card uk-card-primary uk-card-body">
+    <h2 class="uk-text-center">Изучаемые дисциплины и полученные компетенции</h2>
+</div>
+</div>
+<div class="uk-padding uk-padding-remove-top">
+    <div class="uk-width-2-3@m ">
+        <div class="uk-card uk-card-default uk-card-body ">
+            <h3>Дисциплины:</h3>
+            <ul uk-accordion>
+                {% for op in education_program %}
+                    <li>
+                        <input type="checkbox"><a class="uk-accordion-title" href="#">{{ op.name }}</a>
+
+                        <div class="uk-accordion-content uk-margin-large-left">
+                            <h3>Аннотация дисциплины</h3>
+                            <input type="checkbox"><h4>{{ op.annotation }}</h4>
+                            <h3>Знания, умения, навыки</h3>
+                            <h4>По окончанию изучения дисциплины выпускник должен:</h4>
+                            <ul uk-accordion>
+                                <li>
+                                    <input type="checkbox"> <a class="uk-accordion-title" href="#">Знать</a>
+                                    <div class="uk-accordion-content uk-margin-large-left">
+                                        <ul uk-accordion>
+                                            {% for k in op.know.split('\n') %}
+                                                <li>
+                                                    <input type="checkbox"> <a class="uk-accordion-title"
+                                                                               href="#"> {{ k.lower() }}</a>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+                            <ul uk-accordion>
+                                <li>
+                                    <input type="checkbox"><a class="uk-accordion-title" href="#">Уметь</a>
+                                    <div class="uk-accordion-content uk-margin-large-left">
+                                        <ul uk-accordion>
+                                            {% for c in op.can.split('\n') %}
+                                                <li>
+                                                    <input type="checkbox"> <a class="uk-accordion-title"
+                                                                               href="#"> {{ c.lower() }}</a>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+                            <ul uk-accordion>
+                                <li>
+                                    <input type="checkbox"><a class="uk-accordion-title" href="#">Владеть</a>
+                                    <div class="uk-accordion-content uk-margin-large-left">
+                                        <ul uk-accordion>
+                                            {% for o in op.own.split('\n') %}
+                                                <li>
+                                                    <input type="checkbox"> <a class="uk-accordion-title"
+                                                                               href="#"> {{ o.lower() }}</a>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+                            <ul uk-accordion>
+                                <li>
+                                    <input type="checkbox"><a class="uk-accordion-title" href="#">Структура
+                                    дисциплины</a>
+                                    <div class="uk-accordion-content uk-margin-large-left">
+                                        <ul uk-accordion>
+                                            {% for o in op.themes.split('\n') %}
+                                                <li>
+                                                    <input type="checkbox"><a class="uk-accordion-title"
+                                                                              href="#"> {{ o.lower() }}</a>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="uk-card uk-card-secondary uk-card-body">
+    <div class="uk-margin-right">
+        <ul>
+            {% for standard in standards %}
+                <li>
+                    <input type="checkbox"><a class="uk-accordion-title"
+                                              href="#"> {{ standard }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    </div>
+</div>
+
+</div>
+
+</body>
+</html>

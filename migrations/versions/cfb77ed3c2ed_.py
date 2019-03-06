@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: efb520db8180
+Revision ID: cfb77ed3c2ed
 Revises: 
-Create Date: 2018-12-14 00:16:57.465204
+Create Date: 2019-03-05 21:17:40.365074
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'efb520db8180'
+revision = 'cfb77ed3c2ed'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,9 +23,9 @@ def upgrade():
     sa.Column('code', sa.String(length=64), nullable=True),
     sa.Column('name', sa.String(length=128), nullable=True),
     sa.Column('is_support', sa.Boolean(), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('code')
+    sa.PrimaryKeyConstraint('id')
     )
+    op.create_index(op.f('ix_profstandard_code'), 'profstandard', ['code'], unique=True)
     op.create_index(op.f('ix_profstandard_name'), 'profstandard', ['name'], unique=True)
     op.create_table('profstandard_part_type',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -46,6 +46,13 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_source_name'), 'source', ['name'], unique=True)
+    op.create_table('university',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=128), nullable=True),
+    sa.Column('program', sa.String(length=128), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
+    )
     op.create_table('vacancy_part_type',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=True),
@@ -62,17 +69,32 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_general_function_name'), 'general_function', ['name'], unique=True)
+    op.create_index(op.f('ix_general_function_profstandard_id'), 'general_function', ['profstandard_id'], unique=False)
+    op.create_table('profstandard_post',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=128), nullable=True),
+    sa.Column('profstandard_id', sa.Integer(), nullable=True),
+    sa.Column('qualification_level', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['profstandard_id'], ['profstandard.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_profstandard_post_name'), 'profstandard_post', ['name'], unique=True)
+    op.create_index(op.f('ix_profstandard_post_profstandard_id'), 'profstandard_post', ['profstandard_id'], unique=False)
     op.create_table('vacancy',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('region_id', sa.Integer(), nullable=True),
     sa.Column('source_id', sa.Integer(), nullable=True),
     sa.Column('name', sa.String(length=128), nullable=True),
     sa.Column('create_date', sa.DateTime(), nullable=True),
+    sa.Column('text', sa.Text(), nullable=True),
+    sa.Column('link', sa.String(length=128), nullable=True),
     sa.ForeignKeyConstraint(['region_id'], ['region.id'], ),
     sa.ForeignKeyConstraint(['source_id'], ['source.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_vacancy_create_date'), 'vacancy', ['create_date'], unique=False)
+    op.create_index(op.f('ix_vacancy_region_id'), 'vacancy', ['region_id'], unique=False)
+    op.create_index(op.f('ix_vacancy_source_id'), 'vacancy', ['source_id'], unique=False)
     op.create_table('classified_vacancy',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('vacancy_id', sa.Integer(), nullable=True),
@@ -82,6 +104,8 @@ def upgrade():
     sa.ForeignKeyConstraint(['vacancy_id'], ['vacancy.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_index(op.f('ix_classified_vacancy_profstandard_id'), 'classified_vacancy', ['profstandard_id'], unique=False)
+    op.create_index(op.f('ix_classified_vacancy_vacancy_id'), 'classified_vacancy', ['vacancy_id'], unique=False)
     op.create_table('function',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=128), nullable=True),
@@ -91,7 +115,8 @@ def upgrade():
     sa.ForeignKeyConstraint(['general_function_id'], ['general_function.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_function_name'), 'function', ['name'], unique=True)
+    op.create_index(op.f('ix_function_general_function_id'), 'function', ['general_function_id'], unique=False)
+    op.create_index(op.f('ix_function_name'), 'function', ['name'], unique=False)
     op.create_table('vacancy_part',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('vacancy_id', sa.Integer(), nullable=True),
@@ -101,6 +126,8 @@ def upgrade():
     sa.ForeignKeyConstraint(['vacancy_id'], ['vacancy.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_index(op.f('ix_vacancy_part_type_id'), 'vacancy_part', ['type_id'], unique=False)
+    op.create_index(op.f('ix_vacancy_part_vacancy_id'), 'vacancy_part', ['vacancy_id'], unique=False)
     op.create_table('profstandard_part',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('text', sa.Text(), nullable=True),
@@ -110,6 +137,8 @@ def upgrade():
     sa.ForeignKeyConstraint(['part_type_id'], ['profstandard_part_type.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_index(op.f('ix_profstandard_part_function_id'), 'profstandard_part', ['function_id'], unique=False)
+    op.create_index(op.f('ix_profstandard_part_part_type_id'), 'profstandard_part', ['part_type_id'], unique=False)
     op.create_table('match_part',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('vacancy_part_id', sa.Integer(), nullable=True),
@@ -120,23 +149,43 @@ def upgrade():
     sa.ForeignKeyConstraint(['vacancy_part_id'], ['vacancy_part.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_index(op.f('ix_match_part_profstandard_part_id'), 'match_part', ['profstandard_part_id'], unique=False)
+    op.create_index(op.f('ix_match_part_similarity'), 'match_part', ['similarity'], unique=False)
+    op.create_index(op.f('ix_match_part_vacancy_part_id'), 'match_part', ['vacancy_part_id'], unique=False)
     # ### end Alembic commands ###
 
 
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f('ix_match_part_vacancy_part_id'), table_name='match_part')
+    op.drop_index(op.f('ix_match_part_similarity'), table_name='match_part')
+    op.drop_index(op.f('ix_match_part_profstandard_part_id'), table_name='match_part')
     op.drop_table('match_part')
+    op.drop_index(op.f('ix_profstandard_part_part_type_id'), table_name='profstandard_part')
+    op.drop_index(op.f('ix_profstandard_part_function_id'), table_name='profstandard_part')
     op.drop_table('profstandard_part')
+    op.drop_index(op.f('ix_vacancy_part_vacancy_id'), table_name='vacancy_part')
+    op.drop_index(op.f('ix_vacancy_part_type_id'), table_name='vacancy_part')
     op.drop_table('vacancy_part')
     op.drop_index(op.f('ix_function_name'), table_name='function')
+    op.drop_index(op.f('ix_function_general_function_id'), table_name='function')
     op.drop_table('function')
+    op.drop_index(op.f('ix_classified_vacancy_vacancy_id'), table_name='classified_vacancy')
+    op.drop_index(op.f('ix_classified_vacancy_profstandard_id'), table_name='classified_vacancy')
     op.drop_table('classified_vacancy')
+    op.drop_index(op.f('ix_vacancy_source_id'), table_name='vacancy')
+    op.drop_index(op.f('ix_vacancy_region_id'), table_name='vacancy')
     op.drop_index(op.f('ix_vacancy_create_date'), table_name='vacancy')
     op.drop_table('vacancy')
+    op.drop_index(op.f('ix_profstandard_post_profstandard_id'), table_name='profstandard_post')
+    op.drop_index(op.f('ix_profstandard_post_name'), table_name='profstandard_post')
+    op.drop_table('profstandard_post')
+    op.drop_index(op.f('ix_general_function_profstandard_id'), table_name='general_function')
     op.drop_index(op.f('ix_general_function_name'), table_name='general_function')
     op.drop_table('general_function')
     op.drop_index(op.f('ix_vacancy_part_type_name'), table_name='vacancy_part_type')
     op.drop_table('vacancy_part_type')
+    op.drop_table('university')
     op.drop_index(op.f('ix_source_name'), table_name='source')
     op.drop_table('source')
     op.drop_index(op.f('ix_region_name'), table_name='region')
@@ -144,5 +193,6 @@ def downgrade():
     op.drop_index(op.f('ix_profstandard_part_type_name'), table_name='profstandard_part_type')
     op.drop_table('profstandard_part_type')
     op.drop_index(op.f('ix_profstandard_name'), table_name='profstandard')
+    op.drop_index(op.f('ix_profstandard_code'), table_name='profstandard')
     op.drop_table('profstandard')
     # ### end Alembic commands ###

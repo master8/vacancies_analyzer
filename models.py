@@ -2,7 +2,6 @@ from app import db
 
 
 class Profstandard(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(64), unique=True, index=True)
     name = db.Column(db.String(128), index=True, unique=True)
@@ -16,7 +15,6 @@ class Profstandard(db.Model):
 
 
 class GeneralFunction(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(64))
     profstandard_id = db.Column(db.Integer, db.ForeignKey('profstandard.id'), index=True)
@@ -30,7 +28,6 @@ class GeneralFunction(db.Model):
 
 
 class Function(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True)
     code = db.Column(db.String(64))
@@ -44,7 +41,6 @@ class Function(db.Model):
 
 
 class ProfstandardPartType(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), index=True, unique=True)
 
@@ -55,7 +51,6 @@ class ProfstandardPartType(db.Model):
 
 
 class ProfstandardPart(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.Text)
     part_type_id = db.Column(db.Integer, db.ForeignKey('profstandard_part_type.id'), index=True)
@@ -68,7 +63,6 @@ class ProfstandardPart(db.Model):
 
 
 class Region(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), index=True, unique=True)
 
@@ -79,7 +73,6 @@ class Region(db.Model):
 
 
 class Source(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), index=True, unique=True)
     is_support = db.Column(db.Boolean)
@@ -91,7 +84,6 @@ class Source(db.Model):
 
 
 class ClassifiedVacancy(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     vacancy_id = db.Column(db.Integer, db.ForeignKey('vacancy.id'), index=True)
     profstandard_id = db.Column(db.Integer, db.ForeignKey('profstandard.id'), index=True)
@@ -102,7 +94,6 @@ class ClassifiedVacancy(db.Model):
 
 
 class Vacancy(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     region_id = db.Column(db.Integer, db.ForeignKey('region.id'), index=True)
     source_id = db.Column(db.Integer, db.ForeignKey('source.id'), index=True)
@@ -119,7 +110,6 @@ class Vacancy(db.Model):
 
 
 class VacancyPart(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     vacancy_id = db.Column(db.Integer, db.ForeignKey('vacancy.id'), index=True)
     text = db.Column(db.Text)
@@ -132,7 +122,6 @@ class VacancyPart(db.Model):
 
 
 class VacancyPartType(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), index=True, unique=True)
 
@@ -143,7 +132,6 @@ class VacancyPartType(db.Model):
 
 
 class MatchPart(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     vacancy_part_id = db.Column(db.Integer, db.ForeignKey('vacancy_part.id'), index=True)
     profstandard_part_id = db.Column(db.Integer, db.ForeignKey('profstandard_part.id'), index=True)
@@ -155,7 +143,6 @@ class MatchPart(db.Model):
 
 
 class ProfstandardPost(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True, unique=True)
     profstandard_id = db.Column(db.Integer, db.ForeignKey('profstandard.id'), index=True)
@@ -176,8 +163,58 @@ class ProfstandardEducation(db.Model):
         return '<ProfstandardEducation {}>'.format(self.name)
 
 
+class University(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128), unique=True)
+    program = db.Column(db.String(128))
+
+    def __repr__(self):
+        return '<University {}>'.format(self.name)
 
 
+class EducationProgram(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    university_id = db.Column(db.Integer())
+    name = db.Column(db.String(128))
+    annotation = db.Column(db.String(255))
+    know = db.Column(db.String(255))
+    can = db.Column(db.String(255))
+    own = db.Column(db.String(255))
+    themes = db.Column(db.String(255))
+
+    def __repr__(self):
+        return '<EducationProgram {}>'.format(self.name)
 
 
+class ZYN(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    university_id = db.Column(db.Integer())
+    discipline_name = db.Column(db.String(128))
+    know = db.Column(db.String(255))
+    can = db.Column(db.String(255))
+    own = db.Column(db.String(255))
 
+    def __repr__(self):
+        return '<ZYN {}>'.format(self.name)
+
+
+class Parts(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    university_id = db.Column(db.Integer())
+    discipline_name = db.Column(db.String(128))
+    parts_id = db.Column(db.Integer())
+    parts_name = db.Column(db.String(255))
+
+    def __repr__(self):
+        return '<parts {}>'.format(self.name)
+
+
+class PartsThemes(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    university_id = db.Column(db.Integer())
+    discipline_name = db.Column(db.String(128))
+    parts_id = db.Column(db.Integer())
+    themes = db.Column(db.String(255))
+
+    def __repr__(self):
+        return '<parts_themes {}>'.format(self.name)
