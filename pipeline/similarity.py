@@ -123,9 +123,8 @@ def most_similar(infer_vector, vectorized_corpus, own_code=[0], topn=10):
 
 
 def similarity(vacancies, standards, own=True):
-    df_result = pd.DataFrame(columns=['vac_text', 'prof_text', 'prof_type',
-                                      'prof_code', 'sc', 'vector_sim', 'id_profstandard_part',
-                                      'id_matching', 'id_vacancy_part'],
+    df_result = pd.DataFrame(columns=['prof_text',
+                                      'sc', 'id_profstandard_part', 'id_vacancy_part'],
                              index=None)
     match_index = 0
     own_code = [0]
@@ -134,20 +133,11 @@ def similarity(vacancies, standards, own=True):
             labels = sample['labels']
             own_code = labels.split(',')
         similar_docs = most_similar(sample['vectors'], standards, own_code, topn=5)[
-            ['labels', 'text', 'full_text', 'type', 'kod_standard', 'sc', 'Unnamed: 0', 'name_sim_func']] # sc (близость нужна)
-        #similar_docs['vacancy_text'] = sample['text']
-        #similar_docs['vacancy_name'] = sample['name']
-        #similar_docs['id_vacancy'] = sample['id']
-        #similar_docs['vector_sim'] = 'Avg W2V'
+            ['text', 'sc', 'Unnamed: 0']] # sc (близость нужна)
         similar_docs['id_vacancy_part'] = index #нужно
-        #similar_docs['id_matching'] = match_index
-
         similar_docs = similar_docs.rename(columns={
             'text': 'prof_text', #нужно
-            'full_text': 'full_prof_text',
-            'type': 'prof_type',
-            'Unnamed: 0': 'id_profstandard_part', #нужно
-            'kod_standard': 'prof_code'
+            'Unnamed: 0': 'id_profstandard_part' #нужно
         })
         df_result = pd.concat([df_result, similar_docs], ignore_index=True)
         match_index += 1
