@@ -3,12 +3,12 @@ from app import db
 from models import *
 from datetime import datetime
 
-# regions = pd.read_csv('data/t_universities.csv')
-#
-# for index, region in regions.iterrows():
-#     value = University(id=region['id'], name=region['name'], program=region['program'])
-#     db.session.add(value)
-# db.session.commit()
+regions = pd.read_csv('data/t_universities.csv')
+
+for index, region in regions.iterrows():
+    value = University(id=region['id'], name=region['name'], program=region['program'])
+    db.session.add(value)
+db.session.commit()
 
 disciplines = pd.read_csv('data/bd.csv')
 disciplines = disciplines.fillna('0')
