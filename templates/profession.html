@@ -143,7 +143,7 @@
                     <ul uk-accordion>
                         {% for general_function in branch.general_functions %}
                             <li class="uk-open">
-                                <input class="uk-checkbox mode-view" type="checkbox"
+                                <input class="uk-checkbox mode-view" type="checkbox" style="float: left; margin: 6px"
                                        {% if general_function.id in selected.general_fun_ids %}
                                            checked
                                        {% endif %}
@@ -154,7 +154,7 @@
                                     <ul uk-accordion>
                                         {% for function in general_function.functions %}
                                             <li>
-                                                <input class="uk-checkbox mode-view" type="checkbox"
+                                                <input class="uk-checkbox mode-view" type="checkbox" style="float: left; margin: 6px"
                                                        {% if function.id in selected.fun_ids %}
                                                            checked
                                                        {% endif %}
@@ -165,7 +165,7 @@
                                                     <ul uk-accordion>
                                                         {% for part in function.parts %}
                                                             <li>
-                                                                <input class="uk-checkbox mode-view" type="checkbox"
+                                                                <input class="uk-checkbox mode-view" type="checkbox" style="float: left; margin: 6px"
                                                                        {% if part.id in selected.part_ids %}
                                                                            checked
                                                                        {% endif %}

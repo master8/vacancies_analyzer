@@ -45,21 +45,22 @@
                         <ul uk-accordion>
                             {% for general_function in branch.general_functions %}
                                 <li>
-                                    <a class="uk-accordion-title" ><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
+                                    <input class="uk-checkbox mode-view" type="checkbox" style="float: right; margin: 5px" ><a class="uk-accordion-title" ><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
                                     <div class="uk-accordion-content uk-margin-medium-left uk-margin-small-top">
                                         <a uk-icon="icon: table" uk-toggle="target: #toggle-gf-{{ general_function.id }}"></a>
                                         <h3 class="uk-article-meta uk-margin-small-top" hidden id="toggle-gf-{{ general_function.id }}">Функций: {{ general_function.count }} <br> Частые слова: <br> {{ general_function.monogram}}.<br> Частые словосочетания: <br> {{ general_function.bigram }} </h3>
                                         <ul uk-accordion class="uk-margin-small-top">
                                             {% for function in general_function.functions %}
                                                 <li>
-                                                    <a class="uk-accordion-title"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
-                                                    <div class="uk-accordion-content uk-margin-medium-left uk-margin-small-top">
+                                                    <input class="uk-checkbox mode-view" type="checkbox" style="float: right;margin: 5px" ><a class="uk-accordion-title"  ><span class="uk-label uk-label-success"  >{{ function.weight }}</span> {{ function.name }}</a>
+
+                                                    <div class="uk-accordion-content uk-margin-medium-left uk-margin-small-top"  >
                                                         <a uk-icon="icon: table" uk-toggle="target: #toggle-f-{{ function.id }}"></a>
                                                         <h4 class="uk-article-meta uk-margin-small-top" id="toggle-f-{{ function.id }}" hidden>Характеристик: {{ function.count }} <br> Частые слова: <br> {{ function.monogram}}.<br> Частые словосочетания: <br> {{ function.bigram }}</h4>
                                                         <ul uk-accordion class="uk-margin-small-top">
                                                             {% for part in function.parts %}
                                                                 <li>
-                                                                    <a class="uk-accordion-title" ><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
+                                                                    <input class="uk-checkbox mode-view" type="checkbox" style="float: right; margin: 5px" ><a class="uk-accordion-title" ><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
                                                                     <div class="uk-accordion-content">
                                                                          <h5 class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: <br> {{ part.monogram}}.<br> Частые словосочетания: <br> {{ part.bigram }} </h5>
                                                                     </div>
