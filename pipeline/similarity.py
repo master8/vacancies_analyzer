@@ -130,8 +130,9 @@ def similarity(vacancies, standards, own=True):
         if own is True:
             labels = sample['profstandard_id']
             own_code = labels.split(',')
-        similar_docs = most_similar(sample['vectors'], standards, own_code, topn=5)[['part_text', 'similarity', 'profstandard_part_id']] # sc (близость нужна)
-        similar_docs['vacancy_part_id'] = index  # нужно
+        similar_docs = most_similar(sample['vectors'], standards, own_code, topn=5)[['part_text', 'similarity',
+                                        'profstandard_part_id', 'vacancy_part_id']] # sc (близость нужна)
+        # similar_docs['vacancy_part_id'] = index  # нужно
         similar_docs = similar_docs.rename(columns={
             'part_text': 'enriched_text',  # нужно
         })
@@ -156,7 +157,7 @@ def matching_parts(vacancies, profstandards, *args):
     #
     profstandards['full_text'] = profstandards['part_text'] + ' ' + profstandards[
         'function_name'] + ' ' + profstandards['general_function_name']
-    profstandards['processed_text'] = profstandards['full_text'].apply(lambda text: process_text(text)['lemmatized_text_pos_tags'])
+    profstandards['processed_text'] = profstandards['full_text'].apply(lambda text: process_text(str(text))['lemmatized_text_pos_tags'])
     profstandards = get_vectorized_avg_w2v_corpus(profstandards, word2vec.wv)
 
     # df_vacancies = vacancies.dropna(subset=['text_item', 'type'])
