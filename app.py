@@ -1,4 +1,4 @@
-from flask import Flask, request, session, redirect, url_for
+from flask import Flask, request, session, redirect, url_for, jsonify
 from flask import render_template
 from flask_session import Session
 from flask_migrate import Migrate
@@ -6,6 +6,8 @@ from flask_sqlalchemy import SQLAlchemy
 from collections import defaultdict
 import pandas as pd
 import matplotlib
+import pymorphy2
+import searcher
 
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -19,6 +21,8 @@ Session(app=app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+morph = pymorphy2.MorphAnalyzer()
+
 from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Profstandard, Source, Region, Vacancy, \
     ClassifiedVacancy, University, EducationProgram
 
@@ -26,6 +30,24 @@ from dto import Params, SelectedItems, Selected
 
 from handlers import general_function_tree, plot_search, plot_stat, common_words, unique
 
+@app.route('/searcher')
+def root():
+    return render_template("searcher.html")
+
+@app.route('/courses')
+def get_result():
+    amount = request.args.get('amount', default=5, type=int)
+    query_text = request.args.get('query_text', type=str)
+    dev_mode = request.args.get('enableDevMode', default=False, type=bool)
+    model_names = request.args.get('modelName').split(',')
+    
+    query_token = list(searcher.get_lemmatized_documents([query_text], morph, only_tokens=True))[0]
+
+    most_sim_courses = searcher.get_most_sim_for_models(model_names, query_token, topn=amount)
+    model = searcher.get_model_for_show(most_sim_courses)
+    
+    json_result = jsonify(model)
+    return json_result
 
 @app.route('/')
 def home():

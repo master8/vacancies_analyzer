@@ -1,0 +1,309 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Главная страница</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-bar-rating/1.2.2/jquery.barrating.min.js"></script>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
+
+    <environment names="Staging,Production">
+        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
+            asp-fallback-href="wwwroot/lib/bootstrap/dist/css/bootstrap.min.css" asp-fallback-test-class="sr-only"
+            asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="wwwroot/css/site.css" />
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+        <link rel="stylesheet" href="wwwroot/lib/jquery-bar-rating/dist/themes/fontawesome-stars.css">
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.min.css" />
+    </environment>
+</head>
+
+<body>
+    <div class="container body-content">
+        <div style="margin-top: 10px;">
+
+            <!-- <div id="ajaxBusy">
+                <p><img src="../static/images/loading.gif"></p>
+            </div> -->
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div style="display: flex;">
+                        <!-- <select id="rpdType" class="selectpicker">
+                            @foreach (var item in ViewBag.ListRpd)
+                            {
+                            <option value="@item.Id">@item.Name</option>
+                            }
+                        </select> -->
+                        <input type="text" id="queryText" value="Разработка ПО" class="form-control"
+                            style="width: 40%; margin-left: 20px;" />
+                        <div style="margin-left:10px;"></div>
+                        <select id="modelName" multiple class="selectpicker">
+                            <!-- <select id="modelName" multiple> -->
+                            <option value="w2w">w2w</option>
+                            <option value="w2widf" selected>w2widf</option>
+                            <option value="tfidf">tfidf</option>
+                        </select>
+
+                        <label for="amount" style="margin-left: 20px; margin-top: 5px;">Выдача:</label>
+                        <input type="text" id="amount" readonly
+                            style="border: 0; color: #00bfff; font-weight: bold; width: 20px; margin-left: 10px; margin-right: 10px; margin-top: -5px;">
+                        <div id="slider-range-max" style="width: 40%; margin-top: 10px;"></div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- <div class="row">
+                <br>
+                <div class="col-md-11" style="display: flex;">
+                    <select id="topicName" multiple class="selectpicker">
+                        @foreach (var item in ViewBag.ListTopic)
+                        {
+                        <option value="@item.Id">@item.Description</option>
+                        }
+                    </select>
+                    <input type="text" id="topicThreshold" value="0.3" class="form-control"
+                        style="width: 40%; margin-left: 20px;" />
+                </div>
+            </div> -->
+
+            <div class="row" style="margin-top: 20px;">
+                <div class="col-md-2 col-md-offset-5">
+                    <button style="width: 100%" class="btn btn-info" id="seaarchButton">Начать поиск</button>
+                </div>
+            </div>
+            <hr />
+
+            <div class="row" id="results" style="margin-top: 30px;">
+                <h2 style="text-align:  center; color: #00bfff;">
+                    Пожалуйста укажите параметры поиска!
+                </h2>
+            </div>
+
+
+        </div>
+        <hr />
+        <footer>
+            <p>&copy; 2019 - Searcher</p>
+            <p>GodMode: <input type="checkbox" id="godMode"></p>
+        </footer>
+    </div>
+
+    <environment names="Staging,Production">
+        <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
+            asp-fallback-src="wwwroot/lib/jquery/dist/jquery.min.js" asp-fallback-test="window.jQuery"
+            crossorigin="anonymous"
+            integrity="sha384-K+ctZQ+LL8q6tP7I94W+qzQsfRV2a+AfHIi9k8z8l9ggpc8X+Ytst4yBo/hH+8Fk"></script>
+        <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/bootstrap.min.js"
+            asp-fallback-src="wwwroot/lib/bootstrap/dist/js/bootstrap.min.js"
+            asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal" crossorigin="anonymous"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"></script>
+        <script src="wwwroot/js/site.min.js" asp-append-version="true"></script>
+        <script src="lib/jquery-bar-rating/dist/jquery.barrating.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.min.js"></script>
+    </environment>
+
+
+    <form id="loadForm" method='post' action="/user/upload" modelAttribute="data" enctype='multipart/form-data'>
+        <div style="overflow: hidden; height: 0;">
+            <input type="file" id="theFile" name="file" @*onchange="$('#loadForm').submit()" *@ />
+        </div>
+    </form>
+
+    <script>
+        $("#expertName").change(function (val) {
+            $('#authorName').val($("#expertName  option:selected").text());
+        });
+
+        // swal({
+        //     html: 'Описание оценок: <br>' +
+        //         '1 звезда - Полное не соответствие<br>' +
+        //         '2 звезды - Далеко от темы<br>' +
+        //         '3 звезды - Частично охватывает тему<br>' +
+        //         '4 звезды - Совпадает по темам<br>' +
+        //         '5 звезд  - Полностью подходит для курс',
+        //     width: 600
+        // });
+    </script>
+
+    <script>
+        $("#loadButton").click(() => performClick('theFile'));
+
+        // Формирование события клика на элементе.
+        function performClick(elemId) {
+            var elem = document.getElementById(elemId);
+            if (elem && document.createEvent) {
+                var evt = document.createEvent("MouseEvents");
+                evt.initEvent("click", true, false);
+                elem.dispatchEvent(evt);
+            }
+        }
+
+        $("#seaarchButton").click(function () {
+            //var value = $('#inputSearch').val();
+            var query_text = $('#queryText').val();
+            var amount = $('#amount').val();
+            // var rpdType = $('#rpdType option:selected').val();
+            // var expertName = $('#authorName').val();
+            var godMode = $('#godMode').is(':checked');
+            var modelName = $('#modelName').val()
+            // var topicName = $('#topicName').val()
+            // var topicThreshold = $('#topicThreshold').val()
+            //alert(godMode);
+
+            // $.ajax({
+            //     url: '/Home/GetQueryDescription?queryId=' + rpdType,
+            //     context: document.body,
+            //     success: function (xhr) {
+            //         var answer = xhr;
+            //         var res = $("#query_desc");
+            //         res.empty();
+
+            //         res.append('<p>' + answer.substring(0, 1000) + '</p>');
+            //     },
+            //     error: function () {
+            //         alert('SERVER ERROR!');
+            //     }
+            // });
+
+            $.ajax({
+                // url: '/Home/GetJsonResult?amount=' + amount + '&rpdType=' + rpdType + '&expertName=' + expertName + '&enableDevMode=' + godMode + '&modelName=' + modelName + '&topicName=' + topicName + '&topicThreshold=' + topicThreshold,
+                url: '/courses?amount=' + amount + '&query_text=' + query_text + '&enableDevMode=' + godMode + '&modelName=' + modelName,
+                context: document.body,
+                beforeSend: function () { $('#ajaxBusy').show(); },
+                complete: function () { $('#ajaxBusy').hide(); },
+                success: function (xhr) {
+                    var answer = xhr;
+                    var res = $("#results");
+                    res.empty();
+
+                    for (var i = 0; i < answer.length; i++) {
+                        res.append(createResult(answer[i], answer[i].resultId));
+                    }
+                },
+                error: function (request, error) {
+                    console.log(arguments);
+                    alert(" Can't do because: " + error);
+                },
+            });
+        });
+
+
+        function createResult(json, id) {
+            if (json.url == 'nan'){
+                json.url = '#'
+            }
+
+            var div = document.createElement("div");
+            var h3 = document.createElement("h3");
+            var ah3 = document.createElement("a");
+
+            div.id = id;
+            ah3.href = json.url;
+            ah3.target = "_blank";
+            ah3.innerHTML = json.title;
+
+            h3.appendChild(ah3);
+            div.appendChild(h3);
+
+            // var stars = '<select id="example' + id + '"><option value=""></option>';
+            // for (var iter = 1; iter <= 5; iter++) {
+            //     var selected = json.markValue == iter ? 'selected' : '';
+            //     stars += '<option value="' + iter + '" ' + selected + '>' + iter + '</option>';
+            // }
+            // var select = stars + '</select>';
+
+            // div.innerHTML += select;
+
+            var i = document.createElement("i");
+            var ai = document.createElement("a");
+            ai.innerHTML = json.url;
+            ai.href = json.url;
+            ai.target = "_blank";
+            i.appendChild(ai);
+            div.appendChild(i);
+
+
+            var p = document.createElement("p");
+            p.innerHTML = json.description;
+            div.appendChild(p);
+
+            var lessons = json.lessons;
+            if (lessons.length != 0) {
+                var ul = document.createElement("ul");
+                lessons.forEach(element => {
+                    var li = document.createElement("li");
+                    lesson_text = element[0];
+                    // if (lesson_text == 'nan')
+                    //     continue;
+                    li.innerHTML = lesson_text
+                    ul.appendChild(li)
+                });
+                div.appendChild(ul);
+            }
+            // var p2 = document.createElement("p");
+            // p2.innerHTML = ;
+            // div.appendChild(p2);
+            // var p2 = document.createElement("p");
+            // p2.innerHTML = json.topics;
+            // div.appendChild(p2);
+
+
+            if ($('#godMode').is(':checked')) {
+                var pDev = document.createElement("p");
+                pDev.style = "color: red;";
+                pDev.innerHTML = "Model: " + json.modelName + " Course_id: " + json.resultId + " Количество оценок: " + json.numberOfMark + " Средняя оценка: " + json.markaverage;
+                div.appendChild(pDev);
+            }
+
+
+            div.innerHTML += '<hr/>';
+
+            return div;
+        }
+
+    </script>
+
+    <!-- <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> -->
+    <!-- Latest compiled and minified JavaScript -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script> -->
+
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+        integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
+
+    <script>
+        $(function () {
+            $("#slider-range-max").slider({
+                range: "max", min: 1, max: 20, value: 10,
+                slide: function (event, ui) {
+                    $("#amount").val(ui.value);
+                }
+            });
+            $("#amount").val($("#slider-range-max").slider("value"));
+        });
+    </script>
+
+    <script type="text/javascript">
+        $(function () {
+            $('#example').barrating({
+                theme: 'fontawesome-stars'
+            });
+        });
+    </script>
+
+</body>
+
+</html>
