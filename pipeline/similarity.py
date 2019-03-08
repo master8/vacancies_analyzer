@@ -148,16 +148,23 @@ def similarity(vacancies, standards, own=True):
     # df_vacancies = get_vectorized_avg_w2v_corpus(df_vacancies, word2vec.wv)
 
 
-
-def calculate(vacancies, profstandards, *args):
+def matching_parts(vacancies, profstandards, *args):
     '''
     make calculations
 
-    :param vacancies: needs 'text' field
-    :param profstandards: needs 'vectors' field
-    :param args:
+    :param vacancies: vacancy_part_text
+    :param profstandards: part_text, function_name, general_function_name
+    :param args: top_n, own_code for similarity
     :return:
     '''
-    df_vacancies = vacancies['text'].apply(lambda text: process_text(text)['lemmatized_text_pos_tags'])  # лемматизируем
+    #
+    profstandards['full_text'] = profstandards['part_text'] + ' ' + profstandards[
+        'function_name'] + ' ' + profstandards['general_function_name']
+
+    profstandards['processed_text'] = profstandards['full_text'].apply(lambda text: process_text(text)['lemmatized_text_pos_tags'])
+    profstandards = get_vectorized_avg_w2v_corpus(profstandards, word2vec.wv)
+
+    df_vacancies = vacancies.dropna(subset=['text_item', 'type'])
+    df_vacancies['processed_text']  = df_vacancies['vacancy_part_text'].apply(lambda text: process_text(text)['lemmatized_text_pos_tags'])  # лемматизируем
     df_vacancies = get_vectorized_avg_w2v_corpus(df_vacancies, word2vec.wv)  # получаем вектора
 
