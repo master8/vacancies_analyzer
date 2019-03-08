@@ -163,6 +163,6 @@ def matching_parts(vacancies, profstandards, *args):
     # df_vacancies = vacancies.dropna(subset=['text_item', 'type'])
     vacancies['processed_text'] = vacancies['vacancy_part_text'].apply(lambda text: process_text(str(text))['lemmatized_text_pos_tags'])  # лемматизируем
     vacancies = get_vectorized_avg_w2v_corpus(vacancies, word2vec.wv)  # получаем вектора
-    similarity(vacancies, profstandards)
+    return similarity(vacancies, profstandards)
 
 
