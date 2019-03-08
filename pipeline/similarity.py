@@ -108,34 +108,32 @@ def most_similar(infer_vector, vectorized_corpus, own_code=[0], topn=10):
     if own_code[0] != 0:
         df_sim = pd.DataFrame()
         for label in own_code:
-            df_sim_label = vectorized_corpus[vectorized_corpus['labels'] == label]
+            df_sim_label = vectorized_corpus[vectorized_corpus['profstandard_id'] == int(label)]
             df_sim = pd.concat([df_sim, df_sim_label], ignore_index=False)
             print('own=' + own_code[0])
     else:
         df_sim = vectorized_corpus
 
-    df_sim['sc'] = vectorized_corpus['vectors'].apply(
+    df_sim['similarity'] = vectorized_corpus['vectors'].apply(
         lambda v: cosine_similarity([infer_vector], [v.tolist()])[0, 0])
-    df_sim = df_sim.sort_values(by='sc', ascending=False).head(n=topn)
+    df_sim = df_sim.sort_values(by='similarity', ascending=False).head(n=topn)
     return df_sim
 
 
 def similarity(vacancies, standards, own=True):
-    df_result = pd.DataFrame(columns=['prof_text',
-                                      'sc', 'id_profstandard_part', 'id_vacancy_part'],
+    df_result = pd.DataFrame(columns=['enriched_text',
+                                      'similarity', 'profstandard_part_id', 'vacancy_part_id'],
                              index=None)
     match_index = 0
     own_code = [0]
     for index, sample in vacancies.iterrows():
         if own is True:
-            labels = sample['labels']
+            labels = sample['profstandard_id']
             own_code = labels.split(',')
-        similar_docs = most_similar(sample['vectors'], standards, own_code, topn=5)[
-            ['text', 'sc', 'Unnamed: 0']] # sc (близость нужна)
-        similar_docs['id_vacancy_part'] = index #нужно
+        similar_docs = most_similar(sample['vectors'], standards, own_code, topn=5)[['part_text', 'similarity', 'profstandard_part_id']] # sc (близость нужна)
+        similar_docs['vacancy_part_id'] = index  # нужно
         similar_docs = similar_docs.rename(columns={
-            'text': 'prof_text', #нужно
-            'Unnamed: 0': 'id_profstandard_part' #нужно
+            'part_text': 'enriched_text',  # нужно
         })
         df_result = pd.concat([df_result, similar_docs], ignore_index=True)
         match_index += 1
@@ -164,5 +162,6 @@ def matching_parts(vacancies, profstandards, *args):
     # df_vacancies = vacancies.dropna(subset=['text_item', 'type'])
     vacancies['processed_text'] = vacancies['vacancy_part_text'].apply(lambda text: process_text(str(text))['lemmatized_text_pos_tags'])  # лемматизируем
     vacancies = get_vectorized_avg_w2v_corpus(vacancies, word2vec.wv)  # получаем вектора
+    similarity(vacancies, profstandards)
 
 
