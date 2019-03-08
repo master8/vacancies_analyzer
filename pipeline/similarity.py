@@ -130,12 +130,12 @@ def similarity(vacancies, standards, own=True):
         if own is True:
             labels = sample['profstandard_id']
             own_code = labels.split(',')
-        similar_docs = most_similar(sample['vectors'], standards, own_code, topn=5)[['part_text', 'similarity',
-                                        'profstandard_part_id']] # sc (близость нужна)
+        similar_docs = most_similar(sample['vectors'], standards, own_code, topn=5)[['full_text', 'similarity',
+                                        'profstandard_part_id']]  # sc (близость нужна)
         # similar_docs['vacancy_part_id'] = index  # нужно
         similar_docs['vacancy_part_id'] = sample['vacancy_part_id']  # нужно
         similar_docs = similar_docs.rename(columns={
-            'part_text': 'enriched_text',  # нужно
+            'full_text': 'enriched_text',  # нужно
         })
         df_result = pd.concat([df_result, similar_docs], ignore_index=True)
         match_index += 1
