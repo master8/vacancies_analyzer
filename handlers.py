@@ -30,31 +30,35 @@ def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None
                 'parts': selected_parts
             })
 
+
+
+        vacancies_text = []
+
+        for function_text in functions:
+            for text in function_text['texts']:
+                vacancies_text.append(text)
+        vacancies_text = unique(vacancies_text)
+        top_word = common_words(vacancies_text, 1, topn=10)
+        top_bigram = common_words(vacancies_text, 2)
+
+        general_function_branch = {
+            'id': each.id,
+            'weight': round(function_weight, 2),
+            'name': each.name,
+            'functions': functions,
+            'count': parts_count,
+            'level': each.qualification_level,
+            'monogram': top_word,
+            'bigram': top_bigram,
+            'selected_parts': selected_parts,
+            'gen_text':vacancies_text
+        }
+
+        parts += parts_count
+
         if selected is None or each.id in selected.general_fun_ids:
-
-            vacancies_text = []
-
-            for function_text in functions:
-                for text in function_text['texts']:
-                    vacancies_text.append(text)
-            vacancies_text = unique(vacancies_text)
-            top_word = common_words(vacancies_text, 1, topn=10)
-            top_bigram = common_words(vacancies_text, 2)
-
-            general_function_branch = {
-                'id': each.id,
-                'weight': round(function_weight, 2),
-                'name': each.name,
-                'functions': functions,
-                'count': parts_count,
-                'level': each.qualification_level,
-                'monogram': top_word,
-                'bigram': top_bigram,
-                'selected_parts': selected_parts,
-                'gen_text':vacancies_text
-            }
             tree.append(general_function_branch)
-            parts += parts_count
+
     return tree, parts, just_selected
 
 
@@ -75,30 +79,32 @@ def function_branch(general_id, matched_parts, selected: SelectedItems = None):
         if selected is not None and each.id not in selected.fun_ids and len(parts) > 0:
             selected_parts = selected_parts + parts
 
+        vacancies_text = []
+        for part in parts:
+            for vacancy in part['vacancy_parts']:
+                vacancies_text.append(vacancy['vacancy_part'])
+
+        vacancies_text = unique(vacancies_text)
+        top_word = common_words(vacancies_text, 1, topn=10)
+        top_bigram = common_words(vacancies_text, 2)
+
+        function_parts_branch = {
+            'id': each.id,
+            'weight': round(vacancy_weight, 2),
+            'name': each.name,
+            'parts': parts,
+            'texts': vacancies_text,
+            'count': parts_count,
+            'monogram': top_word,
+            'bigram': top_bigram
+        }
+
+        weight += vacancy_weight
+        counts += parts_count
+
         if selected is None or each.id in selected.fun_ids:
-
-            vacancies_text = []
-            for part in parts:
-                for vacancy in part['vacancy_parts']:
-                    vacancies_text.append(vacancy['vacancy_part'])
-
-            vacancies_text = unique(vacancies_text)
-            top_word = common_words(vacancies_text, 1, topn=10)
-            top_bigram = common_words(vacancies_text, 2)
-
-            function_parts_branch = {
-                'id': each.id,
-                'weight': round(vacancy_weight, 2),
-                'name': each.name,
-                'parts': parts,
-                'texts': vacancies_text,
-                'count': parts_count,
-                'monogram': top_word,
-                'bigram': top_bigram
-            }
             branch.append(function_parts_branch)
-            weight += vacancy_weight
-            counts += parts_count
+
     return branch, weight, counts, selected_parts
 
 
@@ -108,37 +114,40 @@ def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = 
     weight = 0
     count = 0
     for each in query:
+
+        parts_weight = 0
+        parts_count = 0
+
+        top_word = []
+        top_bigram = []
+        vacancy_parts = matched_parts[each.id]
+        sorting_parts = pd.DataFrame(vacancy_parts)
+        if sorting_parts.empty:
+            vacancy_parts = sorting_parts.to_dict('r')
+        else:
+            parts_count = len(vacancy_parts)
+            parts_weight = sorting_parts.similarity.sum()
+            vacancy_parts = sorting_parts.sort_values('similarity', ascending=False).to_dict('r')  #Части
+
+            # MOST COMMON
+            top_word = common_words(sorting_parts['vacancy_part'].dropna(), 1, topn=10)
+            top_bigram = common_words(sorting_parts['vacancy_part'].dropna(), 2)
+
+        leaf_parts = {
+            'id': each.id,
+            'weight': round(parts_weight, 2),
+            'standard_part': each.text,
+            'vacancy_parts': vacancy_parts, #вакансии
+            'count': parts_count,
+            'monogram': top_word,
+            'bigram': top_bigram
+        }
+        weight += parts_weight
+        count += parts_count
+
         if selected is None or each.id in selected.part_ids:
-            parts_weight = 0
-            parts_count = 0
-
-            top_word = []
-            top_bigram = []
-            vacancy_parts = matched_parts[each.id]
-            sorting_parts = pd.DataFrame(vacancy_parts)
-            if sorting_parts.empty:
-                vacancy_parts = sorting_parts.to_dict('r')
-            else:
-                parts_count = len(vacancy_parts)
-                parts_weight = sorting_parts.similarity.sum()
-                vacancy_parts = sorting_parts.sort_values('similarity', ascending=False).to_dict('r')  #Части
-
-                # MOST COMMON
-                top_word = common_words(sorting_parts['vacancy_part'].dropna(), 1, topn=10)
-                top_bigram = common_words(sorting_parts['vacancy_part'].dropna(), 2)
-
-            leaf_parts = {
-                'id': each.id,
-                'weight': round(parts_weight, 2),
-                'standard_part': each.text,
-                'vacancy_parts': vacancy_parts, #вакансии
-                'count': parts_count,
-                'monogram': top_word,
-                'bigram': top_bigram
-            }
             leaf.append(leaf_parts)
-            weight += parts_weight
-            count += parts_count
+
     return leaf, weight, count
 
 
