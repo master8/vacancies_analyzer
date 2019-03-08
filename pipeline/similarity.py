@@ -20,8 +20,6 @@ cyrillic = u"абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
 
 allowed_characters = ascii_lowercase + digits + cyrillic + whitespace
 
-
-
 word2vec = Word2Vec.load(os.getcwd()+"../../big_word2vec/big_word2vec_model_CBOW")
 word2vec.wv.init_sims()
 
@@ -112,7 +110,7 @@ def most_similar(infer_vector, vectorized_corpus, own_code=[0], topn=10):
         for label in own_code:
             df_sim_label = vectorized_corpus[vectorized_corpus['labels'] == label]
             df_sim = pd.concat([df_sim, df_sim_label], ignore_index=False)
-            print('own=' + own[0])
+            print('own=' + own_code[0])
     else:
         df_sim = vectorized_corpus
 
@@ -128,7 +126,7 @@ def similarity(vacancies, standards, own=True):
                              index=None)
     match_index = 0
     own_code = [0]
-    for index, sample in tqdm(vacancies.iterrows()):
+    for index, sample in vacancies.iterrows():
         if own is True:
             labels = sample['labels']
             own_code = labels.split(',')
@@ -160,11 +158,11 @@ def matching_parts(vacancies, profstandards, *args):
     #
     profstandards['full_text'] = profstandards['part_text'] + ' ' + profstandards[
         'function_name'] + ' ' + profstandards['general_function_name']
-
     profstandards['processed_text'] = profstandards['full_text'].apply(lambda text: process_text(text)['lemmatized_text_pos_tags'])
     profstandards = get_vectorized_avg_w2v_corpus(profstandards, word2vec.wv)
 
-    df_vacancies = vacancies.dropna(subset=['text_item', 'type'])
-    df_vacancies['processed_text']  = df_vacancies['vacancy_part_text'].apply(lambda text: process_text(text)['lemmatized_text_pos_tags'])  # лемматизируем
-    df_vacancies = get_vectorized_avg_w2v_corpus(df_vacancies, word2vec.wv)  # получаем вектора
+    # df_vacancies = vacancies.dropna(subset=['text_item', 'type'])
+    vacancies['processed_text'] = vacancies['vacancy_part_text'].apply(lambda text: process_text(str(text))['lemmatized_text_pos_tags'])  # лемматизируем
+    vacancies = get_vectorized_avg_w2v_corpus(vacancies, word2vec.wv)  # получаем вектора
+
 
