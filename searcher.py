@@ -20,10 +20,11 @@ def load_pickle(path):
         return pickle.load(handle)
 
 
-topic_vectors = pd.read_pickle('./searcher/vectors/topic_vectors_8000_theta.pkl')
+# topic_vectors = pd.read_pickle('./searcher/vectors/topic_vectors_8000_theta.pkl')
 topic_words = pd.read_pickle('./searcher/data/topic_words_8000.pkl')
 
-full_df = pd.read_csv('./searcher/data/full_df_rpd_with_sr_courses_wo_str.csv')
+full_df = pd.read_pickle('./searcher/data/full_df_rpd_with_sr_courses_wo_str.pkl')
+# full_df = pd.read_csv('./searcher/data/full_df_rpd_with_sr_courses_wo_str.csv')
 
 tfidfmodel = load_pickle('./searcher/models/tfidfmodel.pkl')
 tfidfdictionary = load_pickle('./searcher/models/tfidfdictionary.pkl')
@@ -148,15 +149,16 @@ def get_top_themes_by_conditions(data, k_average=1, list_bad_themes=[], max_num_
 
 def most_similar(inferred_vector, vectors, topic_ids, for_lessons, topn=10):
     sims=[]
-    print(len(vectors))
-    print(topic_vectors.shape)
+    # print(len(vectors))
+    # print(topic_vectors.shape)
     buffer_courses = []
     for i in range(0, len(vectors)):
         if for_lessons == False:
-            topic_vector = topic_vectors[topic_vectors['index_ii'] == i]['60_-0.1_-0.1_8000_theta'].values
-            if len(topic_vector) == 0:
-                continue
-            topic_vector = topic_vector[0]
+            # topic_vector = full_df[full_df['index_ii'] == i]['60_-0.1_-0.1_8000_theta'].values
+            topic_vector = full_df.loc[i]['60_-0.1_-0.1_8000_theta']
+            # if len(topic_vector) == 0:
+            #     continue
+            # topic_vector = topic_vector[0]
             topics_for_course = get_top_themes_by_conditions(data=topic_vector, max_num_topics=3, k_average=3)['list']
             # if i <= topn * 2:
             #     buffer_courses += topics_for_course
@@ -166,6 +168,7 @@ def most_similar(inferred_vector, vectors, topic_ids, for_lessons, topn=10):
             topics_for_course = []
         if count_topics > 0 or len(topic_ids) == 0:
             sim = cosine_similarity(np.reshape(vectors[i], (1,-1)), np.reshape(inferred_vector, (1,-1)))[0][0]
+            # print(sim)
             sims.append((i, sim, topics_for_course))
 
     similar_docs=sorted(sims, key=lambda x: x[1], reverse=True)
@@ -191,6 +194,7 @@ def get_most_sim_for_models(model_names, query, topic_ids, topn=10, dimensionali
             inferred_vector = GetVectors(tfidfmodel, tfidfdictionary, len(tfidfdictionary), [query])[0]
             vectors = tfidf_vectors
             lesson_dict = dict_vectors_struct_tfidf
+
         most_sim, buffer_list = most_similar(inferred_vector=inferred_vector, 
                                 vectors=vectors, 
                                 topic_ids=topic_ids,
@@ -200,13 +204,13 @@ def get_most_sim_for_models(model_names, query, topic_ids, topn=10, dimensionali
         model = []
         for course_id, sim, topics_tmp in most_sim:
             most_sim_lesson = []
-            if course_id in lesson_dict:
-                lesson_vectors = lesson_dict[course_id]
-                most_sim_lesson, buf_tmp = most_similar(inferred_vector=inferred_vector, 
-                                                vectors=lesson_vectors, 
-                                                topic_ids=set(),
-                                                for_lessons=True,
-                                                topn=3)
+            # if course_id in lesson_dict:
+            #     lesson_vectors = lesson_dict[course_id]
+            #     most_sim_lesson, buf_tmp = most_similar(inferred_vector=inferred_vector, 
+            #                                     vectors=lesson_vectors, 
+            #                                     topic_ids=set(),
+            #                                     for_lessons=True,
+            #                                     topn=3)
             model.append((course_id, sim, most_sim_lesson, topics_tmp))
             
         results[model_name] = model
@@ -237,12 +241,13 @@ def get_model_for_show(result_dict, top_lesson=3):
                     lessons.append([lesson_name, lesson_sim])
             
             course_df = full_df.loc[course_id]
-            model = {"resultId": course_id, 
+            model = {"resultId": course_df['index_ii'], 
                      "url": str(course_df['Url']),
+                     "sim": sim,
                      "title": course_df['CourseName'],
                      "markValue": 5,
                      "modelName": model_name,
-                     "description": str(course_df['full_text'])[:300],
+                     "description": str(course_df['full_text_new'])[:300],
                      "topics": topics,
                      "lessons": lessons}
             result.append(model)

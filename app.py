@@ -33,8 +33,12 @@ from handlers import general_function_tree, plot_search, plot_stat, common_words
 
 @app.route('/searcher')
 def root():
+    if "competence" in session:
+        competence = session['competence']
+    else:
+        competence = [["", ""]]
     topics = [(x, ', '.join(y[:3])) for x, y in searcher.topic_words.items()]
-    return render_template("searcher.html", topics=topics)
+    return render_template("searcher.html", topics=topics, competence=competence)
 
 @app.route('/courses')
 def get_result():
@@ -55,10 +59,17 @@ def get_result():
     most_sim_courses, buffer_list = searcher.get_most_sim_for_models(model_names, query_token, set(topic_ids), topn=amount)
     
     dict_counter = dict(Counter(buffer_list))
+    dict_items = sorted(dict_counter.items(), key=lambda x: x[1], reverse=True)
+    topics_for_query = []
+    for model_position, count_courses in dict_items:
+        topic_name = f'topic_{model_position}'
+        keywords = ', '.join(searcher.topic_words[topic_name][:3])
+        keywords += f'. Курсов в теме:{count_courses}'
+        topics_for_query.append((topic_name, keywords))
     
     model = searcher.get_model_for_show(most_sim_courses)
 
-    result = {"model": model, "counter": dict_counter}
+    result = {"model": model, "counter": topics_for_query}
 
     json_result = jsonify(result)
     return json_result

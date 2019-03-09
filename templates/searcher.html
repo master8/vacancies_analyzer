@@ -38,14 +38,13 @@
             <div class="row">
                 <div class="col-md-12">
                     <div style="display: flex;">
-                        <!-- <select id="rpdType" class="selectpicker">
-                            @foreach (var item in ViewBag.ListRpd)
-                            {
-                            <option value="@item.Id">@item.Name</option>
-                            }
-                        </select> -->
-                        <input type="text" id="queryText" value="Разработка ПО" class="form-control"
-                            style="width: 40%; margin-left: 20px;" />
+                        <select id="rpdType" class="selectpicker">
+                            {% for competence_item in competence %}
+                            <option value="{{ competence_item[1] }}">{{ competence_item[1] }}</option>
+                            {% endfor %}
+                        </select>
+                        <!-- <input type="text" id="queryText" value="Разработка ПО" class="form-control"
+                            style="width: 40%; margin-left: 20px;" /> -->
                         <div style="margin-left:10px;"></div>
                         <select id="modelName" multiple class="selectpicker">
                             <!-- <select id="modelName" multiple> -->
@@ -64,7 +63,7 @@
 
             <div class="row">
                 <br>
-                <div class="col-md-12">
+                <div class="col-md-12" id="topicNamesDiv">
                     <select id="topicNames" multiple class="selectpicker">
                         {% for topic in topics %}
                             <option value="{{ topic[0] }}">{{ topic[1] }}</option>
@@ -150,7 +149,8 @@
 
         $("#seaarchButton").click(function () {
             //var value = $('#inputSearch').val();
-            var query_text = $('#queryText').val();
+            // var query_text = $('#queryText').val();
+            var query_text = $('#rpdType').val();
             var amount = $('#amount').val();
             // var rpdType = $('#rpdType option:selected').val();
             // var expertName = $('#authorName').val();
@@ -190,9 +190,14 @@
                     res.empty();
                     answer_model = answer['model']
 
+                    res.append(createSelect(answer['counter']))
+
+                    $('#topicNames').selectpicker();
+
                     for (var i = 0; i < answer_model.length; i++) {
                         res.append(createResult(answer_model[i], answer_model[i].resultId));
                     }
+                    
                 },
                 error: function (request, error) {
                     console.log(arguments);
@@ -214,7 +219,7 @@
             div.id = id;
             ah3.href = json.url;
             ah3.target = "_blank";
-            ah3.innerHTML = json.title;
+            ah3.innerHTML = json.title; // + ':' + json.sim;
 
             h3.appendChild(ah3);
             div.appendChild(h3);
@@ -274,6 +279,28 @@
             div.innerHTML += '<hr/>';
 
             return div;
+        }
+
+        function createSelect(model){
+            var select_topic = $('#topicNames')
+            select_topic.remove();
+            var select_topic_div = $('#topicNamesDiv > div:nth-child(1)')
+            select_topic_div.remove();
+
+            var topicNamesDiv = $('#topicNamesDiv')
+
+            var select_topic = document.createElement("select");
+            select_topic.setAttribute("id", "topicNames")
+            select_topic.setAttribute("multiple", "multiple")
+            for(var i=0; i < model.length; i++){
+                var element = model[i];
+                var select_topic_item = document.createElement("option");
+                select_topic_item.setAttribute("value", element[0])
+                select_topic_item.innerHTML = element[1]
+                select_topic.appendChild(select_topic_item)
+            }
+            topicNamesDiv.append(select_topic)
+            // return select_topic
         }
 
     </script>
