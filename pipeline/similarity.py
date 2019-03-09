@@ -114,7 +114,7 @@ def most_similar(infer_vector, vectorized_corpus, own_code=[0], topn=10):
     else:
         df_sim = vectorized_corpus
 
-    df_sim['similarity'] = vectorized_corpus['vectors'].apply(
+    df_sim['similarity'] = df_sim['vectors'].apply(
         lambda v: cosine_similarity([infer_vector], [v.tolist()])[0, 0])
     df_sim = df_sim.sort_values(by='similarity', ascending=False).head(n=topn)
     return df_sim
@@ -126,7 +126,7 @@ def similarity(vacancies, standards, own=True):
                              index=None)
     match_index = 0
     own_code = [0]
-    for index, sample in vacancies.iterrows():
+    for index, sample in tqdm(vacancies.iterrows()):
         if own is True:
             labels = sample['profstandard_id']
             own_code = labels.split(',')
