@@ -7,7 +7,7 @@ from collections import defaultdict
 import pandas as pd
 import matplotlib
 import pymorphy2
-import searcher
+# import searcher
 
 matplotlib.use('agg')
 import matplotlib.pyplot as plt

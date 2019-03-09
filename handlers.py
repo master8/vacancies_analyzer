@@ -17,10 +17,13 @@ def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None
     just_selected = []
     for each in query:
 
-        functions, function_weight, parts_count, selected_parts = function_branch(each.id, matched_parts, selected)
+        function_weight = 0
+
+        functions, parts_count, selected_parts = function_branch(each.id, matched_parts, selected)
 
         if len(functions) > 0:
             sorting_functions = pd.DataFrame(functions)
+            function_weight = sorting_functions.weight.sum()
             functions = sorting_functions.sort_values('weight', ascending=False).to_dict('r')
 
         if selected is not None and each.id not in selected.general_fun_ids and (len(functions) > 0 or len(selected_parts) > 0):
@@ -64,16 +67,18 @@ def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None
 
 def function_branch(general_id, matched_parts, selected: SelectedItems = None):
     branch = []
-    weight = 0
     counts = 0
     selected_parts = []
     query = Function.query.filter_by(general_function_id=general_id)
     for each in query:
 
-        parts, vacancy_weight, parts_count = parts_vacancies_leafs(each.id, matched_parts, selected)
+        vacancy_weight = 0
+
+        parts, parts_count = parts_vacancies_leafs(each.id, matched_parts, selected)
 
         if len(parts) > 0:
             sorting_parts = pd.DataFrame(parts)
+            vacancy_weight = sorting_parts.weight.sum()
             parts = sorting_parts.sort_values('weight', ascending=False).to_dict('r')
 
         if selected is not None and each.id not in selected.fun_ids and len(parts) > 0:
@@ -99,19 +104,17 @@ def function_branch(general_id, matched_parts, selected: SelectedItems = None):
             'bigram': top_bigram
         }
 
-        weight += vacancy_weight
         counts += parts_count
 
         if selected is None or each.id in selected.fun_ids:
             branch.append(function_parts_branch)
 
-    return branch, weight, counts, selected_parts
+    return branch, counts, selected_parts
 
 
 def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = None):
     leaf = []
     query = ProfstandardPart.query.filter_by(function_id=function_id)
-    weight = 0
     count = 0
     for each in query:
 
@@ -142,13 +145,12 @@ def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = 
             'monogram': top_word,
             'bigram': top_bigram
         }
-        weight += parts_weight
         count += parts_count
 
         if selected is None or each.id in selected.part_ids:
             leaf.append(leaf_parts)
 
-    return leaf, weight, count
+    return leaf, count
 
 
 def common_words(text, n_gram, topn = 5):
