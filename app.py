@@ -4,6 +4,7 @@ from flask_session import Session
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from collections import defaultdict
+from collections import Counter
 import pandas as pd
 import matplotlib
 import pymorphy2
@@ -32,7 +33,8 @@ from handlers import general_function_tree, plot_search, plot_stat, common_words
 
 @app.route('/searcher')
 def root():
-    return render_template("searcher.html")
+    topics = [(x, ', '.join(y[:3])) for x, y in searcher.topic_words.items()]
+    return render_template("searcher.html", topics=topics)
 
 @app.route('/courses')
 def get_result():
@@ -40,13 +42,25 @@ def get_result():
     query_text = request.args.get('query_text', type=str)
     dev_mode = request.args.get('enableDevMode', default=False, type=bool)
     model_names = request.args.get('modelName').split(',')
-    
+    topic_names = request.args.get('topicNames')
+
+    topic_ids = []
+    if topic_names != 'null':
+        for topic_name in topic_names.split(','):
+            topic_ids.append(int(topic_name.replace('topic_', '')))
+
+    print(topic_ids)
     query_token = list(searcher.get_lemmatized_documents([query_text], morph, only_tokens=True))[0]
 
-    most_sim_courses = searcher.get_most_sim_for_models(model_names, query_token, topn=amount)
-    model = searcher.get_model_for_show(most_sim_courses)
+    most_sim_courses, buffer_list = searcher.get_most_sim_for_models(model_names, query_token, set(topic_ids), topn=amount)
     
-    json_result = jsonify(model)
+    dict_counter = dict(Counter(buffer_list))
+    
+    model = searcher.get_model_for_show(most_sim_courses)
+
+    result = {"model": model, "counter": dict_counter}
+
+    json_result = jsonify(result)
     return json_result
 
 @app.route('/')

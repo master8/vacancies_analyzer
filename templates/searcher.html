@@ -14,14 +14,14 @@
 
     <environment names="Staging,Production">
         <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
-            asp-fallback-href="wwwroot/lib/bootstrap/dist/css/bootstrap.min.css" asp-fallback-test-class="sr-only"
+            asp-fallback-href="../static/lib/bootstrap/dist/css/bootstrap.min.css" asp-fallback-test-class="sr-only"
             asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
-        <link rel="stylesheet" href="wwwroot/css/site.css" />
+        <link rel="stylesheet" href="../static/css/site.css" />
         <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
         <link rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
         <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
-        <link rel="stylesheet" href="wwwroot/lib/jquery-bar-rating/dist/themes/fontawesome-stars.css">
+        <link rel="stylesheet" href="../static/lib/jquery-bar-rating/dist/themes/fontawesome-stars.css">
         <link rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.min.css" />
     </environment>
@@ -31,9 +31,9 @@
     <div class="container body-content">
         <div style="margin-top: 10px;">
 
-            <!-- <div id="ajaxBusy">
+            <div id="ajaxBusy">
                 <p><img src="../static/images/loading.gif"></p>
-            </div> -->
+            </div>
 
             <div class="row">
                 <div class="col-md-12">
@@ -60,23 +60,21 @@
                         <div id="slider-range-max" style="width: 40%; margin-top: 10px;"></div>
                     </div>
                 </div>
-
-
             </div>
 
-            <!-- <div class="row">
+            <div class="row">
                 <br>
-                <div class="col-md-11" style="display: flex;">
-                    <select id="topicName" multiple class="selectpicker">
-                        @foreach (var item in ViewBag.ListTopic)
-                        {
-                        <option value="@item.Id">@item.Description</option>
-                        }
+                <div class="col-md-12">
+                    <select id="topicNames" multiple class="selectpicker">
+                        {% for topic in topics %}
+                            <option value="{{ topic[0] }}">{{ topic[1] }}</option>
+                        {% endfor %}
                     </select>
-                    <input type="text" id="topicThreshold" value="0.3" class="form-control"
-                        style="width: 40%; margin-left: 20px;" />
+
+                    <!-- <input type="text" id="topicThreshold" value="0.3" class="form-control"
+                        style="width: 40%; margin-left: 20px;" /> -->
                 </div>
-            </div> -->
+            </div>
 
             <div class="row" style="margin-top: 20px;">
                 <div class="col-md-2 col-md-offset-5">
@@ -102,14 +100,14 @@
 
     <environment names="Staging,Production">
         <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
-            asp-fallback-src="wwwroot/lib/jquery/dist/jquery.min.js" asp-fallback-test="window.jQuery"
+            asp-fallback-src="../static/lib/jquery/dist/jquery.min.js" asp-fallback-test="window.jQuery"
             crossorigin="anonymous"
             integrity="sha384-K+ctZQ+LL8q6tP7I94W+qzQsfRV2a+AfHIi9k8z8l9ggpc8X+Ytst4yBo/hH+8Fk"></script>
         <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/bootstrap.min.js"
-            asp-fallback-src="wwwroot/lib/bootstrap/dist/js/bootstrap.min.js"
+            asp-fallback-src="../static/lib/bootstrap/dist/js/bootstrap.min.js"
             asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal" crossorigin="anonymous"
             integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"></script>
-        <script src="wwwroot/js/site.min.js" asp-append-version="true"></script>
+        <script src="../static/js/site.min.js" asp-append-version="true"></script>
         <script src="lib/jquery-bar-rating/dist/jquery.barrating.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.min.js"></script>
     </environment>
@@ -158,6 +156,8 @@
             // var expertName = $('#authorName').val();
             var godMode = $('#godMode').is(':checked');
             var modelName = $('#modelName').val()
+
+            var topicNames = $('#topicNames').val()
             // var topicName = $('#topicName').val()
             // var topicThreshold = $('#topicThreshold').val()
             //alert(godMode);
@@ -179,17 +179,19 @@
 
             $.ajax({
                 // url: '/Home/GetJsonResult?amount=' + amount + '&rpdType=' + rpdType + '&expertName=' + expertName + '&enableDevMode=' + godMode + '&modelName=' + modelName + '&topicName=' + topicName + '&topicThreshold=' + topicThreshold,
-                url: '/courses?amount=' + amount + '&query_text=' + query_text + '&enableDevMode=' + godMode + '&modelName=' + modelName,
+                url: '/courses?amount=' + amount + '&query_text=' + query_text + '&enableDevMode=' + godMode + '&modelName=' + modelName + '&topicNames=' + topicNames,
                 context: document.body,
                 beforeSend: function () { $('#ajaxBusy').show(); },
                 complete: function () { $('#ajaxBusy').hide(); },
                 success: function (xhr) {
                     var answer = xhr;
+                    console.log(answer['counter'])
                     var res = $("#results");
                     res.empty();
+                    answer_model = answer['model']
 
-                    for (var i = 0; i < answer.length; i++) {
-                        res.append(createResult(answer[i], answer[i].resultId));
+                    for (var i = 0; i < answer_model.length; i++) {
+                        res.append(createResult(answer_model[i], answer_model[i].resultId));
                     }
                 },
                 error: function (request, error) {
@@ -239,12 +241,13 @@
             p.innerHTML = json.description;
             div.appendChild(p);
 
-            var lessons = json.lessons;
+            var lessons = json.topics;
             if (lessons.length != 0) {
                 var ul = document.createElement("ul");
                 lessons.forEach(element => {
                     var li = document.createElement("li");
-                    lesson_text = element[0];
+                    // lesson_text = element[0];
+                    lesson_text = element;
                     // if (lesson_text == 'nan')
                     //     continue;
                     li.innerHTML = lesson_text
@@ -287,7 +290,7 @@
     <script>
         $(function () {
             $("#slider-range-max").slider({
-                range: "max", min: 1, max: 20, value: 10,
+                range: "max", min: 1, max: 100, value: 50,
                 slide: function (event, ui) {
                     $("#amount").val(ui.value);
                 }
