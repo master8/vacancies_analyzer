@@ -34,9 +34,9 @@ w2vvectors = load_pickle('./searcher/vectors/w2vvectors.pkl')
 w2vvectors_weighted = load_pickle('./searcher/vectors/w2vvectors_weighted.pkl')
 # tfidf_vectors = load_pickle('./searcher/vectors/tfidf_vectors.pkl')
 
-dict_vectors_struct_w2w = load_pickle('./searcher/vectors/dict_vectors_struct_w2w.pkl')
+# dict_vectors_struct_w2w = load_pickle('./searcher/vectors/dict_vectors_struct_w2w.pkl')
 # dict_vectors_struct_tfidf = load_pickle('./searcher/vectors/dict_vectors_struct_tfidf.pkl')
-dict_vectors_struct_w2widf = load_pickle('./searcher/vectors/dict_vectors_struct_w2widf.pkl')
+# dict_vectors_struct_w2widf = load_pickle('./searcher/vectors/dict_vectors_struct_w2widf.pkl')
 
 dict_rpd_id_struct = load_pickle('./searcher/data/dict_rpd_id_struct.pkl')
 
@@ -185,15 +185,15 @@ def get_most_sim_for_models(model_names, query, topic_ids, topn=10, dimensionali
         if model_name == "w2widf":
             inferred_vector = GetWeightedAverageW2VectorsCorpus(waw2vmodel, tfidfmodel, tfidfdictionary, [query], dimensionality)
             vectors = w2vvectors_weighted
-            lesson_dict = dict_vectors_struct_w2widf
+            #lesson_dict = dict_vectors_struct_w2widf
         if model_name == "w2w":
             inferred_vector = GetAverageW2VectorsCorpus(waw2vmodel, [query], dimensionality)
             vectors = w2vvectors
-            lesson_dict = dict_vectors_struct_w2w
+            #lesson_dict = dict_vectors_struct_w2w
         if model_name == "tfidf":
             inferred_vector = GetVectors(tfidfmodel, tfidfdictionary, len(tfidfdictionary), [query])[0]
             vectors = tfidf_vectors
-            lesson_dict = dict_vectors_struct_tfidf
+            #lesson_dict = dict_vectors_struct_tfidf
 
         most_sim, buffer_list = most_similar(inferred_vector=inferred_vector, 
                                 vectors=vectors, 
