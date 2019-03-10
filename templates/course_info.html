@@ -29,71 +29,29 @@
 
 <body>
     <div class="container body-content">
-        <div style="margin-top: 10px;">
-
-            <div id="ajaxBusy">
-                <p><img src="../static/images/loading.gif"></p>
+        <!-- <hr /> -->
+        <div class="row" id="results">
+            <div id='{{id}}'>
+                <h3 style="text-align: center;">{{title}}</h3>
+                <h4>Темы:</h4>
+                <ul>
+                    {% for topic in topics %}
+                    <li>{{topic}}</li>
+                    {% endfor %}
+                </ul><br>
+                <h4>Знать:</h4>
+                <p>{{know}}</p><br>
+                <h4>Уметь:</h4>
+                <p>{{can}}</p><br>
+                <h4>Владеть:</h4>
+                <p>{{own}}</p><br>
+                <h4>Описание:</h4>
+                <p>{{description}}</p>
             </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <div style="display: flex;">
-                        <select id="rpdType" class="selectpicker">
-                            {% for competence_item in competence %}
-                            <option value="{{ competence_item[1] }}">{{ competence_item[1] }}</option>
-                            {% endfor %}
-                        </select>
-                        <!-- <input type="text" id="queryText" value="Разработка ПО" class="form-control"
-                            style="width: 40%; margin-left: 20px;" /> -->
-                        <div style="margin-left:10px;"></div>
-                        <select id="modelName" multiple class="selectpicker">
-                            <!-- <select id="modelName" multiple> -->
-                            <option value="w2w">w2w</option>
-                            <option value="w2widf" selected>w2widf</option>
-                            <option value="tfidf">tfidf</option>
-                        </select>
-
-                        <label for="amount" style="margin-left: 20px; margin-top: 5px;">Выдача:</label>
-                        <input type="text" id="amount" readonly
-                            style="border: 0; color: #00bfff; font-weight: bold; width: 20px; margin-left: 10px; margin-right: 10px; margin-top: -5px;">
-                        <div id="slider-range-max" style="width: 40%; margin-top: 10px;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <br>
-                <div class="col-md-12" id="topicNamesDiv">
-                    <select id="topicNames" multiple class="selectpicker">
-                        {% for topic in topics %}
-                            <option value="{{ topic[0] }}">{{ topic[1] }}</option>
-                        {% endfor %}
-                    </select>
-
-                    <!-- <input type="text" id="topicThreshold" value="0.3" class="form-control"
-                        style="width: 40%; margin-left: 20px;" /> -->
-                </div>
-            </div>
-
-            <div class="row" style="margin-top: 20px;">
-                <div class="col-md-2 col-md-offset-5">
-                    <button style="width: 100%" class="btn btn-info" id="seaarchButton">Начать поиск</button>
-                </div>
-            </div>
-            <hr />
-
-            <div class="row" id="results" style="margin-top: 30px;">
-                <h2 style="text-align:  center; color: #00bfff;">
-                    Пожалуйста укажите параметры поиска!
-                </h2>
-            </div>
-
-
         </div>
         <hr />
         <footer>
             <p>&copy; 2019 - Searcher</p>
-            <p>DevMode: <input type="checkbox" id="godMode"></p>
         </footer>
     </div>
 
@@ -197,7 +155,7 @@
                     for (var i = 0; i < answer_model.length; i++) {
                         res.append(createResult(answer_model[i], answer_model[i].resultId));
                     }
-                    
+
                 },
                 error: function (request, error) {
                     console.log(arguments);
@@ -208,8 +166,8 @@
 
 
         function createResult(json, id) {
-            if (json.url == 'nan'){
-                json.url = '/courses/' + id
+            if (json.url == 'nan') {
+                json.url = '#'
             }
 
             var div = document.createElement("div");
@@ -233,13 +191,13 @@
 
             // div.innerHTML += select;
 
-            // var i = document.createElement("i");
-            // var ai = document.createElement("a");
-            // ai.innerHTML = json.url;
-            // ai.href = json.url;
-            // ai.target = "_blank";
-            // i.appendChild(ai);
-            // div.appendChild(i);
+            var i = document.createElement("i");
+            var ai = document.createElement("a");
+            ai.innerHTML = json.url;
+            ai.href = json.url;
+            ai.target = "_blank";
+            i.appendChild(ai);
+            div.appendChild(i);
 
 
             var p = document.createElement("p");
@@ -281,7 +239,7 @@
             return div;
         }
 
-        function createSelect(model){
+        function createSelect(model) {
             var select_topic = $('#topicNames')
             select_topic.remove();
             var select_topic_div = $('#topicNamesDiv > div:nth-child(1)')
@@ -292,7 +250,7 @@
             var select_topic = document.createElement("select");
             select_topic.setAttribute("id", "topicNames")
             select_topic.setAttribute("multiple", "multiple")
-            for(var i=0; i < model.length; i++){
+            for (var i = 0; i < model.length; i++) {
                 var element = model[i];
                 var select_topic_item = document.createElement("option");
                 select_topic_item.setAttribute("value", element[0])

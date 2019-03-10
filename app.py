@@ -74,6 +74,32 @@ def get_result():
     json_result = jsonify(result)
     return json_result
 
+@app.route('/courses/<course_id>')
+def show_course_info(course_id):
+    df = searcher.full_df
+    course_df = df[df['index_ii'] == str(course_id)]
+    title = course_df['CourseName'].values[0].title()
+    description = course_df['full_text'].values[0].title()
+    topic_vector = course_df['60_-0.1_-0.1_8000_theta'].values[0]
+    own = course_df['own'].values[0].title()
+    know = course_df['know'].values[0].title()
+    can = course_df['can'].values[0].title()
+
+    topics_for_course = searcher.get_top_themes_by_conditions(data=topic_vector, 
+                                                              max_num_topics=3, 
+                                                              k_average=3)['list']
+    topics_for_query = []
+    for topic_id in topics_for_course:
+        topic_name = f'topic_{topic_id}'
+        keywords = ', '.join(searcher.topic_words[topic_name][:3])
+        topics_for_query.append(f'{topic_name}: {keywords}')
+
+    return render_template("course_info.html", 
+                            title=title, 
+                            description=description,
+                            topics=topics_for_query,
+                            know=know, can=can, own=own)
+
 @app.route('/')
 def home():
     professions = Profstandard.query.all()

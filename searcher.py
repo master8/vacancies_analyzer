@@ -244,10 +244,10 @@ def get_model_for_show(result_dict, top_lesson=3):
             model = {"resultId": course_df['index_ii'], 
                      "url": str(course_df['Url']),
                      "sim": sim,
-                     "title": course_df['CourseName'],
+                     "title": course_df['CourseName'].title(),
                      "markValue": 5,
                      "modelName": model_name,
-                     "description": str(course_df['full_text_new'])[:300],
+                     "description": str(course_df['full_text_new'])[:300].title(),
                      "topics": topics,
                      "lessons": lessons}
             result.append(model)
