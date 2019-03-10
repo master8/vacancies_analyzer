@@ -144,6 +144,7 @@ def similarity(vacancies, standards, own=True):
 def matching_parts(to_match, big_text, *args):
 
     df = pd.DataFrame(columns=['full_text'])
+    print('got it')
     df['full_text'] = pd.Series(big_text)
     df['processed_text'] = df['full_text'].apply(lambda text: process_text(str(text))['lemmatized_text_pos_tags'])
     df = get_vectorized_avg_w2v_corpus(df, word2vec.wv)
@@ -152,6 +153,6 @@ def matching_parts(to_match, big_text, *args):
     df_to_match['full_text_match'] = pd.Series(to_match)
     df_to_match['processed_text'] = df_to_match['full_text_match'].apply(lambda text: process_text(str(text))['lemmatized_text_pos_tags'])  # лемматизируем
     df_to_match = get_vectorized_avg_w2v_corpus(df_to_match, word2vec.wv)  # получаем вектора
-    return df# similarity(df_to_match, df, own=False)
+    return similarity(df_to_match, df, own=False)
 
 

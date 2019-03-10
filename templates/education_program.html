@@ -48,10 +48,9 @@
                                                             <input type="checkbox"> <a class="uk-accordion-title"
                                                                                        href="#"> {{ k.lower() }}</a>
                                                             <div class="uk-accordion-content uk-margin-large-left">
-                                                                <h5>{{ clever_function(id_program,0) }}</h5>
-
-
-                                                                </div>
+{#                                                                {{ clever_function(id_program,0)|safe }}#}
+                                                                {{ gg|safe }}
+                                                            </div>
                                                         </li>
                                                     {% endfor %}
                                                 </ul>

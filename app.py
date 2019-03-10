@@ -421,12 +421,30 @@ def education_program(id_program):
     profession = "Программист"
     education_program = list(db.session.query(EducationProgram).filter(EducationProgram.university_id == id_program))
     names=[['Знать', 'know'], ['Уметь', 'can'], ['Владеть', 'own']]
+
+    know, can, own = [], [], []
+    full_kco = []
+    for row in EducationProgram.query.filter_by(university_id=id_program):
+        know.extend(row.know.split('\n'))
+        can.extend(row.can.split('\n'))
+        own.extend(row.own.split('\n'))
+    full_kco.extend(know)
+    full_kco.extend(can)
+    full_kco.extend(own)
+    competences = session['competence'] if 'competence' in session else []
+    full_comp = []
+    for comp in competences:
+        full_comp.append(comp[1])
+        pass
+    gg = similarity.matching_parts(full_comp, full_kco).to_html()
+
     return render_template('education_program.html',
                            title='education program',
                            education_program=education_program,
                            profession=profession,
                            names=names,
-                           id_program=id_program)
+                           id_program=id_program,
+                           gg=gg)
 
 
 def clever_function(id_program, place):
@@ -444,9 +462,9 @@ def clever_function(id_program, place):
     for comp in competences:
         full_comp.append(comp[1])
         pass
+    gg = similarity.matching_parts(full_comp, full_kco).to_html()
 
-
-    return similarity.matching_parts(full_kco, full_comp)
+    return gg
 
 
 app.jinja_env.globals.update(clever_function=clever_function)
