@@ -217,7 +217,7 @@ def get_most_sim_for_models(model_names, query, topic_ids, topn=10, dimensionali
     return results, buffer_list
 
 
-def get_model_for_show(result_dict, top_lesson=3):
+def get_model_for_show(result_dict, top_lesson=3, favorite_courses=[], only_favorite=False):
     result = []
     for model_name, model_results in result_dict.items():
         for course_id, sim, lesson_sim, topics_for_course in model_results:
@@ -241,13 +241,22 @@ def get_model_for_show(result_dict, top_lesson=3):
                     lessons.append([lesson_name, lesson_sim])
             
             course_df = full_df.loc[course_id]
-            model = {"resultId": course_df['index_ii'], 
+            course_id_in_df = course_df['index_ii']
+
+            favorite_course = course_id_in_df in favorite_courses
+
+            if only_favorite:
+                if not favorite_course:
+                    continue
+
+            model = {"resultId": course_id_in_df, 
                      "url": str(course_df['Url']),
                      "sim": sim,
-                     "title": course_df['CourseName'].title(),
+                     "title": course_df['CourseName'],
                      "markValue": 5,
                      "modelName": model_name,
-                     "description": str(course_df['full_text_new'])[:300].title(),
+                     "description": str(course_df['full_text_new'])[:300],
+                     "favorite_course": favorite_course,
                      "topics": topics,
                      "lessons": lessons}
             result.append(model)

@@ -7,7 +7,6 @@
     <title>Главная страница</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-bar-rating/1.2.2/jquery.barrating.min.js"></script>
-
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
@@ -63,15 +62,20 @@
 
             <div class="row">
                 <br>
-                <div class="col-md-12" id="topicNamesDiv">
-                    <select id="topicNames" multiple class="selectpicker">
+                <div class="col-md-5" id="topicNamesDiv">
+                    <select id="topicNames" multiple class="selectpicker" data-width="auto">
                         {% for topic in topics %}
-                            <option value="{{ topic[0] }}">{{ topic[1] }}</option>
+                        <option value="{{ topic[0] }}">{{ topic[0] }}: {{ topic[1] }}</option>
                         {% endfor %}
                     </select>
 
                     <!-- <input type="text" id="topicThreshold" value="0.3" class="form-control"
                         style="width: 40%; margin-left: 20px;" /> -->
+                </div>
+                <div class="col-md-2"></div>
+                <div class="col-md-5">
+                    <label for="only_favorite-2">Отоброжать только избранное: </label>
+                    <input id="only_favorite" type="checkbox">
                 </div>
             </div>
 
@@ -123,6 +127,7 @@
             $('#authorName').val($("#expertName  option:selected").text());
         });
 
+
         // swal({
         //     html: 'Описание оценок: <br>' +
         //         '1 звезда - Полное не соответствие<br>' +
@@ -158,6 +163,8 @@
             var modelName = $('#modelName').val()
 
             var topicNames = $('#topicNames').val()
+
+            var only_favorite = $('#only_favorite').is(":checked")
             // var topicName = $('#topicName').val()
             // var topicThreshold = $('#topicThreshold').val()
             //alert(godMode);
@@ -179,17 +186,15 @@
 
             $.ajax({
                 // url: '/Home/GetJsonResult?amount=' + amount + '&rpdType=' + rpdType + '&expertName=' + expertName + '&enableDevMode=' + godMode + '&modelName=' + modelName + '&topicName=' + topicName + '&topicThreshold=' + topicThreshold,
-                url: '/courses?amount=' + amount + '&query_text=' + query_text + '&enableDevMode=' + godMode + '&modelName=' + modelName + '&topicNames=' + topicNames,
+                url: '/courses?amount=' + amount + '&query_text=' + query_text + '&enableDevMode=' + godMode + '&modelName=' + modelName + '&topicNames=' + topicNames + '&only_favorite=' + only_favorite,
                 context: document.body,
                 beforeSend: function () { $('#ajaxBusy').show(); },
                 complete: function () { $('#ajaxBusy').hide(); },
                 success: function (xhr) {
                     var answer = xhr;
-                    console.log(answer['counter'])
                     var res = $("#results");
                     res.empty();
                     answer_model = answer['model']
-
                     res.append(createSelect(answer['counter']))
 
                     $('#topicNames').selectpicker();
@@ -197,7 +202,33 @@
                     for (var i = 0; i < answer_model.length; i++) {
                         res.append(createResult(answer_model[i], answer_model[i].resultId));
                     }
-                    
+
+                    $('*[data-type="course"]').click(function (event) {
+                        this_element = event.target;
+                        course_id = this_element.id.replace('like_', '');
+                        if (query_text == '') {
+                            query_text = 'test'
+                        }
+                        if (this_element.dataset.like == 'true') {
+                            $.ajax({
+                                url: '/like/' + query_text + '/' + course_id,
+                                success: function () {
+                                    this_element.className = "btn btn-secondary btn-sm";
+                                    this_element.innerHTML = "Удалить из избранного";
+                                    this_element.dataset.like = false;
+                                }
+                            });
+                        } else {
+                            $.ajax({
+                                url: '/unlike/' + query_text + '/' + course_id,
+                                success: function () {
+                                    this_element.className = "btn btn-primary btn-sm";
+                                    this_element.innerHTML = "Добавить в избранное";
+                                    this_element.dataset.like = true;
+                                }
+                            });
+                        }
+                    });
                 },
                 error: function (request, error) {
                     console.log(arguments);
@@ -208,7 +239,7 @@
 
 
         function createResult(json, id) {
-            if (json.url == 'nan'){
+            if (json.url == 'nan') {
                 json.url = '/courses/' + id
             }
 
@@ -242,6 +273,22 @@
             // div.appendChild(i);
 
 
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.id = "like_" + id;
+            btn.dataset.type = 'course';
+            if (json.favorite_course == true) {
+                btn.className = "btn btn-secondary btn-sm";
+                btn.innerHTML = "Удалить из избранного";
+                btn.dataset.like = false;
+            } else {
+                btn.className = "btn btn-primary btn-sm";
+                btn.innerHTML = "Добавить в избранное";
+                btn.dataset.like = true;
+            }
+            div.appendChild(btn);
+
+
             var p = document.createElement("p");
             p.innerHTML = json.description;
             div.appendChild(p);
@@ -271,7 +318,7 @@
             if ($('#godMode').is(':checked')) {
                 var pDev = document.createElement("p");
                 pDev.style = "color: red;";
-                pDev.innerHTML = "Model: " + json.modelName + " Course_id: " + json.resultId + " Количество оценок: " + json.numberOfMark + " Средняя оценка: " + json.markaverage;
+                pDev.innerHTML = "Model: " + json.modelName + " Course_id: " + json.resultId + " Sim: " + json.sim;
                 div.appendChild(pDev);
             }
 
@@ -281,27 +328,33 @@
             return div;
         }
 
-        function createSelect(model){
+        function createSelect(model) {
             var select_topic = $('#topicNames')
+            list_topics = select_topic.val();
             select_topic.remove();
-            var select_topic_div = $('#topicNamesDiv > div:nth-child(1)')
+            var select_topic_div = $('#topicNamesDiv > div:nth-child(1)');
             select_topic_div.remove();
 
-            var topicNamesDiv = $('#topicNamesDiv')
+            var topicNamesDiv = $('#topicNamesDiv');
 
             var select_topic = document.createElement("select");
-            select_topic.setAttribute("id", "topicNames")
-            select_topic.setAttribute("multiple", "multiple")
-            for(var i=0; i < model.length; i++){
+            select_topic.dataset.width = "auto"
+            select_topic.setAttribute("id", "topicNames");
+            select_topic.setAttribute("multiple", "multiple");
+            for (var i = 0; i < model.length; i++) {
                 var element = model[i];
                 var select_topic_item = document.createElement("option");
-                select_topic_item.setAttribute("value", element[0])
-                select_topic_item.innerHTML = element[1]
-                select_topic.appendChild(select_topic_item)
+                select_topic_item.setAttribute("value", element[0]);
+                if (list_topics != null && list_topics.includes(element[0])) {
+                    select_topic_item.setAttribute("selected", "selected");
+                }
+
+                select_topic_item.innerHTML = element[0] + ': ' + element[1];
+                select_topic.appendChild(select_topic_item);
             }
             topicNamesDiv.append(select_topic)
-            // return select_topic
         }
+
 
     </script>
 
@@ -313,6 +366,7 @@
         integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-checkbox/1.5.0/js/bootstrap-checkbox.min.js"></script>
 
     <script>
         $(function () {
@@ -332,6 +386,7 @@
                 theme: 'fontawesome-stars'
             });
         });
+        $('#only_favorite').checkboxpicker();
     </script>
 
 </body>
