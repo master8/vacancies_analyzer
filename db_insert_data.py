@@ -82,10 +82,10 @@ for index, vacancy in classified_vacancies.iterrows():
 db.session.commit()
 
 
-vacancies_parts = pd.read_csv('data/t_vacancies_parts.csv')
+vacancies_parts = pd.read_csv('data/vacancy_parts_for_matching.csv')
 
 for index, part in vacancies_parts.iterrows():
-    value = VacancyPart(id=part['id'], vacancy_id=part['vacancy_id'], text=part['text'], type_id=part['type_id'])
+    value = VacancyPart(id=part['vacancy_part_id'], vacancy_id=part['profstandard_id'], text=part['vacancy_part_text'], type_id=1)
     db.session.add(value)
 
 db.session.commit()

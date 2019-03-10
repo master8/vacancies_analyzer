@@ -68,7 +68,7 @@ def home():
 
 @app.route('/results')
 def results():
-    if 'params' in session:
+    if 'region' not in request.args and 'params' in session:
         params = session['params']
     else:
         reg_id = request.args.get('region')
@@ -216,13 +216,15 @@ def profession():
         .filter(Vacancy.region_id == params.region.id) \
         .filter(Vacancy.source_id == params.source.id)
 
-    vacancies_id = list(map(lambda x: x.vacancy_id, classified_vacancies.all()))
+    # vacancies_id = list(map(lambda x: x.vacancy_id, classified_vacancies.all()))
 
     count_labels = defaultdict(int)
 
-    for row in ClassifiedVacancy.query.filter(ClassifiedVacancy.vacancy_id.in_(vacancies_id)):
+    for v in classified_vacancies.all():
+        for row in ClassifiedVacancy.query\
+                .filter(ClassifiedVacancy.vacancy_id == v.vacancy_id)\
+                .filter(ClassifiedVacancy.profstandard_id != v.profstandard_id):
 
-        if str(row.profstandard_id) != prof_id:
             count_labels[row.profstandard_id] += 1
 
     diagram_link, professions = plot_stat(count_labels)
