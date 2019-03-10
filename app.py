@@ -33,8 +33,12 @@ from handlers import general_function_tree, plot_search, plot_stat, common_words
 
 @app.route('/searcher')
 def root():
+    if "competence" in session:
+        competence = session['competence']
+    else:
+        competence = [["", ""]]
     topics = [(x, ', '.join(y[:3])) for x, y in searcher.topic_words.items()]
-    return render_template("searcher.html", topics=topics)
+    return render_template("searcher.html", topics=topics, competence=competence)
 
 @app.route('/courses')
 def get_result():
@@ -43,25 +47,98 @@ def get_result():
     dev_mode = request.args.get('enableDevMode', default=False, type=bool)
     model_names = request.args.get('modelName').split(',')
     topic_names = request.args.get('topicNames')
+    only_favorite = request.args.get('only_favorite')
+
+    if only_favorite == 'false':
+        only_favorite = False
+    elif only_favorite == 'true':
+        only_favorite = True
 
     topic_ids = []
     if topic_names != 'null':
         for topic_name in topic_names.split(','):
             topic_ids.append(int(topic_name.replace('topic_', '')))
 
-    print(topic_ids)
     query_token = list(searcher.get_lemmatized_documents([query_text], morph, only_tokens=True))[0]
 
     most_sim_courses, buffer_list = searcher.get_most_sim_for_models(model_names, query_token, set(topic_ids), topn=amount)
     
     dict_counter = dict(Counter(buffer_list))
-    
-    model = searcher.get_model_for_show(most_sim_courses)
+    dict_items = sorted(dict_counter.items(), key=lambda x: x[1], reverse=True)
+    topics_for_query = []
+    for model_position, count_courses in dict_items:
+        topic_name = f'topic_{model_position}'
+        keywords = ', '.join(searcher.topic_words[topic_name][:3])
+        keywords += f'. Курсов в теме:{count_courses}'
+        topics_for_query.append((topic_name, keywords))
 
-    result = {"model": model, "counter": dict_counter}
+    favorite_list = []
+
+    if query_text == '':
+        query_text = 'test'
+    if 'like_courses' in session:
+        print(session['like_courses'])
+        if query_text in session['like_courses']:
+            favorite_list = session['like_courses'][query_text]
+        
+    model = searcher.get_model_for_show(most_sim_courses,
+                                        favorite_courses=favorite_list,
+                                        only_favorite=only_favorite)
+
+    result = {"model": model, "counter": topics_for_query}
 
     json_result = jsonify(result)
     return json_result
+
+@app.route('/courses/<course_id>')
+def show_course_info(course_id):
+    df = searcher.full_df
+    course_df = df[df['index_ii'] == str(course_id)]
+    title = course_df['CourseName'].values[0]
+    description = course_df['full_text'].values[0]
+    topic_vector = course_df['60_-0.1_-0.1_8000_theta'].values[0]
+    own = course_df['own'].values[0]
+    know = course_df['know'].values[0]
+    can = course_df['can'].values[0]
+
+    topics_for_course = searcher.get_top_themes_by_conditions(data=topic_vector, 
+                                                              max_num_topics=3, 
+                                                              k_average=3)['list']
+    topics_for_query = []
+    for topic_id in topics_for_course:
+        topic_name = f'topic_{topic_id}'
+        keywords = ', '.join(searcher.topic_words[topic_name][:3])
+        topics_for_query.append(f'{topic_name}: {keywords}')
+
+    return render_template("course_info.html", 
+                            title=title, 
+                            description=description,
+                            topics=topics_for_query,
+                            know=know, can=can, own=own)
+
+@app.route('/like/<query>/<course_id>')
+def like_course(query, course_id):
+    if 'like_courses' in session:
+        if query in session['like_courses']:
+            session['like_courses'][query].append(course_id)
+        else:
+            session['like_courses'][query] = [course_id]
+    else:
+        session['like_courses'] = {query: [course_id]}
+        
+    return 'OK'
+
+@app.route('/unlike/<query>/<course_id>')
+def unlike_course(query, course_id):
+    if 'like_courses' in session:
+        if query in session['like_courses']:
+            if course_id in session['like_courses'][query]:
+                session['like_courses'][query].remove(course_id)
+        else:
+            session['like_courses'][query] = []
+    else:
+        session['like_courses'] = {}
+    return 'OK'    
 
 @app.route('/')
 def home():
