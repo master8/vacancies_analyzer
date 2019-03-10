@@ -306,6 +306,7 @@ def split_vacancies():
 @app.route('/save', methods=['POST'])
 def save_selection():
     profession_id = int(request.args.get('prof_id'))
+    session['selected'] = Selected()
     session['selected'].items[profession_id] = SelectedItems(
         profession_id,
         list(map(int, request.form.getlist('gf'))),
