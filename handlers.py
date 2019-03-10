@@ -17,10 +17,13 @@ def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None
     just_selected = []
     for each in query:
 
-        functions, function_weight, parts_count, selected_parts = function_branch(each.id, matched_parts, selected)
+        function_weight = 0
+
+        functions, parts_count, selected_parts = function_branch(each.id, matched_parts, selected)
 
         if len(functions) > 0:
             sorting_functions = pd.DataFrame(functions)
+            function_weight = sorting_functions.weight.sum()
             functions = sorting_functions.sort_values('weight', ascending=False).to_dict('r')
 
         if selected is not None and each.id not in selected.general_fun_ids and (len(functions) > 0 or len(selected_parts) > 0):
@@ -64,16 +67,18 @@ def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None
 
 def function_branch(general_id, matched_parts, selected: SelectedItems = None):
     branch = []
-    weight = 0
     counts = 0
     selected_parts = []
     query = Function.query.filter_by(general_function_id=general_id)
     for each in query:
 
-        parts, vacancy_weight, parts_count = parts_vacancies_leafs(each.id, matched_parts, selected)
+        vacancy_weight = 0
+
+        parts, parts_count = parts_vacancies_leafs(each.id, matched_parts, selected)
 
         if len(parts) > 0:
             sorting_parts = pd.DataFrame(parts)
+            vacancy_weight = sorting_parts.weight.sum()
             parts = sorting_parts.sort_values('weight', ascending=False).to_dict('r')
 
         if selected is not None and each.id not in selected.fun_ids and len(parts) > 0:
@@ -99,19 +104,17 @@ def function_branch(general_id, matched_parts, selected: SelectedItems = None):
             'bigram': top_bigram
         }
 
-        weight += vacancy_weight
         counts += parts_count
 
         if selected is None or each.id in selected.fun_ids:
             branch.append(function_parts_branch)
 
-    return branch, weight, counts, selected_parts
+    return branch, counts, selected_parts
 
 
 def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = None):
     leaf = []
-    query = ProfstandardPart.query.filter_by(function_id=function_id)
-    weight = 0
+    query = ProfstandardPart.query.filter_by(function_id=function_id).filter(ProfstandardPart.part_type_id.in_([4, 5, 6]))
     count = 0
     for each in query:
 
@@ -142,13 +145,12 @@ def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = 
             'monogram': top_word,
             'bigram': top_bigram
         }
-        weight += parts_weight
         count += parts_count
 
         if selected is None or each.id in selected.part_ids:
             leaf.append(leaf_parts)
 
-    return leaf, weight, count
+    return leaf, count
 
 
 def common_words(text, n_gram, topn = 5):
@@ -211,22 +213,23 @@ def plot_stat(count_labels): #график
     t = []
     num = []
     professions = []
-    for key, value in count_labels.items():
-        profession = Profstandard.query.get(key)
-        professions.append({
-            'profession': profession,
-            'count': value
-        })
-        t.append('| ' + profession.code)
-        num.append(value)
-    x = np.array(t, dtype=str)
-    y = np.array(num)
-    diagram = sns.barplot(x=y, y=x)
-    diagram.clear()
-    diagram = sns.barplot(x=y, y=x)
-    dia = diagram.get_figure()
+    if len(count_labels) > 0:
+        for key, value in count_labels.items():
+            profession = Profstandard.query.get(key)
+            professions.append({
+                'profession': profession,
+                'count': value
+            })
+            t.append('| ' + profession.code)
+            num.append(value)
+        x = np.array(t, dtype=str)
+        y = np.array(num)
+        diagram = sns.barplot(x=y, y=x)
+        diagram.clear()
+        diagram = sns.barplot(x=y, y=x)
+        dia = diagram.get_figure()
 
-    dia.savefig('./static/diagram/test_diagram2.svg')
+        dia.savefig('./static/diagram/test_diagram2.svg')
     diagram_link = '../static/diagram/test_diagram2.svg'
     return diagram_link, professions
 
