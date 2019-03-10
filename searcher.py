@@ -229,9 +229,9 @@ def get_model_for_show(result_dict, top_lesson=3, favorite_courses=[], only_favo
 
             topics = []
             for topic_id in topics_for_course:
-                topic_name = f'topic_{topic_id}'
+                topic_name = 'topic_{}'.format(topic_id)
                 topic_title = ', '.join(topic_words[topic_name][:3])
-                topic_text = f'{topic_name}: {topic_title}'
+                topic_text = '{}: {}'.format(topic_name, topic_title)
                 topics.append(topic_text)
 
             lessons = []

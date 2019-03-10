@@ -67,9 +67,9 @@ def get_result():
     dict_items = sorted(dict_counter.items(), key=lambda x: x[1], reverse=True)
     topics_for_query = []
     for model_position, count_courses in dict_items:
-        topic_name = f'topic_{model_position}'
+        topic_name = 'topic_{}'.format(model_position)
         keywords = ', '.join(searcher.topic_words[topic_name][:3])
-        keywords += f'. Курсов в теме:{count_courses}'
+        keywords += '. Курсов в теме:{}'.format(count_courses)
         topics_for_query.append((topic_name, keywords))
 
     favorite_list = []
@@ -106,9 +106,9 @@ def show_course_info(course_id):
                                                               k_average=3)['list']
     topics_for_query = []
     for topic_id in topics_for_course:
-        topic_name = f'topic_{topic_id}'
+        topic_name = 'topic_{}'.format(topic_id)
         keywords = ', '.join(searcher.topic_words[topic_name][:3])
-        topics_for_query.append(f'{topic_name}: {keywords}')
+        topics_for_query.append('{}: {}'.format(topic_name, keywords))
 
     return render_template("course_info.html", 
                             title=title, 
