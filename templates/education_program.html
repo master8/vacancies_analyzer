@@ -37,51 +37,29 @@
                             <input type="checkbox"><h4>{{ op.annotation }}</h4>
                             <h3>Знания, умения, навыки</h3>
                             <h4>По окончанию изучения дисциплины выпускник должен:</h4>
-                            <ul uk-accordion>
-                                <li>
-                                    <input type="checkbox" style="float: left; margin: 6px"> <a class="uk-accordion-title" href="#">Знать</a>
-                                    <div class="uk-accordion-content uk-margin-large-left">
-                                        <ul uk-accordion>
-                                            {% for k in op.know.split('\n') %}
-                                                <li>
-                                                    <input type="checkbox"> <a class="uk-accordion-title"
-                                                                               href="#"> {{ k.lower() }}</a>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </li>
-                            </ul>
-                            <ul uk-accordion>
-                                <li>
-                                    <input type="checkbox" style="float: left; margin: 6px"><a class="uk-accordion-title" href="#">Уметь</a>
-                                    <div class="uk-accordion-content uk-margin-large-left">
-                                        <ul uk-accordion>
-                                            {% for c in op.can.split('\n') %}
-                                                <li>
-                                                    <input type="checkbox"> <a class="uk-accordion-title"
-                                                                               href="#"> {{ c.lower() }}</a>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </li>
-                            </ul>
-                            <ul uk-accordion>
-                                <li>
-                                    <input type="checkbox" style="float: left; margin: 6px"><a class="uk-accordion-title" href="#">Владеть</a>
-                                    <div class="uk-accordion-content uk-margin-large-left">
-                                        <ul uk-accordion>
-                                            {% for o in op.own.split('\n') %}
-                                                <li>
-                                                    <input type="checkbox"> <a class="uk-accordion-title"
-                                                                               href="#"> {{ o.lower() }}</a>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </li>
-                            </ul>
+                                {% for zun in names %}
+                                    <ul uk-accordion>
+                                        <li>
+                                            <input type="checkbox" style="float: left; margin: 6px"> <a class="uk-accordion-title" href="#">{{ zun[0] }}</a>
+                                            <div class="uk-accordion-content uk-margin-large-left">
+                                                <ul uk-accordion>
+                                                    {% for k in op[zun[1]].split('\n') %}
+                                                        <li>
+                                                            <input type="checkbox"> <a class="uk-accordion-title"
+                                                                                       href="#"> {{ k.lower() }}</a>
+                                                            <div class="uk-accordion-content uk-margin-large-left">
+                                                                <h5>{{ clever_function(id_program,0) }}</h5>
+
+
+                                                                </div>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                {% endfor %}
+
                             <ul uk-accordion>
                                 <li>
                                     <input type="checkbox" style="float: left; margin: 6px"><a class="uk-accordion-title" href="#">Структура
@@ -104,16 +82,16 @@
             </ul>
         </div>
     </div>
-    <div class="uk-card uk-card-secondary uk-card-body">
-            <ul>
-                {% for standard in standards %}
-                    <li>
-                        <input type="checkbox"><a class="uk-accordion-title"
-                                                  href="#"> {{ standard }}</a>
-                    </li>
-                {% endfor %}
-            </ul>
-    </div>
+{#    <div class="uk-card uk-card-secondary uk-card-body">#}
+{#            <ul>#}
+{#                {% for standard in standards %}#}
+{#                    <li>#}
+{#                        <input type="checkbox"><a class="uk-accordion-title"#}
+{#                                                  href="#"> {{ standard }}</a>#}
+{#                    </li>#}
+{#                {% endfor %}#}
+{#            </ul>#}
+{#    </div>#}
 </div>
 </div>
 </div>

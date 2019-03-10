@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from flask import Flask, request, session, redirect, url_for, jsonify
 from flask import render_template
 from flask_session import Session
@@ -8,6 +9,9 @@ import pandas as pd
 import matplotlib
 import pymorphy2
 # import searcher
+import ast
+import similarity
+
 
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -416,11 +420,36 @@ def universities():
 def education_program(id_program):
     profession = "Программист"
     education_program = list(db.session.query(EducationProgram).filter(EducationProgram.university_id == id_program))
+    names=[['Знать', 'know'], ['Уметь', 'can'], ['Владеть', 'own']]
     return render_template('education_program.html',
                            title='education program',
                            education_program=education_program,
                            profession=profession,
-                           standards=['ЗНАТЬ', 'ХОЧУ УМЕТЬ', 'МНЕ НУЖНЫ РАБЫ'])
+                           names=names,
+                           id_program=id_program)
+
+
+def clever_function(id_program, place):
+    know, can, own = [], [], []
+    full_kco = []
+    for row in EducationProgram.query.filter_by(university_id=id_program):
+        know.extend(row.know.split('\n'))
+        can.extend(row.can.split('\n'))
+        own.extend(row.own.split('\n'))
+    full_kco.extend(know)
+    full_kco.extend(can)
+    full_kco.extend(own)
+    competences = session['competence'] if 'competence' in session else []
+    full_comp = []
+    for comp in competences:
+        full_comp.append(comp[1])
+        pass
+
+
+    return similarity.matching_parts(full_kco, full_comp)
+
+
+app.jinja_env.globals.update(clever_function=clever_function)
 
 
 @app.after_request

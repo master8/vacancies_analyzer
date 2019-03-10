@@ -122,6 +122,8 @@
         <div class="layer">
             <div class="uk-card uk-card-secondary uk-card-body" id = "panel">
                  <button class="uk-button uk-button-primary uk-margin-small uk-ma" type="button" onclick="addButton()">Добавить</button>
+                 <button class="uk-button uk-button-default uk-align-right" style="margin-bottom:0px;" type="submit" id = 'submit' >Сохранить</button>
+                 <a class="uk-button uk-button-default uk-align-right" style="margin-bottom:0px;" href="/universities">Отправить</a>
                 {% for competence in competences %}
                     <div class="uk-margin-small-bottom uk-margin-small-top" id={{competence[0] }}>
                         <button class="uk-margin-small-right uk-icon-button" onclick="del('{{competence[0]}}')" uk-icon="trash"></button>
@@ -136,15 +138,14 @@
                 function addButton() {
                     var panel = document.getElementById("panel");
                     var div = document.createElement('div');
-                    if (allowSubmit === false){
-                        var btn = document.createElement('button');
-                        btn.className = "uk-button uk-button-default uk-align-right";
-                        btn.type = "submit";
-                        btn.id = 'submit';
-                        btn.style = 'margin-top: 10px; margin-bottom:0px; vertical-align:top;'
-                        btn.innerHTML = 'Сохранить';
-                        panel.insertBefore(btn, panel.childNodes[0]);
-                    }
+                    {#if (allowSubmit === false){#}
+                    {#    var btn = document.createElement('button');#}
+                    {#    btn.className = "uk-button uk-button-default uk-align-right";#}
+                    {#    btn.type = "submit";#}
+                    {#    btn.id = 'submit';#}
+                    {#    btn.style = 'margin-top: 10px; margin-bottom:0px; vertical-align:top;'#}
+                    {#    btn.innerHTML = 'Сохранить';#}
+                    {#    panel.insertBefore(btn, panel.childNodes[0]); }#}
                     div.className = "uk-margin-small-bottom uk-margin-small-top";
                     div.id = i;
                     div.attributes = 'uk-grid';

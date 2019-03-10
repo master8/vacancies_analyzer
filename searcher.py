@@ -19,21 +19,21 @@ def load_pickle(path):
     with open(path, 'rb') as handle:
         return pickle.load(handle)
 
-full_df = pd.read_csv('./searcher/data/full_df_rpd_with_sr_courses_wo_str.csv')
-
-tfidfmodel = load_pickle('./searcher/models/tfidfmodel.pkl')
-tfidfdictionary = load_pickle('./searcher/models/tfidfdictionary.pkl')
-waw2vmodel = load_pickle('./searcher/models/waw2vmodel.pkl')
-
-w2vvectors = load_pickle('./searcher/vectors/w2vvectors.pkl')
-w2vvectors_weighted = load_pickle('./searcher/vectors/w2vvectors_weighted.pkl')
-# tfidf_vectors = load_pickle('./searcher/vectors/tfidf_vectors.pkl')
-
-dict_vectors_struct_w2w = load_pickle('./searcher/vectors/dict_vectors_struct_w2w.pkl')
-# dict_vectors_struct_tfidf = load_pickle('./searcher/vectors/dict_vectors_struct_tfidf.pkl')
-dict_vectors_struct_w2widf = load_pickle('./searcher/vectors/dict_vectors_struct_w2widf.pkl')
-
-dict_rpd_id_struct = load_pickle('./searcher/data/dict_rpd_id_struct.pkl')
+# full_df = pd.read_csv('./searcher/data/full_df_rpd_with_sr_courses_wo_str.csv')
+#
+# tfidfmodel = load_pickle('./searcher/models/tfidfmodel.pkl')
+# tfidfdictionary = load_pickle('./searcher/models/tfidfdictionary.pkl')
+# waw2vmodel = load_pickle('./searcher/models/waw2vmodel.pkl')
+#
+# w2vvectors = load_pickle('./searcher/vectors/w2vvectors.pkl')
+# w2vvectors_weighted = load_pickle('./searcher/vectors/w2vvectors_weighted.pkl')
+# # tfidf_vectors = load_pickle('./searcher/vectors/tfidf_vectors.pkl')
+#
+# dict_vectors_struct_w2w = load_pickle('./searcher/vectors/dict_vectors_struct_w2w.pkl')
+# # dict_vectors_struct_tfidf = load_pickle('./searcher/vectors/dict_vectors_struct_tfidf.pkl')
+# dict_vectors_struct_w2widf = load_pickle('./searcher/vectors/dict_vectors_struct_w2widf.pkl')
+#
+# dict_rpd_id_struct = load_pickle('./searcher/data/dict_rpd_id_struct.pkl')
 
 def get_russian_lemma(token, lemmatizer):
     lemma = lemmatizer.parse(token.lower())[0]
