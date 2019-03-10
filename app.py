@@ -242,8 +242,8 @@ def profession():
             for gen_text in gen['gen_text']:
                 text.append(gen_text)
     text = unique(text)
-    top_words = common_words(text, 1, topn=10)
-    top_bigrams = common_words(text, 2)
+    top_bigrams = common_words(text, 2, topn=20)
+    top_words = common_words(text, 1, topn=25,bigram=top_bigrams)
     return render_template('profession.html',
                            title='profession',
                            best_vacancies=best_vacancies,
@@ -418,56 +418,39 @@ def universities():
 
 @app.route('/education_program/<id_program>', methods=['GET'])
 def education_program(id_program):
-    profession = "Программист"
-    education_program = list(db.session.query(EducationProgram).filter(EducationProgram.university_id == id_program))
-    names=[['Знать', 'know'], ['Уметь', 'can'], ['Владеть', 'own']]
+    # education_program = list(db.session.query(EducationProgram).filter(EducationProgram.university_id == id_program))
+    program = EducationProgram.query.filter_by(university_id=id_program)
+    program_name = '09.03.01 Информатика и вычислительная техника'
+    names = [['Знать', 'know'], ['Уметь', 'can'], ['Владеть', 'own']]
 
     know, can, own = [], [], []
-    full_kco = []
-    for row in EducationProgram.query.filter_by(university_id=id_program):
-        know.extend(row.know.split('\n'))
-        can.extend(row.can.split('\n'))
-        own.extend(row.own.split('\n'))
-    full_kco.extend(know)
-    full_kco.extend(can)
-    full_kco.extend(own)
+    program_tree = []
+    program_df = pd.read_sql(program.statement, db.engine)
+
     competences = session['competence'] if 'competence' in session else []
     full_comp = []
     for comp in competences:
         full_comp.append(comp[1])
         pass
-    gg = similarity.matching_parts(full_comp, full_kco).to_html()
+
+    gg = similarity.matching_parts(full_comp, program_df, part='know').to_html()
+
+    for row in program:
+        program_tree.append({'know': row.know.split('\n'),
+                                'can': row.can.split('\n'),
+                                'own': row.own.split('\n'),
+                                'name': row.name,
+                                'annotation': row.annotation,
+                                'theme': row.themes.split('\n')})
 
     return render_template('education_program.html',
                            title='education program',
-                           education_program=education_program,
-                           profession=profession,
+                           education_program=program_tree,
                            names=names,
-                           id_program=id_program,
+                           program_name=program_name,
                            gg=gg)
 
 
-def clever_function(id_program, place):
-    know, can, own = [], [], []
-    full_kco = []
-    for row in EducationProgram.query.filter_by(university_id=id_program):
-        know.extend(row.know.split('\n'))
-        can.extend(row.can.split('\n'))
-        own.extend(row.own.split('\n'))
-    full_kco.extend(know)
-    full_kco.extend(can)
-    full_kco.extend(own)
-    competences = session['competence'] if 'competence' in session else []
-    full_comp = []
-    for comp in competences:
-        full_comp.append(comp[1])
-        pass
-    gg = similarity.matching_parts(full_comp, full_kco).to_html()
-
-    return gg
-
-
-app.jinja_env.globals.update(clever_function=clever_function)
 
 
 @app.after_request

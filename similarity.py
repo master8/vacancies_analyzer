@@ -104,55 +104,45 @@ def get_vectorized_avg_w2v_corpus(corpus, model):
     return clean_corpus
 
 
-def most_similar(infer_vector, vectorized_corpus, own_code=[0], topn=10):
-    if own_code[0] != 0:
-        df_sim = pd.DataFrame()
-        for label in own_code:
-            df_sim_label = vectorized_corpus[vectorized_corpus['profstandard_id'] == int(label)]
-            df_sim = pd.concat([df_sim, df_sim_label], ignore_index=False)
-            print('own=' + own_code[0])
-    else:
-        df_sim = vectorized_corpus
-
+def most_similar(infer_vector, vectorized_corpus, topn=10):
+    df_sim = vectorized_corpus
     df_sim['similarity'] = df_sim['vectors'].apply(
         lambda v: cosine_similarity([infer_vector], [v.tolist()])[0, 0])
     df_sim = df_sim.sort_values(by='similarity', ascending=False).head(n=topn)
     return df_sim
 
 
-def similarity(vacancies, standards, own=True):
-    df_result = pd.DataFrame(columns=['similarity', 'full_text', 'full_text_match'],
+def similarity(vacancies, standards, topn=5):
+    df_result = pd.DataFrame(columns=['similarity', 'full_text', 'full_text_match', 'id'],
                              index=None)
     match_index = 0
-    own_code = [0]
     for index, sample in vacancies.iterrows():
-        if own is True:
-            labels = sample['profstandard_id']
-            own_code = labels.split(',')
-        similar_docs = most_similar(sample['vectors'], standards, own_code, topn=5)[['full_text', 'similarity']]  # sc (близость нужна)
-        # similar_docs['vacancy_part_id'] = index  # нужно
-        similar_docs['full_text_match'] = sample['full_text_match']  # нужно
+        similar_docs = most_similar(sample['vectors'], standards, topn=topn)[['full_text', 'similarity', 'id']]
+        similar_docs['full_text_match'] = sample['full_text_match']
         df_result = pd.concat([df_result, similar_docs], ignore_index=True)
         match_index += 1
         print(index)
         print(match_index)
     return df_result
 
-    # df_vacancies = get_vectorized_avg_w2v_corpus(df_vacancies, word2vec.wv)
 
+def matching_parts(to_match, program_df, part='know', topn=5):
+    '''
+    :param to_match:
+    :param program_df:
+    :param part: annotation, themes, zun(know, can, own)
+    :param topn:
+    :return:
+    '''
 
-def matching_parts(to_match, big_text, *args):
-
-    df = pd.DataFrame(columns=['full_text'])
-    print('got it')
-    df['full_text'] = pd.Series(big_text)
-    df['processed_text'] = df['full_text'].apply(lambda text: process_text(str(text))['lemmatized_text_pos_tags'])
-    df = get_vectorized_avg_w2v_corpus(df, word2vec.wv)
+    program_df['full_text'] = program_df[part]
+    program_df['processed_text'] = program_df['full_text'].apply(lambda text: process_text(str(text))['lemmatized_text_pos_tags'])
+    program_df = get_vectorized_avg_w2v_corpus(program_df, word2vec.wv)
 
     df_to_match = pd.DataFrame(columns=['full_text_match'])
     df_to_match['full_text_match'] = pd.Series(to_match)
     df_to_match['processed_text'] = df_to_match['full_text_match'].apply(lambda text: process_text(str(text))['lemmatized_text_pos_tags'])  # лемматизируем
-    df_to_match = get_vectorized_avg_w2v_corpus(df_to_match, word2vec.wv)  # получаем вектора
-    return similarity(df_to_match, df, own=False)
+    df_to_match = get_vectorized_avg_w2v_corpus(df_to_match, word2vec.wv)
+    return similarity(df_to_match, program_df, topn=topn)
 
 

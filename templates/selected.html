@@ -21,9 +21,11 @@
 {{ debug }}
 <div class="uk-padding">
     <div class="uk-card uk-card-default uk-card-body">
-        <h1 class="uk-text-center">Выбранные части</h1>
+        <h1 class="uk-text-center">Формирование профессиональных компетенций</h1>
         <p class="uk-text-center">Регион: <b>{{ params.region.name }}</b> Источник: <b>{{ params.source.name }}</b> Период: <b>{{ period }}</b></p>
         <a class="uk-button uk-button-default uk-align-right" href="/results">Результаты поиска</a>
+         <a class="uk-button uk-button-primary uk-align-right" style="margin-bottom:0px;" href="/universities">Сопоставить с ОП</a>
+         <a class="uk-button uk-button-primary uk-align-right" style="margin-bottom:0px;" href="/searcher">Поиск курсов</a>
     </div>
 </div>
 <div class="uk-padding uk-padding-remove-top">
@@ -123,7 +125,6 @@
             <div class="uk-card uk-card-secondary uk-card-body" id = "panel">
                  <button class="uk-button uk-button-primary uk-margin-small uk-ma" type="button" onclick="addButton()">Добавить</button>
                  <button class="uk-button uk-button-default uk-align-right" style="margin-bottom:0px;" type="submit" id = 'submit' >Сохранить</button>
-                 <a class="uk-button uk-button-default uk-align-right" style="margin-bottom:0px;" href="/universities">Отправить</a>
                 {% for competence in competences %}
                     <div class="uk-margin-small-bottom uk-margin-small-top" id={{competence[0] }}>
                         <button class="uk-margin-small-right uk-icon-button" onclick="del('{{competence[0]}}')" uk-icon="trash"></button>
