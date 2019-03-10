@@ -114,7 +114,7 @@ def function_branch(general_id, matched_parts, selected: SelectedItems = None):
 
 def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = None):
     leaf = []
-    query = ProfstandardPart.query.filter_by(function_id=function_id)
+    query = ProfstandardPart.query.filter_by(function_id=function_id).filter(ProfstandardPart.part_type_id.in_([4, 5, 6]))
     count = 0
     for each in query:
 
