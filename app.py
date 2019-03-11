@@ -143,7 +143,10 @@ def results():
 
 @app.route('/profession')
 def profession():
-    params = session['params']
+    if 'params' in session:
+        params = session['params']
+    else:
+        raise ValueError("ОТВАЛИЛАСЬ СЕССИЯ")
     prof_id = request.args.get('id')
 
     query = db.session.query(Vacancy, ClassifiedVacancy) \
@@ -308,12 +311,13 @@ def split_vacancies():
 @app.route('/save', methods=['POST'])
 def save_selection():
     profession_id = int(request.args.get('prof_id'))
-    session['selected'].items[profession_id] = SelectedItems(
-        profession_id,
-        list(map(int, request.form.getlist('gf'))),
-        list(map(int, request.form.getlist('f'))),
-        list(map(int, request.form.getlist('p')))
-    )
+    if 'selected' in session:
+        session['selected'].items[profession_id] = SelectedItems(
+            profession_id,
+            list(map(int, request.form.getlist('gf'))),
+            list(map(int, request.form.getlist('f'))),
+            list(map(int, request.form.getlist('p')))
+        )
     return redirect('/selected')
 
 
@@ -323,11 +327,11 @@ def selected():
     if request.method == "POST":
         codes = request.form.getlist('code')
         names = request.form.getlist('codename')
-
+        standards = []
         competence = []
 
         for i in range(len(codes)):
-            competence.append([codes[i], names[i]])
+            competence.append([codes[i], names[i], request.form.getlist(codes[i])])
         session['competence'] = competence
 
     if 'selected' in session:
