@@ -10,6 +10,7 @@ from models import  Function, ProfstandardPart,  GeneralFunction, Profstandard
 sns.set(style="whitegrid")
 
 
+
 def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None):
     tree = []
     query = GeneralFunction.query.filter_by(profstandard_id=prof_id)
@@ -17,13 +18,10 @@ def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None
     just_selected = []
     for each in query:
 
-        function_weight = 0
-
-        functions, parts_count, selected_parts = function_branch(each.id, matched_parts, selected)
+        functions, function_weight, parts_count, selected_parts = function_branch(each.id, matched_parts, selected)
 
         if len(functions) > 0:
             sorting_functions = pd.DataFrame(functions)
-            function_weight = sorting_functions.weight.sum()
             functions = sorting_functions.sort_values('weight', ascending=False).to_dict('r')
 
         if selected is not None and each.id not in selected.general_fun_ids and (len(functions) > 0 or len(selected_parts) > 0):
@@ -32,8 +30,6 @@ def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None
                 'functions': functions,
                 'parts': selected_parts
             })
-
-
 
         vacancies_text = []
 
@@ -67,18 +63,16 @@ def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None
 
 def function_branch(general_id, matched_parts, selected: SelectedItems = None):
     branch = []
+    weight = 0
     counts = 0
     selected_parts = []
     query = Function.query.filter_by(general_function_id=general_id)
     for each in query:
 
-        vacancy_weight = 0
-
-        parts, parts_count = parts_vacancies_leafs(each.id, matched_parts, selected)
+        parts, vacancy_weight, parts_count = parts_vacancies_leafs(each.id, matched_parts, selected)
 
         if len(parts) > 0:
             sorting_parts = pd.DataFrame(parts)
-            vacancy_weight = sorting_parts.weight.sum()
             parts = sorting_parts.sort_values('weight', ascending=False).to_dict('r')
 
         if selected is not None and each.id not in selected.fun_ids and len(parts) > 0:
@@ -104,23 +98,23 @@ def function_branch(general_id, matched_parts, selected: SelectedItems = None):
             'bigram': top_bigram
         }
 
+        weight += vacancy_weight
         counts += parts_count
 
         if selected is None or each.id in selected.fun_ids:
             branch.append(function_parts_branch)
 
-    return branch, counts, selected_parts
+    return branch, weight, counts, selected_parts
 
 
 def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = None):
     leaf = []
+    weight = 0
     query = ProfstandardPart.query.filter_by(function_id=function_id).filter(ProfstandardPart.part_type_id.in_([4, 5, 6]))
     count = 0
     for each in query:
-
         parts_weight = 0
         parts_count = 0
-
         top_word = []
         top_bigram = []
         vacancy_parts = matched_parts[each.id]
@@ -145,12 +139,13 @@ def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = 
             'monogram': top_word,
             'bigram': top_bigram
         }
+        weight += parts_weight
         count += parts_count
 
         if selected is None or each.id in selected.part_ids:
             leaf.append(leaf_parts)
 
-    return leaf, count
+    return leaf, weight, count
 
 
 def common_words(text, n_gram, topn = 5, bigram = []):
@@ -173,8 +168,8 @@ def common_words(text, n_gram, topn = 5, bigram = []):
             lst.append([value, key])
 
     lst.sort(reverse=True)
-    lst = unique(lst, bigram)
 
+    lst = unique(lst, bigram)
 
     for i in lst[:topn:]:
         if i not in top_word:
@@ -183,12 +178,52 @@ def common_words(text, n_gram, topn = 5, bigram = []):
     return top_word
 
 
+prof_bag = ' '
+for row in Function.query:
+    prof_bag += str(row.name)+' '
+for row in GeneralFunction.query:
+    prof_bag += str(row.name)+' '
+for row in ProfstandardPart.query:
+    prof_bag += str(row.text)+' '
+for row in Profstandard.query:
+    prof_bag += str(row.name)+' '
+
+# prof_bag = []
+# for row in Function.query:
+#     prof_bag.extend(row.name.split(' '))
+# for row in GeneralFunction.query:
+#     prof_bag.extend(row.name.split(' '))
+# for row in ProfstandardPart.query:
+#     try:
+#         prof_bag.extend(row.text.split(' '))
+#     except:pass
+# for row in Profstandard.query:
+#     prof_bag.extend(row.name.split(' '))
+
+
+print('loaded')
+
+
 def unique(lst, bigram=[]):
     answer = []
+    # print('prof')
+    # print(len(prof_bag))
+    # print('bi')
+    # print(len(bigram))
     for i in lst:
         if i not in answer:
             if [wrd for wrd in bigram if i[1] in wrd] == []:
-                answer.append(i)
+                if type(i) == list:
+                    if i[1] not in prof_bag:
+                        answer.append(i)
+                    else:
+                        pass
+                        # print(i[1])
+                else:
+                    # print('wtf')
+                    # print(i)
+                    answer.append(i)
+
     return answer
 
 

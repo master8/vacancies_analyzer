@@ -239,7 +239,7 @@ def profession():
     if 'params' in session:
         params = session['params']
     else:
-        raise ValueError("ОТВАЛИЛАСЬ СЕССИЯ")
+        redirect('/index')
     prof_id = request.args.get('id')
 
     query = db.session.query(Vacancy, ClassifiedVacancy) \
@@ -533,6 +533,7 @@ def education_program(id_program):
     know, can, own = [], [], []
     program_tree = []
     program_df = pd.read_sql(program.statement, db.engine)
+
 
     competences = session['competence'] if 'competence' in session else []
     full_comp = []
