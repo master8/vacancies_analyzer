@@ -426,7 +426,10 @@ def education_program(id_program):
 
 
     program_df = pd.read_sql(program.statement, db.engine)
-
+    my_df = pd.DataFrame()
+    for name in discipline_name:
+        df = program_df[program_df['name'] == name]
+        df.concat(my_df,df)
     program_name = '09.03.01 Информатика и вычислительная техника'
     names = [['Знать', 'know'], ['Уметь', 'can'], ['Владеть', 'own']]
 
