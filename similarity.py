@@ -113,11 +113,11 @@ def most_similar(infer_vector, vectorized_corpus, topn=10):
 
 
 def similarity(vacancies, standards, topn=5):
-    df_result = pd.DataFrame(columns=['similarity', 'full_text', 'full_text_match', 'id'],
+    df_result = pd.DataFrame(columns=['similarity', 'full_text', 'full_text_match'],
                              index=None)
     match_index = 0
     for index, sample in vacancies.iterrows():
-        similar_docs = most_similar(sample['vectors'], standards, topn=topn)[['full_text', 'similarity', 'id']]
+        similar_docs = most_similar(sample['vectors'], standards, topn=topn)[['full_text', 'similarity']]
         similar_docs['full_text_match'] = sample['full_text_match']
         df_result = pd.concat([df_result, similar_docs], ignore_index=True)
         match_index += 1

@@ -8,11 +8,12 @@ from collections import defaultdict
 import pandas as pd
 import matplotlib
 import pymorphy2
-# import similarity
-import searcher
+# import searcher
+import ast
 import similarity
 
 matplotlib.use('agg')
+import matplotlib.pyplot as plt
 
 from config import Config
 from utils import get_date
@@ -26,7 +27,7 @@ migrate = Migrate(app, db)
 morph = pymorphy2.MorphAnalyzer()
 
 from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Profstandard, Source, Region, Vacancy, \
-    ClassifiedVacancy, University, EducationProgram
+    ClassifiedVacancy, University, EducationProgram, ProfstandardPart, GeneralFunction, Function
 
 from dto import Params, SelectedItems, Selected
 
@@ -35,7 +36,12 @@ from handlers import general_function_tree, plot_search, plot_stat, common_words
 
 @app.route('/searcher')
 def root():
-    return render_template("searcher.html")
+    if "competence" in session:
+        competence = session['competence']
+    else:
+        competence = [["", ""]]
+    topics = [(x, ', '.join(y[:3])) for x, y in searcher.topic_words.items()]
+    return render_template("searcher.html", topics=topics, competence=competence)
 
 
 @app.route('/courses')
@@ -44,14 +50,103 @@ def get_result():
     query_text = request.args.get('query_text', type=str)
     dev_mode = request.args.get('enableDevMode', default=False, type=bool)
     model_names = request.args.get('modelName').split(',')
+    topic_names = request.args.get('topicNames')
+    only_favorite = request.args.get('only_favorite')
+
+    if only_favorite == 'false':
+        only_favorite = False
+    elif only_favorite == 'true':
+        only_favorite = True
+
+    topic_ids = []
+    if topic_names != 'null':
+        for topic_name in topic_names.split(','):
+            topic_ids.append(int(topic_name.replace('topic_', '')))
 
     query_token = list(searcher.get_lemmatized_documents([query_text], morph, only_tokens=True))[0]
 
-    most_sim_courses = searcher.get_most_sim_for_models(model_names, query_token, topn=amount)
-    model = searcher.get_model_for_show(most_sim_courses)
+    most_sim_courses, buffer_list = searcher.get_most_sim_for_models(model_names, query_token, set(topic_ids),
+                                                                     topn=amount)
 
-    json_result = jsonify(model)
+    dict_counter = dict(Counter(buffer_list))
+    dict_items = sorted(dict_counter.items(), key=lambda x: x[1], reverse=True)
+    topics_for_query = []
+    for model_position, count_courses in dict_items:
+        topic_name = 'topic_{}'.format(model_position)
+        keywords = ', '.join(searcher.topic_words[topic_name][:3])
+        keywords += '. Курсов в теме:{}'.format(count_courses)
+        topics_for_query.append((topic_name, keywords))
+
+    favorite_list = []
+
+    if query_text == '':
+        query_text = 'test'
+    if 'like_courses' in session:
+        print(session['like_courses'])
+        if query_text in session['like_courses']:
+            favorite_list = session['like_courses'][query_text]
+
+    model = searcher.get_model_for_show(most_sim_courses,
+                                        favorite_courses=favorite_list,
+                                        only_favorite=only_favorite)
+
+    result = {"model": model, "counter": topics_for_query}
+
+    json_result = jsonify(result)
     return json_result
+
+
+@app.route('/courses/<course_id>')
+def show_course_info(course_id):
+    df = searcher.full_df
+    course_df = df[df['index_ii'] == str(course_id)]
+    title = course_df['CourseName'].values[0]
+    description = course_df['full_text'].values[0]
+    topic_vector = course_df['60_-0.1_-0.1_8000_theta'].values[0]
+    own = course_df['own'].values[0]
+    know = course_df['know'].values[0]
+    can = course_df['can'].values[0]
+
+    topics_for_course = searcher.get_top_themes_by_conditions(data=topic_vector,
+                                                              max_num_topics=3,
+                                                              k_average=3)['list']
+    topics_for_query = []
+    for topic_id in topics_for_course:
+        topic_name = 'topic_{}'.format(topic_id)
+        keywords = ', '.join(searcher.topic_words[topic_name][:3])
+        topics_for_query.append('{}: {}'.format(topic_name, keywords))
+
+    return render_template("course_info.html",
+                           title=title,
+                           description=description,
+                           topics=topics_for_query,
+                           know=know, can=can, own=own)
+
+
+@app.route('/like/<query>/<course_id>')
+def like_course(query, course_id):
+    if 'like_courses' in session:
+        if query in session['like_courses']:
+            session['like_courses'][query].append(course_id)
+        else:
+            session['like_courses'][query] = [course_id]
+    else:
+        session['like_courses'] = {query: [course_id]}
+
+    return 'OK'
+
+
+@app.route('/unlike/<query>/<course_id>')
+def unlike_course(query, course_id):
+    if 'like_courses' in session:
+        if query in session['like_courses']:
+            if course_id in session['like_courses'][query]:
+                session['like_courses'][query].remove(course_id)
+        else:
+            session['like_courses'][query] = []
+    else:
+        session['like_courses'] = {}
+    return 'OK'
 
 
 @app.route('/')
@@ -73,7 +168,7 @@ def home():
 
 @app.route('/results')
 def results():
-    if 'params' in session:
+    if 'region' not in request.args and 'params' in session:
         params = session['params']
     else:
         reg_id = request.args.get('region')
@@ -144,7 +239,10 @@ def results():
 
 @app.route('/profession')
 def profession():
-    params = session['params']
+    if 'params' in session:
+        params = session['params']
+    else:
+        redirect('/index')
     prof_id = request.args.get('id')
 
     query = db.session.query(Vacancy, ClassifiedVacancy) \
@@ -221,13 +319,14 @@ def profession():
         .filter(Vacancy.region_id == params.region.id) \
         .filter(Vacancy.source_id == params.source.id)
 
-    vacancies_id = list(map(lambda x: x.vacancy_id, classified_vacancies.all()))
+    # vacancies_id = list(map(lambda x: x.vacancy_id, classified_vacancies.all()))
 
     count_labels = defaultdict(int)
 
-    for row in ClassifiedVacancy.query.filter(ClassifiedVacancy.vacancy_id.in_(vacancies_id)):
-
-        if str(row.profstandard_id) != prof_id:
+    for v in classified_vacancies.all():
+        for row in ClassifiedVacancy.query \
+                .filter(ClassifiedVacancy.vacancy_id == v.vacancy_id) \
+                .filter(ClassifiedVacancy.profstandard_id != v.profstandard_id):
             count_labels[row.profstandard_id] += 1
 
     diagram_link, professions = plot_stat(count_labels)
@@ -309,12 +408,16 @@ def split_vacancies():
 @app.route('/save', methods=['POST'])
 def save_selection():
     profession_id = int(request.args.get('prof_id'))
-    session['selected'].items[profession_id] = SelectedItems(
-        profession_id,
-        list(map(int, request.form.getlist('gf'))),
-        list(map(int, request.form.getlist('f'))),
-        list(map(int, request.form.getlist('p')))
-    )
+
+    session['selected'] = Selected()
+    if 'selected' in session:
+        session['selected'].items[profession_id] = SelectedItems(
+            profession_id,
+            list(map(int, request.form.getlist('gf'))),
+            list(map(int, request.form.getlist('f'))),
+            list(map(int, request.form.getlist('p')))
+        )
+
     return redirect('/selected')
 
 
@@ -323,11 +426,15 @@ def selected():
     if request.method == "POST":
         codes = request.form.getlist('code')
         names = request.form.getlist('codename')
-
         competence = []
 
         for i in range(len(codes)):
-            competence.append([codes[i], names[i]])
+            standards = []
+            for index in request.form.getlist(codes[i]):
+                standards.append(ProfstandardPart.query.get(index[5:]).text if index[:4] == 'part' else
+                                 GeneralFunction.query.get(index[5:]).name if index[:4] == 'gene' else
+                                 Function.query.get(index[5:]).name if index[:4] == 'func' else index)
+            competence.append([codes[i], names[i], standards])
         session['competence'] = competence
 
     if 'selected' in session:
@@ -420,21 +527,17 @@ def education_program(id_program):
     program_tree = []
     discipline_name = request.form.getlist('subject')
     if len(discipline_name) > 0:
-        program = EducationProgram.query.filter_by(university_id=id_program).filter(EducationProgram.name.in_(discipline_name))
+        program = EducationProgram.query.filter_by(university_id=id_program).filter(
+            EducationProgram.name.in_(discipline_name))
     else:
         program = EducationProgram.query.filter_by(university_id=id_program)
 
-
     program_df = pd.read_sql(program.statement, db.engine)
-    my_df = pd.DataFrame()
-    for name in discipline_name:
-        df = program_df[program_df['name'] == name]
-        df.concat(my_df,df)
+
     program_name = '09.03.01 Информатика и вычислительная техника'
     names = [['Знать', 'know'], ['Уметь', 'can'], ['Владеть', 'own']]
 
     know, can, own = [], [], []
-
 
     competences = session['competence'] if 'competence' in session else []
     full_comp = []
@@ -442,27 +545,48 @@ def education_program(id_program):
         full_comp.append(comp[1])
         pass
 
+
+
+    zyn_df = pd.DataFrame(columns=['zyn_text'])
+    all_zyn = list()
+    all_id = list()
+    for index, row in program_df.iterrows():
+        zyn = list()
+        zyn.extend(row.know.split('\n'))
+        zyn.extend(row.can.split('\n'))
+        zyn.extend(row.own.split('\n'))
+        all_zyn.extend(zyn)
+        all_id.extend([row['id']] * len(zyn))
+
+    zyn_df['zyn_text'] = all_zyn
+    zyn_df['id_discipline'] = all_id
+    gg = pd.DataFrame()
+    if len(discipline_name) > 0:
+        gg = similarity.matching_parts(full_comp, zyn_df, 'zyn_text').to_html()
+        gt = similarity.matching_parts(full_comp, program_df, 'themes')
+
     for row in program:
-        program_tree.append({'know': row.know.split('\n'),
+        dict_know = dict()
+        know = row.know.split('\n')
+        for i in range(len(know)):
+            dict_know[know[i]] = 0
+            for index, row in gg.iterrows():
+                if i == row['full_text']:
+                    dict_know[know[i]] = row['similarity']
+                    break
+        program_tree.append({'know':dict_know,
                              'can': row.can.split('\n'),
                              'own': row.own.split('\n'),
                              'name': row.name,
                              'annotation': row.annotation,
                              'theme': row.themes.split('\n')})
-    zyn = program_df['know'].tolist().append(program_df['can'].tolist()).append(program_df['own'].tolist())
-    zyn_df = pd.DataFrame(columns=['zyn_text'])
-    zyn_df['zyn_text'] = zyn
-
-    if len(discipline_name) > 0:
-        gg = similarity.matching_parts(full_comp, zyn_df, 'zyn_text')
-        gt = similarity.matching_parts(full_comp, program_df, 'theme')
 
     return render_template('education_program.html',
                            title='education program',
                            education_program=program_tree,
                            names=names,
                            program_name=program_name,
-                           gg=[], id_program=id_program)
+                           gg=gg, id_program=id_program)
 
 
 @app.after_request
