@@ -165,7 +165,7 @@ def common_words(text, n_gram, topn = 5, bigram = []):
 
     for i in fully_indexed:
         for key, value in i.items():
-            lst.append([value, key])
+            lst.append((value, key))
 
     lst.sort(reverse=True)
 
@@ -178,15 +178,15 @@ def common_words(text, n_gram, topn = 5, bigram = []):
     return top_word
 
 
-prof_bag = ' '
-for row in Function.query:
-    prof_bag += str(row.name)+' '
-for row in GeneralFunction.query:
-    prof_bag += str(row.name)+' '
-for row in ProfstandardPart.query:
-    prof_bag += str(row.text)+' '
-for row in Profstandard.query:
-    prof_bag += str(row.name)+' '
+# prof_bag = ' ' #рабботало
+# for row in Function.query:
+#     prof_bag += str(row.name)+' '
+# for row in GeneralFunction.query:
+#     prof_bag += str(row.name)+' '
+# for row in ProfstandardPart.query:
+#     prof_bag += str(row.text)+' '
+# for row in Profstandard.query:
+#     prof_bag += str(row.name)+' '
 
 # prof_bag = []
 # for row in Function.query:
@@ -211,19 +211,20 @@ def unique(lst, bigram=[]):
     # print('bi')
     # print(len(bigram))
     for i in lst:
-        if i not in answer:
-            if [wrd for wrd in bigram if i[1] in wrd] == []:
-                if type(i) == list:
-                    if i[1] not in prof_bag:
-                        answer.append(i)
-                    else:
-                        pass
-                        # print(i[1])
-                else:
-                    # print('wtf')
-                    # print(i)
-                    answer.append(i)
-
+        if [wrd for wrd in bigram if i[1] in wrd] == []:
+            # if type(i) == list:
+            #     if i[1] not in prof_bag:
+            #         answer.append(i)
+            #     else:
+            #         pass
+            #         # print(i[1])
+            # else:
+            #     # print('wtf')
+            #     # print(i)
+            #     answer.append(i)
+            answer.append(i)
+    answer = set(answer)
+    answer = list(answer)
     return answer
 
 

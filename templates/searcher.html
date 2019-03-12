@@ -74,14 +74,18 @@
                 </div>
                 <div class="col-md-2"></div>
                 <div class="col-md-5">
-                    <label for="only_favorite-2">Отоброжать только избранное: </label>
+                    <label for="only_favorite-2">Отображать только избранное: </label>
                     <input id="only_favorite" type="checkbox">
                 </div>
             </div>
 
             <div class="row" style="margin-top: 20px;">
-                <div class="col-md-2 col-md-offset-5">
+                <div class="col-md-2 col-md-offset-4">
                     <button style="width: 100%" class="btn btn-info" id="seaarchButton">Начать поиск</button>
+                </div>
+
+                <div class="col-md-2">
+                    <button style="width: 100%" class="btn btn-warning" id="vizButton">Визуализация тем</button>
                 </div>
             </div>
             <hr />
@@ -152,6 +156,20 @@
             }
         }
 
+        $("#vizButton").click(function () {
+            var topicNames = $('#topicNames option');
+            var values = $.map(topicNames, function(elt, i) { return $(elt).text();});
+            // alert(values);
+
+            var url = '/searcher-viz' + '?topicNames=' + values;
+            // alert(url)
+            window.open(url, '_blank');
+            // alert('!!!')
+            // window.location.href = $(this).attr(url);
+
+            // alert('!!!')
+        })
+
         $("#seaarchButton").click(function () {
             //var value = $('#inputSearch').val();
             // var query_text = $('#queryText').val();
@@ -165,24 +183,6 @@
             var topicNames = $('#topicNames').val()
 
             var only_favorite = $('#only_favorite').is(":checked")
-            // var topicName = $('#topicName').val()
-            // var topicThreshold = $('#topicThreshold').val()
-            //alert(godMode);
-
-            // $.ajax({
-            //     url: '/Home/GetQueryDescription?queryId=' + rpdType,
-            //     context: document.body,
-            //     success: function (xhr) {
-            //         var answer = xhr;
-            //         var res = $("#query_desc");
-            //         res.empty();
-
-            //         res.append('<p>' + answer.substring(0, 1000) + '</p>');
-            //     },
-            //     error: function () {
-            //         alert('SERVER ERROR!');
-            //     }
-            // });
 
             $.ajax({
                 // url: '/Home/GetJsonResult?amount=' + amount + '&rpdType=' + rpdType + '&expertName=' + expertName + '&enableDevMode=' + godMode + '&modelName=' + modelName + '&topicName=' + topicName + '&topicThreshold=' + topicThreshold,
