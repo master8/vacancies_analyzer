@@ -8,7 +8,12 @@ from collections import defaultdict
 import pandas as pd
 import matplotlib
 import pymorphy2
-# import similarity
+
+import json
+
+import ast
+import similarity
+
 import searcher
 import similarity
 
@@ -37,6 +42,29 @@ from handlers import general_function_tree, plot_search, plot_stat, common_words
 def root():
     return render_template("searcher.html")
 
+
+@app.route('/searcher-viz')
+def searcher_viz():
+    topic_names = ',' + request.args.get('topicNames')
+
+    with_weight = 'Курсов в теме' in topic_names
+
+    topics = topic_names.split(',topic_')[1:]
+
+    data = []
+    for topic in topics:
+        weight = 1.0
+        if with_weight:
+            tp_list = topic.split('. Курсов в теме:')
+            topic = tp_list[0]
+            weight = float(tp_list[1])
+        data.append({"label": topic, "weight": weight})
+
+    # topics = [(x, ', '.join(y[:3])) for x, y in searcher.topic_words.items()]
+    # for topic_name, topic_words in topics:
+    #     data.append({"label": "{}:{}".format(topic_name.replace('topic_', ''), topic_words), "weight": 1.0})
+
+    return render_template("searcher-viz.html", visual_data=data)
 
 @app.route('/courses')
 def get_result():
