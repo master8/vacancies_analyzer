@@ -449,14 +449,12 @@ def education_program(id_program):
                              'name': row.name,
                              'annotation': row.annotation,
                              'theme': row.themes.split('\n')})
-    gk = []
-    gc = []
-    go = []
-    gt = []
+    zyn = program_df['know'].tolist().append(program_df['can'].tolist()).append(program_df['own'].tolist())
+    zyn_df = pd.DataFrame(columns=['zyn_text'])
+    zyn_df['zyn_text'] = zyn
+
     if len(discipline_name) > 0:
-        gg = similarity.matching_parts(full_comp, program_df, 'know')
-        gc = similarity.matching_parts(full_comp, program_df, 'can')
-        go = similarity.matching_parts(full_comp, program_df, 'own')
+        gg = similarity.matching_parts(full_comp, zyn_df, 'zyn_text')
         gt = similarity.matching_parts(full_comp, program_df, 'theme')
 
     return render_template('education_program.html',
