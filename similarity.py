@@ -20,7 +20,7 @@ cyrillic = u"абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
 
 allowed_characters = ascii_lowercase + digits + cyrillic + whitespace
 
-word2vec = Word2Vec.load(os.path.join(os.getcwd(), "../big_word2vec/big_word2vec_model_CBOW"))
+word2vec = Word2Vec.load(os.path.join(os.getcwd(), "big_word2vec/big_word2vec_model_CBOW"))
 word2vec.wv.init_sims()
 
 def complex_preprocess(text, additional_allowed_characters = "+#"):
@@ -126,7 +126,7 @@ def similarity(vacancies, standards, topn=5):
     return df_result
 
 
-def matching_parts(to_match, program_df, part='know', topn=5):
+def matching_parts(to_match, program_df, part, topn=5):
     '''
     :param to_match:
     :param program_df:
