@@ -126,7 +126,7 @@ def similarity(vacancies, standards, topn=5):
     return df_result
 
 
-def matching_parts(to_match, program_df, part='know', topn=5):
+def matching_parts(to_match, program_df, part, topn=5):
     '''
     :param to_match:
     :param program_df:

@@ -415,22 +415,29 @@ def universities():
     return render_template('universities.html', title='universities', universities=universities)
 
 
-@app.route('/education_program/<id_program>', methods=['GET'])
+@app.route('/education_program/<id_program>', methods=['GET', 'POST'])
 def education_program(id_program):
-    program = EducationProgram.query.filter_by(university_id=id_program)
+    program_tree = []
+    discipline_name = request.form.getlist('subject')
+    if len(discipline_name) > 0:
+        program = EducationProgram.query.filter_by(university_id=id_program).filter(EducationProgram.name.in_(discipline_name))
+    else:
+        program = EducationProgram.query.filter_by(university_id=id_program)
+
+
+    program_df = pd.read_sql(program.statement, db.engine)
+
     program_name = '09.03.01 Информатика и вычислительная техника'
     names = [['Знать', 'know'], ['Уметь', 'can'], ['Владеть', 'own']]
 
     know, can, own = [], [], []
-    program_tree = []
-    program_df = pd.read_sql(program.statement, db.engine)
+
 
     competences = session['competence'] if 'competence' in session else []
     full_comp = []
     for comp in competences:
         full_comp.append(comp[1])
         pass
-
 
     for row in program:
         program_tree.append({'know': row.know.split('\n'),
@@ -439,15 +446,22 @@ def education_program(id_program):
                              'name': row.name,
                              'annotation': row.annotation,
                              'theme': row.themes.split('\n')})
-
-    # gg = similarity.matching_parts(full_comp, list(p))
+    gk = []
+    gc = []
+    go = []
+    gt = []
+    if len(discipline_name) > 0:
+        gg = similarity.matching_parts(full_comp, program_df, 'know')
+        gc = similarity.matching_parts(full_comp, program_df, 'can')
+        go = similarity.matching_parts(full_comp, program_df, 'own')
+        gt = similarity.matching_parts(full_comp, program_df, 'theme')
 
     return render_template('education_program.html',
                            title='education program',
                            education_program=program_tree,
                            names=names,
                            program_name=program_name,
-                           gg=[])
+                           gg=[], id_program=id_program)
 
 
 @app.after_request

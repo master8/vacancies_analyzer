@@ -26,72 +26,76 @@
 <script>
     $(document).ready(function () {
         $("#submit").click(function () {
-           $(".chk:not(:checked)").parent().remove()
+            $(".chk:not(:checked)").parent().remove()
         });
 
     });
 </script>
 <div class="uk-padding uk-padding-remove-top">
-
     <div>
-        <div class="uk-card uk-card-default uk-card-body ">
-            <button class="uk-button uk-button-default" style="margin-bottom:0px;" type="submit" id='submit'>
-                Сохранить
-            </button>
-            <h3>Дисциплины:</h3>
-            <ul uk-accordion>
-                {% for op in education_program %}
-                    <li>
-                        <input type="checkbox" class="chk" style="float: left; margin: 6px"><a
-                            class="uk-accordion-title"
-                            href="#">{{ op.name }}</a>
-                        <div class="uk-accordion-content uk-margin-large-left">
-                            <h3>Аннотация дисциплины</h3>
-                            <h4>{{ op.annotation }}</h4>
-                            <h3>Знания, умения, навыки</h3>
-                            <h4>По окончанию изучения дисциплины выпускник должен:</h4>
-                            {% for zun in names %}
+        <form action="/education_program/{{ id_program }}" method="post">
+            <div class="uk-card uk-card-default uk-card-body ">
+                <button class="uk-button uk-button-default" style="margin-bottom:0px;" type="submit" id='submit'>
+                    Сохранить
+                </button>
+
+                <h3>Дисциплины:</h3>
+                <ul uk-accordion>
+                    {% for op in education_program %}
+                        <li>
+                            <input type="checkbox" class="chk" style="float: left; margin: 6px" value="{{ op.name }}"
+                                   name="subject"><a
+                                class="uk-accordion-title"
+                                href="#">{{ op.name }} </a>
+                            <div class="uk-accordion-content uk-margin-large-left">
+                                <h3>Аннотация дисциплины</h3>
+                                <h4>{{ op.annotation }}</h4>
+                                <h3>Знания, умения, навыки</h3>
+                                <h4>По окончанию изучения дисциплины выпускник должен:</h4>
+                                {% for zun in names %}
+                                    <ul uk-accordion>
+                                        <li>
+                                            <a class="uk-accordion-title" href="#">{{ zun[0] }}</a>
+                                            <div class="uk-accordion-content uk-margin-large-left">
+                                                <ul uk-accordion>
+                                                    {% for k in op[zun[1]] %}
+                                                        <li>
+                                                            <a class="uk-accordion-title"
+                                                               href="#"> {{ k.lower() }}</a>
+                                                            <div class="uk-accordion-content uk-margin-large-left">
+                                                                {{ gg|safe }}
+                                                            </div>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                {% endfor %}
                                 <ul uk-accordion>
                                     <li>
-                                        <a class="uk-accordion-title" href="#">{{ zun[0] }}</a>
+                                        <a class="uk-accordion-title" href="#">Структура
+                                            дисциплины</a>
                                         <div class="uk-accordion-content uk-margin-large-left">
                                             <ul uk-accordion>
-                                                {% for k in op[zun[1]] %}
+                                                {% for theme in op['theme'] %}
                                                     <li>
-                                                        <a class="uk-accordion-title"
-                                                           href="#"> {{ k.lower() }}</a>
-                                                        <div class="uk-accordion-content uk-margin-large-left">
-                                                            {{ gg|safe }}
-                                                        </div>
+                                                        <a class="uk-accordion-title" href="#"> {{ theme.lower() }}</a>
                                                     </li>
                                                 {% endfor %}
                                             </ul>
                                         </div>
                                     </li>
                                 </ul>
-                            {% endfor %}
-                            <ul uk-accordion>
-                                <li>
-                                    <a class="uk-accordion-title" href="#">Структура
-                                        дисциплины</a>
-                                    <div class="uk-accordion-content uk-margin-large-left">
-                                        <ul uk-accordion>
-                                            {% for theme in op['theme'] %}
-                                                <li>
-                                                    <a class="uk-accordion-title" href="#"> {{ theme.lower() }}</a>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </form>
     </div>
 </div>
+
 </div>
 </div>
 
