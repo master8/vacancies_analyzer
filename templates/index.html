@@ -29,16 +29,15 @@
                                 <table class="uk-table uk-table-middle uk-table-divider">
                                     <tbody>
                                         {% for profession in professions %}
+                                            {% if profession.is_support == True %}
                                             <tr>
                                                 <td class="uk-table-shrink">
                                                     <input class="uk-checkbox"
-                                                            {% if profession.is_support == False %}
-                                                           disabled
-                                                            {% endif %}
                                                            type="checkbox" value="{{ profession.id }}" name="prof">
                                                 </td>
                                                 <td class="uk-text-truncate uk-table-expand">{{ profession.name }}</td>
                                             </tr>
+                                            {% endif %}
                                         {% endfor %}
                                     </tbody>
                                 </table>
