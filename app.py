@@ -8,13 +8,11 @@ from collections import defaultdict
 import pandas as pd
 import matplotlib
 import pymorphy2
-# import searcher
-import ast
+# import similarity
+import searcher
 import similarity
 
-
 matplotlib.use('agg')
-import matplotlib.pyplot as plt
 
 from config import Config
 from utils import get_date
@@ -34,9 +32,11 @@ from dto import Params, SelectedItems, Selected
 
 from handlers import general_function_tree, plot_search, plot_stat, common_words, unique
 
+
 @app.route('/searcher')
 def root():
     return render_template("searcher.html")
+
 
 @app.route('/courses')
 def get_result():
@@ -44,14 +44,15 @@ def get_result():
     query_text = request.args.get('query_text', type=str)
     dev_mode = request.args.get('enableDevMode', default=False, type=bool)
     model_names = request.args.get('modelName').split(',')
-    
+
     query_token = list(searcher.get_lemmatized_documents([query_text], morph, only_tokens=True))[0]
 
     most_sim_courses = searcher.get_most_sim_for_models(model_names, query_token, topn=amount)
     model = searcher.get_model_for_show(most_sim_courses)
-    
+
     json_result = jsonify(model)
     return json_result
+
 
 @app.route('/')
 def home():
@@ -243,7 +244,7 @@ def profession():
                 text.append(gen_text)
     text = unique(text)
     top_bigrams = common_words(text, 2, topn=20)
-    top_words = common_words(text, 1, topn=25,bigram=top_bigrams)
+    top_words = common_words(text, 1, topn=25, bigram=top_bigrams)
     return render_template('profession.html',
                            title='profession',
                            best_vacancies=best_vacancies,
@@ -319,7 +320,6 @@ def save_selection():
 
 @app.route('/selected', methods=["GET", "POST"])
 def selected():
-
     if request.method == "POST":
         codes = request.form.getlist('code')
         names = request.form.getlist('codename')
@@ -391,7 +391,6 @@ def selected():
 
         period = 'C: ' + str(params.start_date) + ' По: ' + str(params.end_date)  # месяц - день - год
 
-
         return render_template('selected.html',
                                params=params,
                                period=period,
@@ -399,7 +398,7 @@ def selected():
                                competences=session['competence'] if 'competence' in session else []
                                )
     else:
-        params = {"region":{"name":""},"source":{"name":""}}
+        params = {"region": {"name": ""}, "source": {"name": ""}}
         period = ''
         professions = []
         return render_template('selected.html',
@@ -418,7 +417,6 @@ def universities():
 
 @app.route('/education_program/<id_program>', methods=['GET'])
 def education_program(id_program):
-    # education_program = list(db.session.query(EducationProgram).filter(EducationProgram.university_id == id_program))
     program = EducationProgram.query.filter_by(university_id=id_program)
     program_name = '09.03.01 Информатика и вычислительная техника'
     names = [['Знать', 'know'], ['Уметь', 'can'], ['Владеть', 'own']]
@@ -433,24 +431,23 @@ def education_program(id_program):
         full_comp.append(comp[1])
         pass
 
-    gg = similarity.matching_parts(full_comp, program_df, part='know').to_html()
 
     for row in program:
         program_tree.append({'know': row.know.split('\n'),
-                                'can': row.can.split('\n'),
-                                'own': row.own.split('\n'),
-                                'name': row.name,
-                                'annotation': row.annotation,
-                                'theme': row.themes.split('\n')})
+                             'can': row.can.split('\n'),
+                             'own': row.own.split('\n'),
+                             'name': row.name,
+                             'annotation': row.annotation,
+                             'theme': row.themes.split('\n')})
+
+    # gg = similarity.matching_parts(full_comp, list(p))
 
     return render_template('education_program.html',
                            title='education program',
                            education_program=program_tree,
                            names=names,
                            program_name=program_name,
-                           gg=gg)
-
-
+                           gg=[])
 
 
 @app.after_request

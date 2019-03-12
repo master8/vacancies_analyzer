@@ -20,7 +20,7 @@ cyrillic = u"абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
 
 allowed_characters = ascii_lowercase + digits + cyrillic + whitespace
 
-word2vec = Word2Vec.load(os.path.join(os.getcwd(), "../big_word2vec/big_word2vec_model_CBOW"))
+word2vec = Word2Vec.load(os.path.join(os.getcwd(), "big_word2vec/big_word2vec_model_CBOW"))
 word2vec.wv.init_sims()
 
 def complex_preprocess(text, additional_allowed_characters = "+#"):
