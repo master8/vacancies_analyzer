@@ -28,7 +28,7 @@ migrate = Migrate(app, db)
 morph = pymorphy2.MorphAnalyzer()
 
 from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Profstandard, Source, Region, Vacancy, \
-    ClassifiedVacancy, University, EducationProgram
+    ClassifiedVacancy, University, EducationProgram, ProfstandardPart, GeneralFunction, Function
 
 from dto import Params, SelectedItems, Selected
 
@@ -327,11 +327,16 @@ def selected():
     if request.method == "POST":
         codes = request.form.getlist('code')
         names = request.form.getlist('codename')
-        standards = []
         competence = []
 
         for i in range(len(codes)):
-            competence.append([codes[i], names[i], request.form.getlist(codes[i])])
+            standards = []
+            for index in request.form.getlist(codes[i]):
+
+                standards.append(ProfstandardPart.query.get(index[5:]).text if index[:4] == 'part' else
+                      GeneralFunction.query.get(index[5:]).name if index[:4] == 'gene' else
+                      Function.query.get(index[5:]).name if index[:4] == 'func' else index)
+            competence.append([codes[i], names[i], standards])
         session['competence'] = competence
 
     if 'selected' in session:
