@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from flask import Flask, request, session, redirect, url_for, jsonify
 from flask import render_template
 from flask_session import Session
@@ -8,7 +9,12 @@ from collections import Counter
 import pandas as pd
 import matplotlib
 import pymorphy2
+
+import ast
+import similarity
+
 import searcher
+
 
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -25,7 +31,7 @@ migrate = Migrate(app, db)
 morph = pymorphy2.MorphAnalyzer()
 
 from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Profstandard, Source, Region, Vacancy, \
-    ClassifiedVacancy, University, EducationProgram
+    ClassifiedVacancy, University, EducationProgram, ProfstandardPart, GeneralFunction, Function
 
 from dto import Params, SelectedItems, Selected
 
@@ -230,7 +236,10 @@ def results():
 
 @app.route('/profession')
 def profession():
-    params = session['params']
+    if 'params' in session:
+        params = session['params']
+    else:
+        raise ValueError("ОТВАЛИЛАСЬ СЕССИЯ")
     prof_id = request.args.get('id')
 
     query = db.session.query(Vacancy, ClassifiedVacancy) \
@@ -331,8 +340,8 @@ def profession():
             for gen_text in gen['gen_text']:
                 text.append(gen_text)
     text = unique(text)
-    top_words = common_words(text, 1, topn=10)
-    top_bigrams = common_words(text, 2)
+    top_bigrams = common_words(text, 2, topn=20)
+    top_words = common_words(text, 1, topn=25,bigram=top_bigrams)
     return render_template('profession.html',
                            title='profession',
                            best_vacancies=best_vacancies,
@@ -397,13 +406,16 @@ def split_vacancies():
 @app.route('/save', methods=['POST'])
 def save_selection():
     profession_id = int(request.args.get('prof_id'))
+
     session['selected'] = Selected()
-    session['selected'].items[profession_id] = SelectedItems(
-        profession_id,
-        list(map(int, request.form.getlist('gf'))),
-        list(map(int, request.form.getlist('f'))),
-        list(map(int, request.form.getlist('p')))
-    )
+    if 'selected' in session:
+        session['selected'].items[profession_id] = SelectedItems(
+            profession_id,
+            list(map(int, request.form.getlist('gf'))),
+            list(map(int, request.form.getlist('f'))),
+            list(map(int, request.form.getlist('p')))
+        )
+
     return redirect('/selected')
 
 
@@ -413,11 +425,16 @@ def selected():
     if request.method == "POST":
         codes = request.form.getlist('code')
         names = request.form.getlist('codename')
-
         competence = []
 
         for i in range(len(codes)):
-            competence.append([codes[i], names[i]])
+            standards = []
+            for index in request.form.getlist(codes[i]):
+
+                standards.append(ProfstandardPart.query.get(index[5:]).text if index[:4] == 'part' else
+                      GeneralFunction.query.get(index[5:]).name if index[:4] == 'gene' else
+                      Function.query.get(index[5:]).name if index[:4] == 'func' else index)
+            competence.append([codes[i], names[i], standards])
         session['competence'] = competence
 
     if 'selected' in session:
@@ -508,13 +525,39 @@ def universities():
 
 @app.route('/education_program/<id_program>', methods=['GET'])
 def education_program(id_program):
-    profession = "Программист"
-    education_program = list(db.session.query(EducationProgram).filter(EducationProgram.university_id == id_program))
+    # education_program = list(db.session.query(EducationProgram).filter(EducationProgram.university_id == id_program))
+    program = EducationProgram.query.filter_by(university_id=id_program)
+    program_name = '09.03.01 Информатика и вычислительная техника'
+    names = [['Знать', 'know'], ['Уметь', 'can'], ['Владеть', 'own']]
+
+    know, can, own = [], [], []
+    program_tree = []
+    program_df = pd.read_sql(program.statement, db.engine)
+
+    competences = session['competence'] if 'competence' in session else []
+    full_comp = []
+    for comp in competences:
+        full_comp.append(comp[1])
+        pass
+
+    gg = similarity.matching_parts(full_comp, program_df, part='know').to_html()
+
+    for row in program:
+        program_tree.append({'know': row.know.split('\n'),
+                                'can': row.can.split('\n'),
+                                'own': row.own.split('\n'),
+                                'name': row.name,
+                                'annotation': row.annotation,
+                                'theme': row.themes.split('\n')})
+
     return render_template('education_program.html',
                            title='education program',
-                           education_program=education_program,
-                           profession=profession,
-                           standards=['ЗНАТЬ', 'ХОЧУ УМЕТЬ', 'МНЕ НУЖНЫ РАБЫ'])
+                           education_program=program_tree,
+                           names=names,
+                           program_name=program_name,
+                           gg=gg)
+
+
 
 
 @app.after_request

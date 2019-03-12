@@ -41,8 +41,8 @@ def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None
             for text in function_text['texts']:
                 vacancies_text.append(text)
         vacancies_text = unique(vacancies_text)
-        top_word = common_words(vacancies_text, 1, topn=10)
-        top_bigram = common_words(vacancies_text, 2)
+        top_bigram = common_words(vacancies_text, 2, topn=15)
+        top_word = common_words(vacancies_text, 1, topn=20,bigram=top_bigram)
 
         general_function_branch = {
             'id': each.id,
@@ -90,8 +90,8 @@ def function_branch(general_id, matched_parts, selected: SelectedItems = None):
                 vacancies_text.append(vacancy['vacancy_part'])
 
         vacancies_text = unique(vacancies_text)
-        top_word = common_words(vacancies_text, 1, topn=10)
-        top_bigram = common_words(vacancies_text, 2)
+        top_bigram = common_words(vacancies_text, 2, topn=10)
+        top_word = common_words(vacancies_text, 1, topn=15, bigram=top_bigram)
 
         function_parts_branch = {
             'id': each.id,
@@ -133,8 +133,8 @@ def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = 
             vacancy_parts = sorting_parts.sort_values('similarity', ascending=False).to_dict('r')  #Части
 
             # MOST COMMON
-            top_word = common_words(sorting_parts['vacancy_part'].dropna(), 1, topn=10)
-            top_bigram = common_words(sorting_parts['vacancy_part'].dropna(), 2)
+            top_bigram = common_words(sorting_parts['vacancy_part'].dropna(), 2, topn=5)
+            top_word = common_words(sorting_parts['vacancy_part'].dropna(), 1, topn=10, bigram=top_bigram)
 
         leaf_parts = {
             'id': each.id,
@@ -153,7 +153,7 @@ def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = 
     return leaf, count
 
 
-def common_words(text, n_gram, topn = 5):
+def common_words(text, n_gram, topn = 5, bigram = []):
     lst = []
     top_word = []
     tfidf_vec = TfidfVectorizer(ngram_range=(n_gram, n_gram))
@@ -173,7 +173,8 @@ def common_words(text, n_gram, topn = 5):
             lst.append([value, key])
 
     lst.sort(reverse=True)
-    lst = unique(lst)
+    lst = unique(lst, bigram)
+
 
     for i in lst[:topn:]:
         if i not in top_word:
@@ -182,11 +183,12 @@ def common_words(text, n_gram, topn = 5):
     return top_word
 
 
-def unique(lst):
+def unique(lst, bigram=[]):
     answer = []
     for i in lst:
         if i not in answer:
-            answer.append(i)
+            if [wrd for wrd in bigram if i[1] in wrd] == []:
+                answer.append(i)
     return answer
 
 

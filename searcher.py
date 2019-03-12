@@ -20,6 +20,7 @@ def load_pickle(path):
         return pickle.load(handle)
 
 
+
 # topic_vectors = pd.read_pickle('./searcher/vectors/topic_vectors_8000_theta.pkl')
 topic_words = pd.read_pickle('./searcher/data/topic_words_8000.pkl')
 
@@ -39,6 +40,7 @@ w2vvectors_weighted = load_pickle('./searcher/vectors/w2vvectors_weighted.pkl')
 # dict_vectors_struct_w2widf = load_pickle('./searcher/vectors/dict_vectors_struct_w2widf.pkl')
 
 dict_rpd_id_struct = load_pickle('./searcher/data/dict_rpd_id_struct.pkl')
+
 
 def get_russian_lemma(token, lemmatizer):
     lemma = lemmatizer.parse(token.lower())[0]
