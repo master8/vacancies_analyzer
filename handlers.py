@@ -165,7 +165,7 @@ def common_words(text, n_gram, topn = 5, bigram = []):
 
     for i in fully_indexed:
         for key, value in i.items():
-            lst.append([value, key])
+            lst.append((value, key))
 
     lst.sort(reverse=True)
 
