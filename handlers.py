@@ -114,7 +114,7 @@ def function_branch(general_id, matched_parts, selected: SelectedItems = None):
 
 def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = None):
     leaf = []
-    query = ProfstandardPart.query.filter_by(function_id=function_id)
+    query = ProfstandardPart.query.filter_by(function_id=function_id).filter(ProfstandardPart.part_type_id.in_([4, 5, 6]))
     count = 0
     for each in query:
 
@@ -215,22 +215,23 @@ def plot_stat(count_labels): #график
     t = []
     num = []
     professions = []
-    for key, value in count_labels.items():
-        profession = Profstandard.query.get(key)
-        professions.append({
-            'profession': profession,
-            'count': value
-        })
-        t.append('| ' + profession.code)
-        num.append(value)
-    x = np.array(t, dtype=str)
-    y = np.array(num)
-    diagram = sns.barplot(x=y, y=x)
-    diagram.clear()
-    diagram = sns.barplot(x=y, y=x)
-    dia = diagram.get_figure()
+    if len(count_labels) > 0:
+        for key, value in count_labels.items():
+            profession = Profstandard.query.get(key)
+            professions.append({
+                'profession': profession,
+                'count': value
+            })
+            t.append('| ' + profession.code)
+            num.append(value)
+        x = np.array(t, dtype=str)
+        y = np.array(num)
+        diagram = sns.barplot(x=y, y=x)
+        diagram.clear()
+        diagram = sns.barplot(x=y, y=x)
+        dia = diagram.get_figure()
 
-    dia.savefig('./static/diagram/test_diagram2.svg')
+        dia.savefig('./static/diagram/test_diagram2.svg')
     diagram_link = '../static/diagram/test_diagram2.svg'
     return diagram_link, professions
 
