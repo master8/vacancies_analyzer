@@ -33,7 +33,7 @@ waw2vmodel = load_pickle('./searcher/models/waw2vmodel.pkl')
 
 w2vvectors = load_pickle('./searcher/vectors/w2vvectors.pkl')
 w2vvectors_weighted = load_pickle('./searcher/vectors/w2vvectors_weighted.pkl')
-# tfidf_vectors = load_pickle('./searcher/vectors/tfidf_vectors.pkl')
+tfidf_vectors = load_pickle('./searcher/vectors/tfidf_vectors.pkl')
 
 # dict_vectors_struct_w2w = load_pickle('./searcher/vectors/dict_vectors_struct_w2w.pkl')
 # dict_vectors_struct_tfidf = load_pickle('./searcher/vectors/dict_vectors_struct_tfidf.pkl')
