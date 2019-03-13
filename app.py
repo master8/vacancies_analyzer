@@ -535,58 +535,88 @@ def education_program(id_program):
     program_df = pd.read_sql(program.statement, db.engine)
 
     program_name = '09.03.01 Информатика и вычислительная техника'
-    names = [['Знать', 'know'], ['Уметь', 'can'], ['Владеть', 'own']]
-
-    know, can, own = [], [], []
-
     competences = session['competence'] if 'competence' in session else []
     full_comp = []
     for comp in competences:
         full_comp.append(comp[1])
         pass
 
-
+    # full_comp = ['управление проектами','разработка требований','Анаиз требований']
 
     zyn_df = pd.DataFrame(columns=['zyn_text'])
     all_zyn = list()
     all_id = list()
+    all_type = []
     for index, row in program_df.iterrows():
         zyn = list()
         zyn.extend(row.know.split('\n'))
+        all_type.extend('know' for i in row.know.split('\n'))
         zyn.extend(row.can.split('\n'))
+        all_type.extend('can' for i in row.can.split('\n'))
         zyn.extend(row.own.split('\n'))
+        all_type.extend('own' for i in row.own.split('\n'))
         all_zyn.extend(zyn)
         all_id.extend([row['id']] * len(zyn))
 
     zyn_df['zyn_text'] = all_zyn
     zyn_df['id_discipline'] = all_id
+    zyn_df['type'] = all_type
+    zyn_df['zyn_index'] = zyn_df.index
     gg = pd.DataFrame()
-    if len(discipline_name) > 0:
-        gg = similarity.matching_parts(full_comp, zyn_df, 'zyn_text').to_html()
-        gt = similarity.matching_parts(full_comp, program_df, 'themes')
+    # if len(discipline_name) > 0:
+    gg = similarity.matching_parts(full_comp, zyn_df, 'zyn_text',topn = 10)
+        # gt = similarity.matching_parts(full_comp, program_df, 'themes')
 
     for row in program:
-        dict_know = dict()
-        know = row.know.split('\n')
-        for i in range(len(know)):
-            dict_know[know[i]] = 0
-            for index, row in gg.iterrows():
-                if i == row['full_text']:
-                    dict_know[know[i]] = row['similarity']
-                    break
-        program_tree.append({'know':dict_know,
-                             'can': row.can.split('\n'),
-                             'own': row.own.split('\n'),
+        zyn_data = zyn_df[zyn_df['id_discipline'] == row.id]
+        gg_program = gg[gg['id_discipline'] == row.id]
+
+        def getall(type):
+            zyn_all = []
+            for item in range(len(zyn_data[zyn_data['type'] == type].zyn_text.tolist())):
+                zyn_all.append((zyn_data[zyn_data['type'] == type].zyn_text.tolist()[item],
+                               zyn_data[zyn_data['type'] == type].index.tolist()[item]))
+            return zyn_all
+
+
+        def getsim(type):
+            zyn_all = []
+            for item in range(len(gg_program[gg_program['type'] == type].full_text_match.tolist())):
+                zyn_all.append((gg_program[gg_program['type'] == type].full_text_match.tolist()[item],
+                                gg_program[gg_program['type'] == type].similarity.tolist()[item],
+                               gg_program[gg_program['type'] == type].zyn_index.tolist()[item]))
+            return zyn_all
+
+
+        know_all = getall('know')
+        can_all = getall('can')
+        own_all = getall('own')
+
+        know_tags = getsim('know')
+        can_tags = getsim('can')
+        own_tags = getsim('on')
+
+        program_tree.append({
+                            'types': [['Знать', 'know'], ['Уметь', 'can'], ['Владеть', 'own']],
+                            'theme': row.themes.split('\n'),
+
+                            'know': know_all,
+                            'know_tags': know_tags,
+                             'can': can_all,
+                            'can_tags': can_tags,
+                             'own': own_all,
+                            'own_tags': own_tags,
                              'name': row.name,
-                             'annotation': row.annotation,
-                             'theme': row.themes.split('\n')})
+                             'id': row.id,
+                             'annotation': row.annotation
+                             })
+
 
     return render_template('education_program.html',
                            title='education program',
-                           education_program=program_tree,
-                           names=names,
+                           program_tree=program_tree,
                            program_name=program_name,
-                           gg=gg, id_program=id_program)
+                           gg=gg.to_html(), id_program=id_program)
 
 
 @app.after_request

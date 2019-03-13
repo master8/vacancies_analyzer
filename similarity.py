@@ -20,7 +20,7 @@ cyrillic = u"абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
 
 allowed_characters = ascii_lowercase + digits + cyrillic + whitespace
 
-word2vec = Word2Vec.load(os.path.join(os.getcwd(), "big_word2vec/big_word2vec_model_CBOW"))
+word2vec = Word2Vec.load(os.path.join(os.getcwd(), "../big_word2vec/big_word2vec_model_CBOW"))
 word2vec.wv.init_sims()
 
 def complex_preprocess(text, additional_allowed_characters = "+#"):
@@ -112,12 +112,15 @@ def most_similar(infer_vector, vectorized_corpus, topn=10):
     return df_sim
 
 
-def similarity(vacancies, standards, topn=5):
-    df_result = pd.DataFrame(columns=['similarity', 'full_text', 'full_text_match'],
+def similarity(competences, zyn, topn=5):
+    df_result = pd.DataFrame(columns=['similarity', 'full_text', 'full_text_match', 'zyn_text',
+                                      'id_discipline', 'type', 'zyn_index'],
                              index=None)
     match_index = 0
-    for index, sample in vacancies.iterrows():
-        similar_docs = most_similar(sample['vectors'], standards, topn=topn)[['full_text', 'similarity']]
+    for index, sample in competences.iterrows():
+        similar_docs = most_similar(sample['vectors'], zyn, topn=topn)[['full_text', 'similarity',
+                                                                        'zyn_text', 'id_discipline',
+                                                                        'type', 'zyn_index']]
         similar_docs['full_text_match'] = sample['full_text_match']
         df_result = pd.concat([df_result, similar_docs], ignore_index=True)
         match_index += 1
@@ -126,23 +129,16 @@ def similarity(vacancies, standards, topn=5):
     return df_result
 
 
-def matching_parts(to_match, program_df, part, topn=5):
-    '''
-    :param to_match:
-    :param program_df:
-    :param part: annotation, themes, zun(know, can, own)
-    :param topn:
-    :return:
-    '''
+def matching_parts(competence, zyn, part, topn=5):
 
-    program_df['full_text'] = program_df[part]
-    program_df['processed_text'] = program_df['full_text'].apply(lambda text: process_text(str(text))['lemmatized_text_pos_tags'])
-    program_df = get_vectorized_avg_w2v_corpus(program_df, word2vec.wv)
+    zyn['full_text'] = zyn[part]
+    zyn['processed_text'] = zyn['full_text'].apply(lambda text: process_text(str(text))['lemmatized_text_pos_tags'])
+    zyn = get_vectorized_avg_w2v_corpus(zyn, word2vec.wv)
 
-    df_to_match = pd.DataFrame(columns=['full_text_match'])
-    df_to_match['full_text_match'] = pd.Series(to_match)
-    df_to_match['processed_text'] = df_to_match['full_text_match'].apply(lambda text: process_text(str(text))['lemmatized_text_pos_tags'])  # лемматизируем
-    df_to_match = get_vectorized_avg_w2v_corpus(df_to_match, word2vec.wv)
-    return similarity(df_to_match, program_df, topn=topn)
+    competences = pd.DataFrame(columns=['full_text_match'])
+    competences['full_text_match'] = pd.Series(competence)
+    competences['processed_text'] = competences['full_text_match'].apply(lambda text: process_text(str(text))['lemmatized_text_pos_tags'])  # лемматизируем
+    competences = get_vectorized_avg_w2v_corpus(competences, word2vec.wv)
+    return similarity(competences, zyn, topn=topn)
 
 
