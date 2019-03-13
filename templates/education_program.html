@@ -46,7 +46,7 @@
                             <input type="checkbox" class="chk" style="float: left; margin: 6px" value="{{ program.name }}"
                                    name="subject"><a
                                 class="uk-accordion-title"
-                                href="#">{{ program.name }} </a>
+                                href="#">{{ program.name }}__  </a>
                             <div class="uk-accordion-content uk-margin-large-left">
                                 <h3>Аннотация дисциплины</h3>
                                 <h4>{{ program.annotation }}</h4>
@@ -55,13 +55,13 @@
                                 {% for zun in program.types %}
                                     <ul uk-accordion>
                                         <li>
-                                            <a class="uk-accordion-title" href="#">{{ zun[0] }}</a>
+                                            <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ program[zun[1]+'_tags'][-1][2] }}</span> {{ zun[0] }} </a>
                                             <div class="uk-accordion-content uk-margin-large-left">
                                                 <ul uk-accordion>
                                                     {% for all in program[zun[1]] %}
                                                         <li>
                                                             <a class="uk-accordion-title"
-                                                               href="#"> {{ all[0] }}</a>
+                                                               href="#"> {{ all[0] }} __ </a>
                                                             <div class="uk-accordion-content uk-margin-large-left">
                                                                 {% for tags in program[zun[1]+'_tags'] %}
                                                                     {% if tags[2] ==all[1] %}
