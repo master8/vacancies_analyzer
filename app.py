@@ -29,7 +29,7 @@ migrate = Migrate(app, db)
 morph = pymorphy2.MorphAnalyzer()
 
 from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Profstandard, Source, Region, Vacancy, \
-    ClassifiedVacancy, University, EducationProgram
+    ClassifiedVacancy, University, EducationProgram, ProfstandardPart, GeneralFunction, Function
 
 from dto import Params, SelectedItems, Selected
 
@@ -368,6 +368,7 @@ def selected():
             competence.append([codes[i], names[i], standards])
         session['competence'] = competence
 
+        # print(session['competence'])
     if 'selected' in session:
         params = session['params']
         professions = []
@@ -471,9 +472,9 @@ def education_program(id_program):
     for comp in competences:
         full_comp.append(comp[1])
         pass
-
+    print(competences)
     # full_comp = ['управление проектами','разработка требований','Анаиз требований']
-
+    print(full_comp)
     zyn_df = pd.DataFrame(columns=['zyn_text'])
     all_zyn = list()
     all_id = list()
@@ -512,10 +513,13 @@ def education_program(id_program):
 
         def getsim(type):
             zyn_all = []
+            sum_sim = 0
             for item in range(len(gg_program[gg_program['type'] == type].full_text_match.tolist())):
+                sum_sim+=gg_program[gg_program['type'] == type].similarity.tolist()[item]
                 zyn_all.append((gg_program[gg_program['type'] == type].full_text_match.tolist()[item],
-                                gg_program[gg_program['type'] == type].similarity.tolist()[item],
+                                round(gg_program[gg_program['type'] == type].similarity.tolist()[item],2),
                                gg_program[gg_program['type'] == type].zyn_index.tolist()[item]))
+            zyn_all.append((0,0,sum_sim))
             return zyn_all
 
 
@@ -524,6 +528,7 @@ def education_program(id_program):
         own_all = getall('own')
 
         know_tags = getsim('know')
+        print(know_tags)
         can_tags = getsim('can')
         own_tags = getsim('on')
 
@@ -539,7 +544,8 @@ def education_program(id_program):
                             'own_tags': own_tags,
                              'name': row.name,
                              'id': row.id,
-                             'annotation': row.annotation
+                             'annotation': row.annotation,
+                                'score':know_tags[-1][-1]+can_tags[-1][-1]+own_tags[-1][-1]
                              })
 
 
