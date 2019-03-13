@@ -517,9 +517,9 @@ def education_program(id_program):
             for item in range(len(gg_program[gg_program['type'] == type].full_text_match.tolist())):
                 sum_sim+=gg_program[gg_program['type'] == type].similarity.tolist()[item]
                 zyn_all.append((gg_program[gg_program['type'] == type].full_text_match.tolist()[item],
-                                gg_program[gg_program['type'] == type].similarity.tolist()[item],
+                                round(gg_program[gg_program['type'] == type].similarity.tolist()[item],2),
                                gg_program[gg_program['type'] == type].zyn_index.tolist()[item]))
-            zyn_all.append(([],[],sum_sim))
+            zyn_all.append((0,0,sum_sim))
             return zyn_all
 
 
@@ -544,7 +544,8 @@ def education_program(id_program):
                             'own_tags': own_tags,
                              'name': row.name,
                              'id': row.id,
-                             'annotation': row.annotation
+                             'annotation': row.annotation,
+                                'score':know_tags[-1][-1]+can_tags[-1][-1]+own_tags[-1][-1]
                              })
 
 
