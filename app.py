@@ -14,7 +14,7 @@ import pymorphy2
 import json
 
 import ast
-# import similarity
+import similarity
 
 import searcher
 
