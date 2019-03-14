@@ -241,10 +241,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-static/diagram/test_diagram.svg
-static/diagram/test_diagram.svg
-static/diagram/test_diagram.svg
-static/diagram/test_diagram.svg
+static/diagram/
 /static/diagram/test_diagram2.svg
 /data/t_all_vacancies.csv
 /data/u_predict.csv

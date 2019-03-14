@@ -41,14 +41,20 @@ from handlers import general_function_tree, plot_search, plot_stat, common_words
 
 
 
-@app.route('/searcher')
-def root():
-    if "competence" in session:
-        competence = session['competence']
-    else:
-        competence = [["", ""]]
+@app.route('/searcher/<query_type>')
+def root(query_type):
+    queryies = None
     topics = [(x, ', '.join(y[:3])) for x, y in searcher.topic_words.items()]
-    return render_template("searcher.html", topics=topics, competence=competence)
+    if query_type == 'session':
+        if "competence" in session:
+            queryies = session['competence']
+        else:
+            queryies = [["", ""]]
+    elif query_type == 'rpd':
+        queryies = [(x, y) for x, y in enumerate(searcher.list_rpd_names)]
+
+    return render_template("searcher.html", topics=topics, queryies=queryies, type=query_type)
+    
 
 @app.route('/searcher-viz')
 def searcher_viz():
@@ -77,6 +83,11 @@ def get_result():
     model_names = request.args.get('modelName').split(',')
     topic_names = request.args.get('topicNames')
     only_favorite = request.args.get('only_favorite')
+    query_type = request.args.get('query_type', default='custom', type=str)
+
+    if query_type == "rpd":
+        index_rpd = searcher.list_rpd_names.index(query_text)
+        query_text = searcher.list_rpd_text[index_rpd]
 
     if only_favorite == 'false':
         only_favorite = False

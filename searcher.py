@@ -19,7 +19,14 @@ def load_pickle(path):
     with open(path, 'rb') as handle:
         return pickle.load(handle)
 
+def load_text_file(path):
+    result = None
+    with open(path, "r", encoding='utf-8') as file:
+        result = list(map(lambda x: x.replace('\n', ''), file.readlines()))
+    return result
 
+list_rpd_names = load_text_file('./searcher/rpd/docs.cfn')
+list_rpd_text = load_text_file('./searcher/rpd/docs.cor')
 
 # topic_vectors = pd.read_pickle('./searcher/vectors/topic_vectors_8000_theta.pkl')
 topic_words = pd.read_pickle('./searcher/data/topic_words_8000.pkl')

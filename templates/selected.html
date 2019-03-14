@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>{{ title }}</title>
     <meta charset="utf-8">
@@ -9,221 +10,288 @@
     <script src="../static/js/uikit-icons.min.js"></script>
     <style>
         .layer {
-            overflow: scroll; /* Добавляем полосы прокрутки */
-            height: 600px; /* Высота блока */
-            padding: 5px; /* Поля вокруг текста */
+            overflow: scroll;
+            /* Добавляем полосы прокрутки */
+            height: 600px;
+            /* Высота блока */
+            padding: 5px;
+            /* Поля вокруг текста */
             overflow-x: auto;
             overflow-y: auto;
-            }
+        }
     </style>
 </head>
-<body>
-{{ debug }}
-<div class="uk-padding">
-    <div class="uk-card uk-card-default uk-card-body">
-        <h1 class="uk-text-center">Формирование профессиональных компетенций</h1>
-        <p class="uk-text-center">Регион: <b>{{ params.region.name }}</b> Источник: <b>{{ params.source.name }}</b> Период: <b>{{ period }}</b></p>
-        <a class="uk-button uk-button-default uk-align-right" href="/results">Результаты поиска</a>
-         <a class="uk-button uk-button-primary uk-align-right" style="margin-bottom:0px;" href="/universities">Сопоставить с ОП</a>
-         <a class="uk-button uk-button-primary uk-align-right" style="margin-bottom:0px;" href="/searcher">Поиск курсов</a>
-    </div>
-</div>
-<div class="uk-padding uk-padding-remove-top">
-    <div class="uk-child-width-expand@s" uk-grid>
-        <div class="layer">
 
-            {% for profession in professions %}
+<body>
+    {{ debug }}
+    <div class="uk-padding">
+        <div class="uk-card uk-card-default uk-card-body">
+            <h1 class="uk-text-center">Формирование профессиональных компетенций</h1>
+            <p class="uk-text-center">Регион: <b>{{ params.region.name }}</b> Источник: <b>{{ params.source.name }}</b>
+                Период: <b>{{ period }}</b></p>
+            <a class="uk-button uk-button-primary uk-align-right" 
+                href="/universities">Сопоставить с ОП</a>
+            <a class="uk-button uk-button-primary uk-align-right" 
+                href="/searcher/session">Поиск под компетенции</a>
+            <a class="uk-button uk-button-primary uk-align-right"  href="/searcher/rpd">Поиск
+                по РПД</a>
+            <a class="uk-button uk-button-primary uk-align-right" 
+                href="/searcher/custom">Свободный поиск</a>
+            <a class="uk-button uk-button-default uk-align-right" href="/results">Результаты поиска</a>
+
+
+        </div>
+    </div>
+    <div class="uk-padding uk-padding-remove-top">
+        <div class="uk-child-width-expand@s" uk-grid>
+            <div class="layer">
+
+                {% for profession in professions %}
                 <h3 class="uk-text-center">{{ profession.name }}</h3>
                 {% for branch in profession.branches %}
-                    <div class="uk-card uk-card-default uk-card-body uk-margin-top">
-                        <div>
-                            <h4><a class="uk-margin-right" uk-icon="icon: chevron-down" uk-toggle="target: #toggle-level-{{ branch.level }}"></a>Уровень {{ branch.level }}</h4>
-                            <ul class="uk-list uk-text-small" id="toggle-level-{{ branch.level }}" hidden>
-                                {% for post in branch.posts %}
-                                    <li>{{ post.name }}</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        <ul uk-accordion>
-                            {% for general_function in branch.general_functions %}
-                                <li>
-                                    <input class="uk-checkbox mode-view" type="checkbox" style="float: right; margin: 5px" ><a class="uk-accordion-title" id='gene_{{ general_function.id }}' draggable="true" ondragstart="return dragStart(event)"  ><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
-                                    <div class="uk-accordion-content uk-margin-medium-left uk-margin-small-top">
-                                        <a uk-icon="icon: table" uk-toggle="target: #toggle-gf-{{ general_function.id }}"></a>
-                                        <h3 class="uk-article-meta uk-margin-small-top" hidden id="toggle-gf-{{ general_function.id }}">Функций: {{ general_function.count }} <br> Частые слова: <br> {{ general_function.monogram}}.<br> Частые словосочетания: <br> {{ general_function.bigram }} </h3>
-                                        <ul uk-accordion class="uk-margin-small-top">
-                                            {% for function in general_function.functions %}
-                                                <li>
-                                                    <input class="uk-checkbox mode-view" type="checkbox" style="float: right;margin: 5px" ><a class="uk-accordion-title"  id='func_{{ function.id }}' draggable="true" ondragstart="return dragStart(event)" ><span class="uk-label uk-label-success"  >{{ function.weight }}</span> {{ function.name }}</a>
-
-                                                    <div class="uk-accordion-content uk-margin-medium-left uk-margin-small-top"  >
-                                                        <a uk-icon="icon: table" uk-toggle="target: #toggle-f-{{ function.id }}"></a>
-                                                        <h4 class="uk-article-meta uk-margin-small-top" id="toggle-f-{{ function.id }}" hidden>Характеристик: {{ function.count }} <br> Частые слова: <br> {{ function.monogram}}.<br> Частые словосочетания: <br> {{ function.bigram }}</h4>
-                                                        <ul uk-accordion class="uk-margin-small-top">
-                                                            {% for part in function.parts %}
-                                                                <li>
-                                                                    <input class="uk-checkbox mode-view" type="checkbox" style="float: right; margin: 5px" ><a class="uk-accordion-title" id='part_{{ part.id }}' draggable="true" ondragstart="return dragStart(event)" ><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
-                                                                    <div class="uk-accordion-content">
-                                                                         <h5 class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: <br> {{ part.monogram}}.<br> Частые словосочетания: <br> {{ part.bigram }} </h5>
-                                                                    </div>
-                                                                </li>
-                                                            {% endfor %}
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                            {% endfor %}
-                                            {% for part in general_function.selected_parts %}
-                                                <li>
-                                                    <input class="uk-checkbox mode-view" type="checkbox" style="float: right; margin: 5px" ><a class="uk-accordion-title" id='part_{{ part.id }}' draggable="true" ondragstart="return dragStart(event)"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
-                                                    <div class="uk-accordion-content">
-                                                         <h5 class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: <br> {{ part.monogram}}.<br> Частые словосочетания: <br> {{ part.bigram }} </h5>
-                                                    </div>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </li>
+                <div class="uk-card uk-card-default uk-card-body uk-margin-top">
+                    <div>
+                        <h4><a class="uk-margin-right" uk-icon="icon: chevron-down"
+                                uk-toggle="target: #toggle-level-{{ branch.level }}"></a>Уровень {{ branch.level }}</h4>
+                        <ul class="uk-list uk-text-small" id="toggle-level-{{ branch.level }}" hidden>
+                            {% for post in branch.posts %}
+                            <li>{{ post.name }}</li>
                             {% endfor %}
-                            {% for just_selected in branch.just_selected %}
-                                {% for function in just_selected.functions %}
+                        </ul>
+                    </div>
+                    <ul uk-accordion>
+                        {% for general_function in branch.general_functions %}
+                        <li>
+                            <input class="uk-checkbox mode-view" type="checkbox" style="float: right; margin: 5px"><a
+                                class="uk-accordion-title" id='gene_{{ general_function.id }}' draggable="true"
+                                ondragstart="return dragStart(event)"><span
+                                    class="uk-label uk-label-danger">{{ general_function.weight }}</span>
+                                {{ general_function.name }}</a>
+                            <div class="uk-accordion-content uk-margin-medium-left uk-margin-small-top">
+                                <a uk-icon="icon: table" uk-toggle="target: #toggle-gf-{{ general_function.id }}"></a>
+                                <h3 class="uk-article-meta uk-margin-small-top" hidden
+                                    id="toggle-gf-{{ general_function.id }}">Функций: {{ general_function.count }} <br>
+                                    Частые слова: <br> {{ general_function.monogram}}.<br> Частые словосочетания: <br>
+                                    {{ general_function.bigram }} </h3>
+                                <ul uk-accordion class="uk-margin-small-top">
+                                    {% for function in general_function.functions %}
                                     <li>
-                                        <input class="uk-checkbox mode-view" type="checkbox" style="float: right; margin: 5px" ><a class="uk-accordion-title" id='func_{{ function.id }}' draggable="true" ondragstart="return dragStart(event)"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
+                                        <input class="uk-checkbox mode-view" type="checkbox"
+                                            style="float: right;margin: 5px"><a class="uk-accordion-title"
+                                            id='func_{{ function.id }}' draggable="true"
+                                            ondragstart="return dragStart(event)"><span
+                                                class="uk-label uk-label-success">{{ function.weight }}</span>
+                                            {{ function.name }}</a>
+
                                         <div class="uk-accordion-content uk-margin-medium-left uk-margin-small-top">
-                                            <a uk-icon="icon: table" uk-toggle="target: #toggle-f-{{ function.id }}"></a>
-                                            <h4 class="uk-article-meta uk-margin-small-top" id="toggle-f-{{ function.id }}" hidden>Характеристик: {{ function.count }} <br> Частые слова: <br> {{ function.monogram}}.<br> Частые словосочетания: <br> {{ function.bigram }}</h4>
+                                            <a uk-icon="icon: table"
+                                                uk-toggle="target: #toggle-f-{{ function.id }}"></a>
+                                            <h4 class="uk-article-meta uk-margin-small-top"
+                                                id="toggle-f-{{ function.id }}" hidden>Характеристик:
+                                                {{ function.count }} <br> Частые слова: <br> {{ function.monogram}}.<br>
+                                                Частые словосочетания: <br> {{ function.bigram }}</h4>
                                             <ul uk-accordion class="uk-margin-small-top">
                                                 {% for part in function.parts %}
-                                                    <li>
-                                                        <input class="uk-checkbox mode-view" type="checkbox" style="float: right; margin: 5px" ><a class="uk-accordion-title" id='part_{{ part.id }}' draggable="true" ondragstart="return dragStart(event)"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
-                                                        <div class="uk-accordion-content">
-                                                             <h5 class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: <br> {{ part.monogram}}.<br> Частые словосочетания: <br> {{ part.bigram }} </h5>
-                                                        </div>
-                                                    </li>
+                                                <li>
+                                                    <input class="uk-checkbox mode-view" type="checkbox"
+                                                        style="float: right; margin: 5px"><a class="uk-accordion-title"
+                                                        id='part_{{ part.id }}' draggable="true"
+                                                        ondragstart="return dragStart(event)"><span
+                                                            class="uk-label">{{ part.weight }}</span>
+                                                        {{ part.standard_part }}</a>
+                                                    <div class="uk-accordion-content">
+                                                        <h5 class="uk-article-meta">Частей характеристики:
+                                                            {{ part.count }}. <br> Частые слова: <br>
+                                                            {{ part.monogram}}.<br> Частые словосочетания: <br>
+                                                            {{ part.bigram }} </h5>
+                                                    </div>
+                                                </li>
                                                 {% endfor %}
                                             </ul>
                                         </div>
                                     </li>
-                                {% endfor %}
-                            {% endfor %}
-                            {% for just_selected in branch.just_selected %}
-                                {% for part in just_selected.parts %}
+                                    {% endfor %}
+                                    {% for part in general_function.selected_parts %}
                                     <li>
-                                        <input class="uk-checkbox mode-view" type="checkbox" style="float: right; margin: 5px" ><a class="uk-accordion-title" id='part_{{ part.id }}' draggable="true" ondragstart="return dragStart(event)"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
+                                        <input class="uk-checkbox mode-view" type="checkbox"
+                                            style="float: right; margin: 5px"><a class="uk-accordion-title"
+                                            id='part_{{ part.id }}' draggable="true"
+                                            ondragstart="return dragStart(event)"><span
+                                                class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
                                         <div class="uk-accordion-content">
-                                             <h5 class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: <br> {{ part.monogram}}.<br> Частые словосочетания: <br> {{ part.bigram }} </h5>
+                                            <h5 class="uk-article-meta">Частей характеристики: {{ part.count }}. <br>
+                                                Частые слова: <br> {{ part.monogram}}.<br> Частые словосочетания: <br>
+                                                {{ part.bigram }} </h5>
                                         </div>
                                     </li>
-                                {% endfor %}
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endfor %}
-            {% endfor %}
-        </div>
-        <form action="/selected" id ='myForm' method="post" >
-        <div class="layer">
-            <div class="uk-card uk-card-secondary uk-card-body" id = "panel">
-                 <button class="uk-button uk-button-primary uk-margin-small" type="button" onclick="addButton()">Добавить</button>
-                 <button class="uk-button uk-button-default uk-align-right" type="button" style="margin-bottom:0px;" onclick="savemeFunction()">Сохранить</button>
-                {% for competence in competences %}
-                    <div ondragenter="return dragEnter(event)"
-                         ondrop="return dragDrop(event)"
-                         ondragover="return dragOver(event)"
-                         class="uk-margin-small-bottom uk-margin-small-top"
-                         style="background-color: #3e4942; padding: 6px; padding-bottom: 20px; border: solid black 1px;"
-                         id={{competence[0] }} >
-                        <button class="uk-margin-small-right uk-icon-button" style="float: right" onclick="del('{{competence[0]}}')" uk-icon="trash"></button>
-                        <input class="uk-input uk-margin-small-right uk-form-width-small" name ="code" type="text" placeholder="Код ПК" value="{{ competence[0] }}">
-                        <input class="uk-input" style="width: 400px" name = "codename" value="{{ competence[1] }}" placeholder="Наименование профессиональной компетенции">
-                        {% for prof in competence[2] %}
-                            <div id='saved_{{ prof }}' onclick="del(id)"> <a id='{{ prof }}' class="uk-margin-small-top" style="padding-top: 15px; padding-left: 10px; padding-right: 100px;"> <!-- <span class="uk-label">weight</span> --> {{ prof }} </a> <input type="hidden" value={{ prof }} name={{ competence[0] }}> </div>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </li>
                         {% endfor %}
-                    </div>
+                        {% for just_selected in branch.just_selected %}
+                        {% for function in just_selected.functions %}
+                        <li>
+                            <input class="uk-checkbox mode-view" type="checkbox" style="float: right; margin: 5px"><a
+                                class="uk-accordion-title" id='func_{{ function.id }}' draggable="true"
+                                ondragstart="return dragStart(event)"><span
+                                    class="uk-label uk-label-success">{{ function.weight }}</span>
+                                {{ function.name }}</a>
+                            <div class="uk-accordion-content uk-margin-medium-left uk-margin-small-top">
+                                <a uk-icon="icon: table" uk-toggle="target: #toggle-f-{{ function.id }}"></a>
+                                <h4 class="uk-article-meta uk-margin-small-top" id="toggle-f-{{ function.id }}" hidden>
+                                    Характеристик: {{ function.count }} <br> Частые слова: <br>
+                                    {{ function.monogram}}.<br> Частые словосочетания: <br> {{ function.bigram }}</h4>
+                                <ul uk-accordion class="uk-margin-small-top">
+                                    {% for part in function.parts %}
+                                    <li>
+                                        <input class="uk-checkbox mode-view" type="checkbox"
+                                            style="float: right; margin: 5px"><a class="uk-accordion-title"
+                                            id='part_{{ part.id }}' draggable="true"
+                                            ondragstart="return dragStart(event)"><span
+                                                class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
+                                        <div class="uk-accordion-content">
+                                            <h5 class="uk-article-meta">Частей характеристики: {{ part.count }}. <br>
+                                                Частые слова: <br> {{ part.monogram}}.<br> Частые словосочетания: <br>
+                                                {{ part.bigram }} </h5>
+                                        </div>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </li>
+                        {% endfor %}
+                        {% endfor %}
+                        {% for just_selected in branch.just_selected %}
+                        {% for part in just_selected.parts %}
+                        <li>
+                            <input class="uk-checkbox mode-view" type="checkbox" style="float: right; margin: 5px"><a
+                                class="uk-accordion-title" id='part_{{ part.id }}' draggable="true"
+                                ondragstart="return dragStart(event)"><span class="uk-label">{{ part.weight }}</span>
+                                {{ part.standard_part }}</a>
+                            <div class="uk-accordion-content">
+                                <h5 class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова:
+                                    <br> {{ part.monogram}}.<br> Частые словосочетания: <br> {{ part.bigram }} </h5>
+                            </div>
+                        </li>
+                        {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
                 {% endfor %}
             </div>
-            <script>
-                var i = 0 ;
-                var chilld= 0;
-                function addButton() {
-                    var panel = document.getElementById("panel");
-                    var div = document.createElement('div');
+            <form action="/selected" id='myForm' method="post">
+                <div class="layer">
+                    <div class="uk-card uk-card-secondary uk-card-body" id="panel">
+                        <button class="uk-button uk-button-primary uk-margin-small" type="button"
+                            onclick="addButton()">Добавить</button>
+                        <button class="uk-button uk-button-default uk-align-right" type="button"
+                            style="margin-bottom:0px;" onclick="savemeFunction()">Сохранить</button>
+                        {% for competence in competences %}
+                        <div ondragenter="return dragEnter(event)" ondrop="return dragDrop(event)"
+                            ondragover="return dragOver(event)" class="uk-margin-small-bottom uk-margin-small-top"
+                            style="background-color: #3e4942; padding: 6px; padding-bottom: 20px; border: solid black 1px;"
+                            id={{competence[0] }}>
+                            <button class="uk-margin-small-right uk-icon-button" style="float: right"
+                                onclick="del('{{competence[0]}}')" uk-icon="trash"></button>
+                            <input class="uk-input uk-margin-small-right uk-form-width-small" name="code" type="text"
+                                placeholder="Код ПК" value="{{ competence[0] }}">
+                            <input class="uk-input" style="width: 400px" name="codename" value="{{ competence[1] }}"
+                                placeholder="Наименование профессиональной компетенции">
+                            {% for prof in competence[2] %}
+                            <div id='saved_{{ prof }}' onclick="del(id)"> <a id='{{ prof }}' class="uk-margin-small-top"
+                                    style="padding-top: 15px; padding-left: 10px; padding-right: 100px;">
+                                    <!-- <span class="uk-label">weight</span> --> {{ prof }} </a> <input type="hidden"
+                                    value={{ prof }} name={{ competence[0] }}> </div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <script>
+                        var i = 0;
+                        var chilld = 0;
+                        function addButton() {
+                            var panel = document.getElementById("panel");
+                            var div = document.createElement('div');
 
-                    div.className = "uk-margin-small-bottom uk-margin-small-top";
-                    div.id = i;
-                    div.setAttribute("ondragenter", "return dragEnter(event)");
-                    div.setAttribute("ondrop", "return dragDrop(event)");
-                    div.setAttribute("ondragover","return dragOver(event)");
-                    div.attributes = '';
-                    div.style = "background-color: #353535; padding: 6px; padding-bottom: 20px; border: solid black 1px;";
-                    div.innerHTML =
-                            '<button class="uk-margin-small-right uk-icon-button" style="float: right" onclick="del('+i+')" uk-icon="trash"></button>'+
-                            '<input class="uk-input uk-margin-small-right uk-form-width-small" name ="code" type="text" placeholder="Код ПК">' +
-                            '<textarea class="uk-input" style="width: 400px"  rows="1" name = "codename" placeholder="Наименование профессиональной компетенции"></textarea>';
+                            div.className = "uk-margin-small-bottom uk-margin-small-top";
+                            div.id = i;
+                            div.setAttribute("ondragenter", "return dragEnter(event)");
+                            div.setAttribute("ondrop", "return dragDrop(event)");
+                            div.setAttribute("ondragover", "return dragOver(event)");
+                            div.attributes = '';
+                            div.style = "background-color: #353535; padding: 6px; padding-bottom: 20px; border: solid black 1px;";
+                            div.innerHTML =
+                                '<button class="uk-margin-small-right uk-icon-button" style="float: right" onclick="del(' + i + ')" uk-icon="trash"></button>' +
+                                '<input class="uk-input uk-margin-small-right uk-form-width-small" name ="code" type="text" placeholder="Код ПК">' +
+                                '<textarea class="uk-input" style="width: 400px"  rows="1" name = "codename" placeholder="Наименование профессиональной компетенции"></textarea>';
 
-                    panel.appendChild(div);
-                    console.log("нажатие");
-                    i+=1;
-                }
-                function del(n) {
-                    var div = document.getElementById(n);
-                    var panel = div.parentNode;
-                    panel.removeChild(div);
+                            panel.appendChild(div);
+                            console.log("нажатие");
+                            i += 1;
+                        }
+                        function del(n) {
+                            var div = document.getElementById(n);
+                            var panel = div.parentNode;
+                            panel.removeChild(div);
 
-                }
-            </script>
-            <script>
-                function dragStart(ev) {
-                   ev.dataTransfer.effectAllowed='move';
-                   ev.dataTransfer.setData("Text", ev.target.getAttribute('id'));
-                   ev.dataTransfer.setDragImage(ev.target,100,100);
-                   return true;
-                }
-                function dragEnter(ev) {
-                   ev.preventDefault();
-                   return true;
-                }
-                function dragOver(ev) {
-                     ev.preventDefault();
-                }
-                function dragDrop(ev) {
-                   var data = ev.dataTransfer.getData("Text");
-                   var node = document.getElementById(data);
-                   var dupNode = node.cloneNode(true);
-                   var newdiv = document.createElement('div');
-                   var newtext = document.createElement('input');
-                   newtext.setAttribute('type','hidden')
-                    newtext.value = node.id;
-                   dupNode.classList.remove("uk-accordion-title");
-                   dupNode.removeAttribute('draggable');
-                   dupNode.removeAttribute('ondragstart');
-                   {#dupNode.setAttribute('onclick=del('+dupNode.id+')');#}
-                    dupNode.classList.add("uk-margin-small-top");
-                   dupNode.style = 'padding-top:15px; padding-left:10px; padding-right:100px;';
-                    newdiv.appendChild(dupNode);
-                    newtext.name = ev.target.childNodes[3].value;
-                    newdiv.appendChild(newtext);
-                    newdiv.id = "chilld_"+chilld;
-                    newdiv.value = "go diego"
-                    newdiv.setAttribute('onclick',"del('"+newdiv.id+"')");
-                    chilld+=1;
-                   ev.target.appendChild(newdiv);
-                   ev.stopPropagation();
+                        }
+                    </script>
+                    <script>
+                        function dragStart(ev) {
+                            ev.dataTransfer.effectAllowed = 'move';
+                            ev.dataTransfer.setData("Text", ev.target.getAttribute('id'));
+                            ev.dataTransfer.setDragImage(ev.target, 100, 100);
+                            return true;
+                        }
+                        function dragEnter(ev) {
+                            ev.preventDefault();
+                            return true;
+                        }
+                        function dragOver(ev) {
+                            ev.preventDefault();
+                        }
+                        function dragDrop(ev) {
+                            var data = ev.dataTransfer.getData("Text");
+                            var node = document.getElementById(data);
+                            var dupNode = node.cloneNode(true);
+                            var newdiv = document.createElement('div');
+                            var newtext = document.createElement('input');
+                            newtext.setAttribute('type', 'hidden')
+                            newtext.value = node.id;
+                            dupNode.classList.remove("uk-accordion-title");
+                            dupNode.removeAttribute('draggable');
+                            dupNode.removeAttribute('ondragstart');
+                            { #dupNode.setAttribute('onclick=del(' + dupNode.id + ')'); # }
+                            dupNode.classList.add("uk-margin-small-top");
+                            dupNode.style = 'padding-top:15px; padding-left:10px; padding-right:100px;';
+                            newdiv.appendChild(dupNode);
+                            newtext.name = ev.target.childNodes[3].value;
+                            newdiv.appendChild(newtext);
+                            newdiv.id = "chilld_" + chilld;
+                            newdiv.value = "go diego"
+                            newdiv.setAttribute('onclick', "del('" + newdiv.id + "')");
+                            chilld += 1;
+                            ev.target.appendChild(newdiv);
+                            ev.stopPropagation();
 
 
-                   console.log(newtext);
-                   return false;
-                }
-            </script>
-            <script>
+                            console.log(newtext);
+                            return false;
+                        }
+                    </script>
+                    <script>
 
-                function savemeFunction() {
-                    var form = document.getElementById('myForm');
-                    form.submit();
-                }
-            </script>
+                        function savemeFunction() {
+                            var form = document.getElementById('myForm');
+                            form.submit();
+                        }
+                    </script>
+                </div>
+            </form>
         </div>
-        </form>
     </div>
-</div>
 </body>
+
 </html>
