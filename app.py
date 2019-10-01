@@ -40,7 +40,6 @@ from dto import Params, SelectedItems, Selected
 from handlers import general_function_tree, plot_search, plot_stat, common_words, unique
 
 
-
 @app.route('/searcher/<query_type>')
 def root(query_type):
     queryies = None
@@ -54,7 +53,7 @@ def root(query_type):
         queryies = [(x, y) for x, y in enumerate(searcher.list_rpd_names)]
 
     return render_template("searcher.html", topics=topics, queryies=queryies, type=query_type)
-    
+
 
 @app.route('/searcher-viz')
 def searcher_viz():
@@ -74,6 +73,7 @@ def searcher_viz():
         data.append({"label": topic, "weight": weight})
 
     return render_template("searcher-viz.html", visual_data=data)
+
 
 @app.route('/courses')
 def get_result():
@@ -101,8 +101,9 @@ def get_result():
 
     query_token = list(searcher.get_lemmatized_documents([query_text], morph, only_tokens=True))[0]
 
-    most_sim_courses, buffer_list = searcher.get_most_sim_for_models(model_names, query_token, set(topic_ids), topn=amount)
-    
+    most_sim_courses, buffer_list = searcher.get_most_sim_for_models(model_names, query_token, set(topic_ids),
+                                                                     topn=amount)
+
     dict_counter = dict(Counter(buffer_list))
     dict_items = sorted(dict_counter.items(), key=lambda x: x[1], reverse=True)
     topics_for_query = []
@@ -120,7 +121,7 @@ def get_result():
         print(session['like_courses'])
         if query_text in session['like_courses']:
             favorite_list = session['like_courses'][query_text]
-        
+
     model = searcher.get_model_for_show(most_sim_courses,
                                         favorite_courses=favorite_list,
                                         only_favorite=only_favorite)
@@ -129,6 +130,7 @@ def get_result():
 
     json_result = jsonify(result)
     return json_result
+
 
 @app.route('/courses/<course_id>')
 def show_course_info(course_id):
@@ -141,8 +143,8 @@ def show_course_info(course_id):
     know = course_df['know'].values[0]
     can = course_df['can'].values[0]
 
-    topics_for_course = searcher.get_top_themes_by_conditions(data=topic_vector, 
-                                                              max_num_topics=3, 
+    topics_for_course = searcher.get_top_themes_by_conditions(data=topic_vector,
+                                                              max_num_topics=3,
                                                               k_average=3)['list']
     topics_for_query = []
     for topic_id in topics_for_course:
@@ -150,11 +152,12 @@ def show_course_info(course_id):
         keywords = ', '.join(searcher.topic_words[topic_name][:3])
         topics_for_query.append('{}: {}'.format(topic_name, keywords))
 
-    return render_template("course_info.html", 
-                            title=title, 
-                            description=description,
-                            topics=topics_for_query,
-                            know=know, can=can, own=own)
+    return render_template("course_info.html",
+                           title=title,
+                           description=description,
+                           topics=topics_for_query,
+                           know=know, can=can, own=own)
+
 
 @app.route('/like/<query>/<course_id>')
 def like_course(query, course_id):
@@ -165,8 +168,9 @@ def like_course(query, course_id):
             session['like_courses'][query] = [course_id]
     else:
         session['like_courses'] = {query: [course_id]}
-        
+
     return 'OK'
+
 
 @app.route('/unlike/<query>/<course_id>')
 def unlike_course(query, course_id):
@@ -178,7 +182,8 @@ def unlike_course(query, course_id):
             session['like_courses'][query] = []
     else:
         session['like_courses'] = {}
-    return 'OK'  
+    return 'OK'
+
 
 @app.route('/')
 def home():
@@ -322,6 +327,7 @@ def profession():
         })
 
     general_functions, count, just_selected = general_function_tree(prof_id, matched_parts)
+
     sorting_generals = pd.DataFrame(general_functions)
     general_functions = sorting_generals.sort_values('weight', ascending=False).to_dict('r')
     posts = defaultdict(list)
@@ -496,11 +502,11 @@ def selected():
                 })
 
             general_functions, count, just_selected = general_function_tree(prof_id, matched_parts, selected_items)
+
             sorting_generals = pd.DataFrame(general_functions)
             general_functions = sorting_generals.sort_values('weight', ascending=False).to_dict('r')
             posts = defaultdict(list)
             general_functions_by_level = defaultdict(list)
-            just_selected_by_level = defaultdict(list)
 
             for post in ProfstandardPost.query.filter_by(profstandard_id=prof_id):
                 posts[post.qualification_level].append(post)
@@ -508,6 +514,7 @@ def selected():
             for function in general_functions:
                 general_functions_by_level[function['level']].append(function)
 
+            just_selected_by_level = defaultdict(list)
             for item in just_selected:
                 just_selected_by_level[item['level']].append(item)
                 if item['level'] not in general_functions_by_level:
@@ -596,32 +603,30 @@ def education_program(id_program):
     zyn_df['zyn_index'] = zyn_df.index
     gg = pd.DataFrame()
     # if len(discipline_name) > 0:
-    gg = similarity.matching_parts(full_comp, zyn_df, 'zyn_text',topn = 10)
-        # gt = similarity.matching_parts(full_comp, program_df, 'themes')
+    gg = similarity.matching_parts(full_comp, zyn_df, 'zyn_text', topn=10)
+    # gt = similarity.matching_parts(full_comp, program_df, 'themes')
 
     for row in program:
         zyn_data = zyn_df[zyn_df['id_discipline'] == row.id]
         gg_program = gg[gg['id_discipline'] == row.id]
 
-        def getall(type):
+        def getall(type_val):
             zyn_all = []
-            for item in range(len(zyn_data[zyn_data['type'] == type].zyn_text.tolist())):
-                zyn_all.append((zyn_data[zyn_data['type'] == type].zyn_text.tolist()[item],
-                               zyn_data[zyn_data['type'] == type].index.tolist()[item]))
+            for item in range(len(zyn_data[zyn_data['type'] == type_val].zyn_text.tolist())):
+                zyn_all.append((zyn_data[zyn_data['type'] == type_val].zyn_text.tolist()[item],
+                                zyn_data[zyn_data['type'] == type_val].index.tolist()[item]))
             return zyn_all
 
-
-        def getsim(type):
+        def getsim(type_val):
             zyn_all = []
             sum_sim = 0
-            for item in range(len(gg_program[gg_program['type'] == type].full_text_match.tolist())):
-                sum_sim+=gg_program[gg_program['type'] == type].similarity.tolist()[item]
-                zyn_all.append((gg_program[gg_program['type'] == type].full_text_match.tolist()[item],
-                                round(gg_program[gg_program['type'] == type].similarity.tolist()[item],2),
-                               gg_program[gg_program['type'] == type].zyn_index.tolist()[item]))
-            zyn_all.append((0,0,sum_sim))
+            for item in range(len(gg_program[gg_program['type'] == type_val].full_text_match.tolist())):
+                sum_sim += gg_program[gg_program['type'] == type_val].similarity.tolist()[item]
+                zyn_all.append((gg_program[gg_program['type'] == type_val].full_text_match.tolist()[item],
+                                round(gg_program[gg_program['type'] == type_val].similarity.tolist()[item], 2),
+                                gg_program[gg_program['type'] == type_val].zyn_index.tolist()[item]))
+            zyn_all.append((0, 0, sum_sim))
             return zyn_all
-
 
         know_all = getall('know')
         can_all = getall('can')
@@ -633,21 +638,20 @@ def education_program(id_program):
         own_tags = getsim('on')
 
         program_tree.append({
-                            'types': [['Знать', 'know'], ['Уметь', 'can'], ['Владеть', 'own']],
-                            'theme': row.themes.split('\n'),
+            'types': [['Знать', 'know'], ['Уметь', 'can'], ['Владеть', 'own']],
+            'theme': row.themes.split('\n'),
 
-                            'know': know_all,
-                            'know_tags': know_tags,
-                             'can': can_all,
-                            'can_tags': can_tags,
-                             'own': own_all,
-                            'own_tags': own_tags,
-                             'name': row.name,
-                             'id': row.id,
-                             'annotation': row.annotation,
-                                'score':know_tags[-1][-1]+can_tags[-1][-1]+own_tags[-1][-1]
-                             })
-
+            'know': know_all,
+            'know_tags': know_tags,
+            'can': can_all,
+            'can_tags': can_tags,
+            'own': own_all,
+            'own_tags': own_tags,
+            'name': row.name,
+            'id': row.id,
+            'annotation': row.annotation,
+            'score': know_tags[-1][-1] + can_tags[-1][-1] + own_tags[-1][-1]
+        })
 
     return render_template('education_program.html',
                            title='education program',

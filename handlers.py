@@ -6,9 +6,9 @@ import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from dto import SelectedItems
-from models import  Function, ProfstandardPart,  GeneralFunction, Profstandard
-sns.set(style="whitegrid")
+from models import Function, ProfstandardPart, GeneralFunction, Profstandard
 
+sns.set(style="whitegrid")
 
 
 def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None):
@@ -24,7 +24,8 @@ def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None
             sorting_functions = pd.DataFrame(functions)
             functions = sorting_functions.sort_values('weight', ascending=False).to_dict('r')
 
-        if selected is not None and each.id not in selected.general_fun_ids and (len(functions) > 0 or len(selected_parts) > 0):
+        if selected is not None and each.id not in selected.general_fun_ids and (
+                len(functions) > 0 or len(selected_parts) > 0):
             just_selected.append({
                 'level': each.qualification_level,
                 'functions': functions,
@@ -38,7 +39,7 @@ def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None
                 vacancies_text.append(text)
         vacancies_text = unique(vacancies_text)
         top_bigram = common_words(vacancies_text, 2, topn=15)
-        top_word = common_words(vacancies_text, 1, topn=20,bigram=top_bigram)
+        top_word = common_words(vacancies_text, 1, topn=20, bigram=top_bigram)
 
         general_function_branch = {
             'id': each.id,
@@ -50,7 +51,7 @@ def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None
             'monogram': top_word,
             'bigram': top_bigram,
             'selected_parts': selected_parts,
-            'gen_text':vacancies_text
+            'gen_text': vacancies_text
         }
 
         parts += parts_count
@@ -110,7 +111,8 @@ def function_branch(general_id, matched_parts, selected: SelectedItems = None):
 def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = None):
     leaf = []
     weight = 0
-    query = ProfstandardPart.query.filter_by(function_id=function_id).filter(ProfstandardPart.part_type_id.in_([4, 5, 6]))
+    query = ProfstandardPart.query.filter_by(function_id=function_id).filter(
+        ProfstandardPart.part_type_id.in_([4, 5, 6]))
     count = 0
     for each in query:
         parts_weight = 0
@@ -124,17 +126,20 @@ def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = 
         else:
             parts_count = len(vacancy_parts)
             parts_weight = sorting_parts.similarity.sum()
-            vacancy_parts = sorting_parts.sort_values('similarity', ascending=False).to_dict('r')  #Части
+            vacancy_parts = sorting_parts.sort_values('similarity', ascending=False).to_dict('r')  # Части
 
             # MOST COMMON
+
             top_bigram = common_words(sorting_parts['vacancy_part'].dropna(), 2, topn=5)
             top_word = common_words(sorting_parts['vacancy_part'].dropna(), 1, topn=10, bigram=top_bigram)
+            if each.text == 'Выбор основных средств поддержки информационной безопасности на уровне БД':
+                print(sorting_parts['vacancy_part'].dropna(), top_word, top_bigram)
 
         leaf_parts = {
             'id': each.id,
             'weight': round(parts_weight, 2),
             'standard_part': each.text,
-            'vacancy_parts': vacancy_parts, #вакансии
+            'vacancy_parts': vacancy_parts,  # вакансии
             'count': parts_count,
             'monogram': top_word,
             'bigram': top_bigram
@@ -148,12 +153,15 @@ def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = 
     return leaf, weight, count
 
 
-def common_words(text, n_gram, topn = 5, bigram = []):
+def common_words(text, n_gram, topn=5, bigram=[]):
+    #bigram = bigram.split(', ')
     lst = []
     top_word = []
-    tfidf_vec = TfidfVectorizer(ngram_range=(n_gram, n_gram))
+    tfidf_vec = TfidfVectorizer(ngram_range=(n_gram, n_gram), stop_words=['по', 'опыт', 'на', 'результат', 'хорошее', 'знание'])
+
     try:
-        transformed = tfidf_vec.fit_transform(raw_documents=text)
+        text = pd.Series(text).apply(lambda row: row.lower())
+        transformed = tfidf_vec.fit_transform(raw_documents=list(text))
         index_value = {i[1]: i[0] for i in tfidf_vec.vocabulary_.items()}
     except ValueError:
         transformed = []
@@ -162,20 +170,16 @@ def common_words(text, n_gram, topn = 5, bigram = []):
     fully_indexed = []
     for row in transformed:
         fully_indexed.append({index_value[column]: value for column, value in zip(row.indices, row.data)})
-
     for i in fully_indexed:
         for key, value in i.items():
             lst.append((value, key))
-
-    lst.sort(reverse=True)
-
     lst = unique(lst, bigram)
-
+    lst = sorted(lst, key=lambda x: x[0], reverse=True)
     for i in lst[:topn:]:
         if i not in top_word:
-            top_word.append(i[1])
+            top_word.append((i[1], i[0]))
 
-    return top_word
+    return [i[0] for i in sorted(top_word, key=lambda x: x[1], reverse=True)] #', '.join([i[0] for i in sorted(top_word, key=lambda x: x[1], reverse=True)])
 
 
 # prof_bag = ' ' #рабботало
@@ -228,7 +232,7 @@ def unique(lst, bigram=[]):
     return answer
 
 
-def plot_search(professions):  #график
+def plot_search(professions):  # график
     t = []
     num = []
     for i in professions:
@@ -247,7 +251,7 @@ def plot_search(professions):  #график
     return diagram_link
 
 
-def plot_stat(count_labels): #график
+def plot_stat(count_labels):  # график
     t = []
     num = []
     professions = []
@@ -270,7 +274,3 @@ def plot_stat(count_labels): #график
         dia.savefig('./static/diagram/test_diagram2.svg')
     diagram_link = '../static/diagram/test_diagram2.svg'
     return diagram_link, professions
-
-
-
-

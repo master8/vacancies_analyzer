@@ -5,8 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../static/css/uikit.min.css" />
+    <link rel="shortcut icon" href="../static/images/favicon.png" type="image/png">
     <script src="../static/js/uikit.min.js"></script>
     <script src="../static/js/uikit-icons.min.js"></script>
+
 </head>
 <body>
 <form action="/results" method="get" class="uk-form-stacked">
@@ -30,10 +32,9 @@
                                     <tbody>
                                         {% for profession in professions %}
                                             {% if profession.is_support == True %}
-                                            <tr>
-                                                <td class="uk-table-shrink">
-                                                    <input class="uk-checkbox"
-                                                           type="checkbox" value="{{ profession.id }}" name="prof">
+                                            <tr style="cursor: pointer" onmousedown="this.firstElementChild.firstElementChild.checked = !this.firstElementChild.firstElementChild.checked" onmouseover="this.style.backgroundColor='#ffffdd';" onmouseout="this.style.backgroundColor='#fff';" >
+                                                <td class="uk-table-shrink" >
+                                                    <input class="uk-checkbox"  type="checkbox" value="{{ profession.id }}" name="prof"/>
                                                 </td>
                                                 <td class="uk-text-truncate uk-table-expand">{{ profession.name }}</td>
                                             </tr>
