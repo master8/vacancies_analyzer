@@ -132,8 +132,6 @@ def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = 
 
             top_bigram = common_words(sorting_parts['vacancy_part'].dropna(), 2, topn=5)
             top_word = common_words(sorting_parts['vacancy_part'].dropna(), 1, topn=10, bigram=top_bigram)
-            if each.text == 'Выбор основных средств поддержки информационной безопасности на уровне БД':
-                print(sorting_parts['vacancy_part'].dropna(), top_word, top_bigram)
 
         leaf_parts = {
             'id': each.id,

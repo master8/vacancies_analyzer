@@ -7,11 +7,13 @@
     <link rel="stylesheet" href="../static/css/uikit.min.css" />
     <script src="../static/js/uikit.min.js"></script>
     <script src="../static/js/uikit-icons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
 </head>
 <body>
 <div class="uk-padding">
     <div class="uk-card uk-card-default uk-card-body">
         <h1 class="uk-text-center">Результат поиска вакансий</h1>
+        <!--<div uk-spinner="ratio: 3"></div>-->
         <p class="uk-text-center">Регион: <b>{{ params.region.name }}</b> Источник: <b>{{ params.source.name }}</b> Период: <b>{{ period }}</b></p>
         <a class="uk-button uk-button-default uk-align-right" href="/">Home</a>
     </div>
@@ -51,7 +53,76 @@
         </div>
         <div>
             <div class="uk-card uk-card-default uk-card-body uk-child-width-expand@s">
-                <img src="{{ diagram_link }}?cache=none" uk-svg>
+                <canvas id="myChart" width="300" height="300"></canvas>
+
+                <script>
+                    let professions = JSON.parse('{{professions |tojson}}');
+
+                    function getRandomColor() {
+                        var letters = '0123456789ABCDEF'.split('');
+                        var color = '#';
+                        for (var i = 0; i < 6; i++ ) {
+                            color += letters[Math.floor(Math.random() * 16)];
+                        }
+                        return color;
+                    }
+
+
+                    var ctx = document.getElementById('myChart').getContext('2d');
+                    var myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: professions.map(obj=>obj.code),
+                            datasets: [{
+                                label: 'Число вакансий',
+                                data: professions.map(obj=>obj['count']),
+                                backgroundColor: professions.map(()=>getRandomColor()),
+                                borderWidth: 1,
+                            }]
+                        },
+                        options: {
+                            onClick: ((evt)=> {
+
+                                var activePoints = myChart.getElementsAtEvent(evt);
+                                var selectedIndex = activePoints[0]._index;
+                                var name = professions.filter((obj)=>
+                                            obj.code === myChart.data.labels[selectedIndex]);
+
+                                console.log(name[0]['profstandard_id'])
+                                console.log(myChart.data.labels[selectedIndex]);
+                                document.location.href = '/profession?id='+name[0]['profstandard_id'];
+                            })
+                            ,
+                            tooltips:{
+                                callbacks: {
+                                    title: ((tooltipItems, data) =>{
+                                        var name = professions.filter((obj)=>
+                                            obj.code === tooltipItems[0]['label']);
+
+                                        return name[0].name
+                                    })}
+                            },
+                            title:{
+                                display: true,
+                                text: 'Число вакансий'
+                            },
+                            legend:{
+                                display: false,
+                            },
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero: true,
+                                    },
+                                    gridLines: {
+                                        lineWidth: 5,
+                                        drawBorder: false
+                                    }
+                                }]
+                            }
+                        }
+                    });
+                </script>
             </div>
         </div>
     </div>

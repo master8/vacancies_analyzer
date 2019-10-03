@@ -10,16 +10,12 @@ from collections import Counter
 import pandas as pd
 import matplotlib
 import pymorphy2
-
 import json
-
-import ast
 import similarity
 
-import searcher
+# import searcher
 
 matplotlib.use('agg')
-import matplotlib.pyplot as plt
 
 from config import Config
 from utils import get_date
@@ -262,15 +258,13 @@ def results():
             'rate': 0
         }]
 
-    diagram_link = plot_search(professions)
-
     return render_template('results.html',
                            title='results',
                            params=params,
                            period=period,
                            professions=professions,
-                           diagram_link=diagram_link,
                            total=total)
+
 
 
 @app.route('/profession')
