@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="../static/css/uikit.min.css" />
     <script src="../static/js/uikit.min.js"></script>
     <script src="../static/js/uikit-icons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+    <script type="text/javascript"  src="../static/js/charts.js"></script>
 </head>
 <body>
 
@@ -34,10 +36,10 @@
                         <tbody>
                             {% for p in professions %}
                                 <tr>
-                                    <td class="uk-text-nowrap">{{ p.profession.code }}</td>
+                                    <td class="uk-text-nowrap">{{ p.code }}</td>
                                     <td class="uk-table-link">
-                                        <a class="uk-link-reset" href="/profession?id={{ p.profession.id }}">
-                                            {{ p.profession.name }}
+                                        <a class="uk-link-reset" href="/profession?id={{ p.id }}">
+                                            {{ p.name }}
                                         </a>
                                     </td>
                                     <td class="uk-text-nowrap">{{ p.count }}</td>
@@ -50,7 +52,13 @@
         </div>
         <div>
             <div class="uk-card uk-card-default uk-card-body uk-child-width-expand@s">
-                <img class="uk-height-large" src="{{ diagram_link }}?cache=none" uk-svg>
+                <canvas id="myChart" width="300" height="300"></canvas>
+
+                <script>
+                    window.onload = loadcharts( JSON.parse('{{professions |tojson}}'),
+                        'Пересечения с другими профессиями', 'Пересечений')
+                </script>
+
             </div>
         </div>
     </div>

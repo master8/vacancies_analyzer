@@ -33,7 +33,7 @@ from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Pr
 
 from dto import Params, SelectedItems, Selected
 
-from handlers import general_function_tree, plot_search, plot_stat, common_words, unique
+from handlers import general_function_tree, plot_stat, common_words, unique
 
 
 @app.route('/searcher/<query_type>')
@@ -219,7 +219,7 @@ def results():
         params = Params(region, source, dt_sdate, dt_edate, prof_id_list)
         session['params'] = params
 
-    period = 'C: ' + str(params.start_date) + ' По: ' + str(params.end_date)  # месяц - день - год
+    period = 'C: ' + str(params.start_date.date()) + ' По: ' + str(params.end_date.date())  # месяц - день - год
 
     professions = []
     total = Vacancy.query \
@@ -240,10 +240,11 @@ def results():
             .filter_by(source_id=params.source.id)
 
         rate = vacancy.count() * 100 / total
+        profession = Profstandard.query.get(prof_id)
         prof_dict = {
             'profstandard_id': prof_id,
-            'code': Profstandard.query.get(prof_id).code,
-            'name': Profstandard.query.get(prof_id).name,
+            'code': profession.code,
+            'name': profession.name,
             'count': vacancy.count(),
             'rate': str(round(rate, 2)) + '%'
         }
@@ -257,7 +258,6 @@ def results():
             'count': 0,
             'rate': 0
         }]
-
     return render_template('results.html',
                            title='results',
                            params=params,
@@ -360,7 +360,7 @@ def profession():
                 .filter(ClassifiedVacancy.profstandard_id != v.profstandard_id):
             count_labels[row.profstandard_id] += 1
 
-    diagram_link, professions = plot_stat(count_labels)
+    professions = plot_stat(count_labels)
 
     if 'selected' in session and int(prof_id) in session['selected'].items:
         selected = session['selected'].items[int(prof_id)]
@@ -375,6 +375,7 @@ def profession():
     text = unique(text)
     top_bigrams = common_words(text, 2, topn=20)
     top_words = common_words(text, 1, topn=25, bigram=top_bigrams)
+    # print(count_labels)
     return render_template('profession.html',
                            title='profession',
                            best_vacancies=best_vacancies,
@@ -388,7 +389,6 @@ def profession():
                            params=params,
                            sdate=params.start_date,
                            edate=params.end_date,
-                           diagram_link=diagram_link,
                            professions=professions,
                            selected=selected)
 
@@ -529,7 +529,7 @@ def selected():
                 'branches': branches
             })
 
-        period = 'C: ' + str(params.start_date) + ' По: ' + str(params.end_date)  # месяц - день - год
+        period = 'C: ' + str(params.start_date.date()) + ' По: ' + str(params.end_date.date())  # месяц - день - год
 
         return render_template('selected.html',
                                params=params,
