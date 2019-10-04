@@ -9,6 +9,8 @@
     <script src="../static/js/uikit-icons.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
     <script type="text/javascript"  src="../static/js/charts.js"></script>
+    <script type="text/javascript"  src="../static/js/getqueries.js"></script>
+    <link rel="shortcut icon" href="../static/images/curriculum.svg" type="image/png">
 </head>
 <body>
 
@@ -25,7 +27,7 @@
             <div class="uk-card uk-card-default uk-card-body">
                 <div class="uk-overflow-auto">
                     <h3>Пересечения с другими профессиями</h3>
-                    <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+                    <table id ='crossTable' class="uk-table uk-table-hover uk-table-middle uk-table-divider">
                         <thead>
                             <tr>
                                 <th class="uk-table-shrink">Код</th>
@@ -33,19 +35,7 @@
                                 <th class="uk-table-shrink">Количество</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {% for p in professions %}
-                                <tr>
-                                    <td class="uk-text-nowrap">{{ p.code }}</td>
-                                    <td class="uk-table-link">
-                                        <a class="uk-link-reset" href="/profession?id={{ p.id }}">
-                                            {{ p.name }}
-                                        </a>
-                                    </td>
-                                    <td class="uk-text-nowrap">{{ p.count }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
+                        <!-- Table inserting -->
                     </table>
                 </div>
             </div>
@@ -53,41 +43,34 @@
         <div>
             <div class="uk-card uk-card-default uk-card-body uk-child-width-expand@s">
                 <canvas id="myChart" width="300" height="300"></canvas>
+                <!-- graph  -->
 
                 <script>
-                    window.onload = loadcharts( JSON.parse('{{professions |tojson}}'),
-                        'Пересечения с другими профессиями', 'Пересечений')
+                    window.onload = loadProfession('{{profession_id}}')
                 </script>
 
             </div>
         </div>
     </div>
 </div>
+
 <div class="uk-padding uk-padding-remove-top">
     <div class="uk-child-width-expand@s" uk-grid>
         <div>
             <div class="uk-card uk-card-default uk-card-body">
                 <div class="uk-overflow-auto">
-                    <h3>Тол лучших совпадений</h3>
-                    <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+                    <h3>Топ лучших совпадений</h3>
+                <script>
+                    window.onload = loadTop('{{profession_id}}')
+                </script>
+                    <table  id="topbest"  class="uk-table uk-table-hover uk-table-middle uk-table-divider">
                         <thead>
                             <tr>
                                 <th class="uk-table-shrink">Вероятность</th>
                                 <th class="uk-table-expand">Название вакансии</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {% for vacancy in best_vacancies %}
-                                <tr>
-                                    <td class="uk-text-nowrap">{{ vacancy.probability|round(4, 'floor') }}</td>
-                                    <td class="uk-table-link">
-                                        <a class="uk-link-reset" href="/vacancy?id={{ vacancy.id }}">
-                                            {{ vacancy.name }}
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
+                        <!--- best table--->
                     </table>
                     <a class="uk-button uk-button-default" href="/vacancies?prof={{ profession_id }}">Все вакансии</a>
                     <a class="uk-button uk-button-default" href="/split/vacancies?prof={{ profession_id }}">Все разделенные вакансии</a>
@@ -98,31 +81,21 @@
             <div class="uk-card uk-card-secondary uk-card-body">
                 <div class="uk-overflow-auto">
                     <h3>Топ худших совпадений</h3>
-                    <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+                    <table id="topworst" class="uk-table uk-table-hover uk-table-middle uk-table-divider">
                         <thead>
                             <tr>
                                 <th class="uk-table-shrink">Вероятность</th>
                                 <th class="uk-table-expand">Название вакансии</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {% for vacancy in worst_vacancies %}
-                                <tr>
-                                    <td class="uk-text-nowrap">{{ vacancy.probability|round(4, 'floor') }}</td>
-                                    <td class="uk-table-link">
-                                        <a class="uk-link-reset" href="/vacancy?id={{ vacancy.id }}">
-                                            {{ vacancy.name }}
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
+                        <!--- worst table--->
                     </table>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 <div class="uk-padding uk-padding-remove-top">
     <div class="uk-card uk-card-secondary uk-card-body">
         <h2 class="uk-text-center">Сопоставление. Дерево профессионального стандарта</h2>

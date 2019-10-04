@@ -267,14 +267,49 @@ def results():
 
 
 
-@app.route('/profession')
-def profession():
+
+
+
+@app.route('/get_intersection')
+def get_profession():
+    if 'params' in session:
+        params = session['params']
+
+    else:
+        redirect('/index')
+    prof_id = request.args.get('id')
+
+    # 1. Пересечения
+    classified_vacancies = db.session.query(ClassifiedVacancy) \
+        .filter(ClassifiedVacancy.profstandard_id == prof_id) \
+        .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
+        .filter(Vacancy.create_date <= params.end_date) \
+        .filter(Vacancy.create_date >= params.start_date) \
+        .filter(Vacancy.region_id == params.region.id) \
+        .filter(Vacancy.source_id == params.source.id)
+
+    # vacancies_id = list(map(lambda x: x.vacancy_id, classified_vacancies.all()))
+    count_labels = defaultdict(int)
+
+    for v in classified_vacancies.all():
+        for row in ClassifiedVacancy.query \
+                .filter(ClassifiedVacancy.vacancy_id == v.vacancy_id) \
+                .filter(ClassifiedVacancy.profstandard_id != v.profstandard_id):
+            count_labels[row.profstandard_id] += 1
+
+    professions = plot_stat(count_labels)
+    return jsonify(professions)
+
+
+@app.route('/get_top')
+def get_top():
     if 'params' in session:
         params = session['params']
     else:
         redirect('/index')
     prof_id = request.args.get('id')
 
+    # 2. топ вакансий
     query = db.session.query(Vacancy, ClassifiedVacancy) \
         .filter(ClassifiedVacancy.profstandard_id == prof_id) \
         .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
@@ -285,7 +320,7 @@ def profession():
         .order_by(ClassifiedVacancy.probability)
     best_vacancies = []
     worst_vacancies = []
-
+    # 2.1 топ худших
     for vacancy, classified_vacancy in query[:10]:
         worst_vacancy = {
             'id': vacancy.id,
@@ -293,7 +328,7 @@ def profession():
             'probability': classified_vacancy.probability
         }
         worst_vacancies.append(worst_vacancy)
-
+    # 2.2 топ худших
     for vacancy, classified_vacancy in reversed(query[-10:]):
         best_vacancy = {
             'id': vacancy.id,
@@ -301,7 +336,20 @@ def profession():
             'probability': classified_vacancy.probability
         }
         best_vacancies.append(best_vacancy)
+    return jsonify({'best': best_vacancies, 'worst': worst_vacancies})
 
+
+
+@app.route('/profession')
+def profession():
+    if 'params' in session:
+        params = session['params']
+    else:
+        redirect('/index')
+    prof_id = request.args.get('id')
+
+
+    # 3. Сопоставление
     query = db.session.query(MatchPart, VacancyPart) \
         .filter(MatchPart.vacancy_part_id == VacancyPart.id) \
         .filter(VacancyPart.vacancy_id == Vacancy.id) \
@@ -319,11 +367,11 @@ def profession():
             'similarity': round(match_part.similarity, 3),
             'vacancy_part': vacancy_part.text
         })
-
+    # 3.1 Дерево
     general_functions, count, just_selected = general_function_tree(prof_id, matched_parts)
 
     sorting_generals = pd.DataFrame(general_functions)
-    general_functions = sorting_generals.sort_values('weight', ascending=False).to_dict('r')
+    general_functions = sorting_generals.sort_values('weight', ascending=False).to_dict('r') # валится ошибка
     posts = defaultdict(list)
     general_functions_by_level = defaultdict(list)
 
@@ -342,25 +390,8 @@ def profession():
             'general_functions': value
         })
 
-    classified_vacancies = db.session.query(ClassifiedVacancy) \
-        .filter(ClassifiedVacancy.profstandard_id == prof_id) \
-        .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
-        .filter(Vacancy.create_date <= params.end_date) \
-        .filter(Vacancy.create_date >= params.start_date) \
-        .filter(Vacancy.region_id == params.region.id) \
-        .filter(Vacancy.source_id == params.source.id)
 
-    # vacancies_id = list(map(lambda x: x.vacancy_id, classified_vacancies.all()))
-
-    count_labels = defaultdict(int)
-
-    for v in classified_vacancies.all():
-        for row in ClassifiedVacancy.query \
-                .filter(ClassifiedVacancy.vacancy_id == v.vacancy_id) \
-                .filter(ClassifiedVacancy.profstandard_id != v.profstandard_id):
-            count_labels[row.profstandard_id] += 1
-
-    professions = plot_stat(count_labels)
+    # 4. Выделение
 
     if 'selected' in session and int(prof_id) in session['selected'].items:
         selected = session['selected'].items[int(prof_id)]
@@ -378,8 +409,6 @@ def profession():
     # print(count_labels)
     return render_template('profession.html',
                            title='profession',
-                           best_vacancies=best_vacancies,
-                           worst_vacancies=worst_vacancies,
                            profession=Profstandard.query.get(prof_id).name,
                            branches=branches,
                            count=count,
@@ -389,7 +418,6 @@ def profession():
                            params=params,
                            sdate=params.start_date,
                            edate=params.end_date,
-                           professions=professions,
                            selected=selected)
 
 
