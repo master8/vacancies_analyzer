@@ -50,7 +50,9 @@ function loadcharts(professions, title, label){
             },
             title:{
                 display: true,
-                text: title
+                text: title,
+                fontSize: 18,
+                position: 'top'
             },
             legend:{
                 display: false,

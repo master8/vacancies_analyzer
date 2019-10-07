@@ -13,7 +13,7 @@ import pymorphy2
 import json
 import similarity
 
-# import searcher
+import searcher
 
 matplotlib.use('agg')
 
@@ -340,6 +340,77 @@ def get_top():
 
 
 
+
+
+
+@app.route('/get_branches')
+def get_branches():
+    if 'params' in session:
+        params = session['params']
+    else:
+        redirect('/index')
+    prof_id = request.args.get('id')
+
+
+    # 3. Сопоставление
+    query = db.session.query(MatchPart, VacancyPart) \
+        .filter(MatchPart.vacancy_part_id == VacancyPart.id) \
+        .filter(VacancyPart.vacancy_id == Vacancy.id) \
+        .filter(ClassifiedVacancy.profstandard_id == prof_id) \
+        .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
+        .filter(Vacancy.create_date <= params.end_date) \
+        .filter(Vacancy.create_date >= params.start_date) \
+        .filter(Vacancy.region_id == params.region.id) \
+        .filter(Vacancy.source_id == params.source.id)
+
+    matched_parts = defaultdict(list)
+
+    for match_part, vacancy_part in query:
+        matched_parts[match_part.profstandard_part_id].append({
+            'similarity': round(match_part.similarity, 3),
+            'vacancy_part': vacancy_part.text
+        })
+
+    # 3.1 Дерево
+    general_functions, count, just_selected = general_function_tree(prof_id, matched_parts)
+
+    sorting_generals = pd.DataFrame(general_functions)
+    general_functions = sorting_generals.sort_values('weight', ascending=False).to_dict('r') # валится ошибка
+    posts = defaultdict(list)
+    general_functions_by_level = defaultdict(list)
+
+    for post in ProfstandardPost.query.filter_by(profstandard_id=prof_id):
+        posts[post.qualification_level].append(post.name)
+
+    for function in general_functions:
+        general_functions_by_level[function['level']].append(function)
+
+    branches = []
+
+    for key, value in general_functions_by_level.items():
+        branches.append({
+            'level': key,
+            'posts': posts[key],
+            'general_functions': value
+        })
+
+    # 5. Выделение
+
+    if 'selected' in session and int(prof_id) in session['selected'].items:
+        selected = session['selected'].items[int(prof_id)]
+    else:
+        selected = SelectedItems(int(prof_id), [], [], [])
+
+    return jsonify({'branches': branches, 'selected': selected})
+
+
+
+
+
+
+
+
+
 @app.route('/profession')
 def profession():
     if 'params' in session:
@@ -367,6 +438,7 @@ def profession():
             'similarity': round(match_part.similarity, 3),
             'vacancy_part': vacancy_part.text
         })
+
     # 3.1 Дерево
     general_functions, count, just_selected = general_function_tree(prof_id, matched_parts)
 
@@ -376,7 +448,7 @@ def profession():
     general_functions_by_level = defaultdict(list)
 
     for post in ProfstandardPost.query.filter_by(profstandard_id=prof_id):
-        posts[post.qualification_level].append(post)
+        posts[post.qualification_level].append(post.name)
 
     for function in general_functions:
         general_functions_by_level[function['level']].append(function)
@@ -390,14 +462,7 @@ def profession():
             'general_functions': value
         })
 
-
-    # 4. Выделение
-
-    if 'selected' in session and int(prof_id) in session['selected'].items:
-        selected = session['selected'].items[int(prof_id)]
-    else:
-        selected = SelectedItems(int(prof_id), [], [], [])
-
+    # 4 тексты
     text = []
     for branch in branches:
         for gen in branch['general_functions']:
@@ -406,7 +471,16 @@ def profession():
     text = unique(text)
     top_bigrams = common_words(text, 2, topn=20)
     top_words = common_words(text, 1, topn=25, bigram=top_bigrams)
-    # print(count_labels)
+
+    # 5. Выделение
+
+    if 'selected' in session and int(prof_id) in session['selected'].items:
+        selected = session['selected'].items[int(prof_id)]
+    else:
+        selected = SelectedItems(int(prof_id), [], [], [])
+
+    print(branches)
+
     return render_template('profession.html',
                            title='profession',
                            profession=Profstandard.query.get(prof_id).name,
