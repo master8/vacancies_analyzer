@@ -132,8 +132,6 @@ def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = 
 
             top_bigram = common_words(sorting_parts['vacancy_part'].dropna(), 2, topn=5)
             top_word = common_words(sorting_parts['vacancy_part'].dropna(), 1, topn=10, bigram=top_bigram)
-            if each.text == 'Выбор основных средств поддержки информационной безопасности на уровне БД':
-                print(sorting_parts['vacancy_part'].dropna(), top_word, top_bigram)
 
         leaf_parts = {
             'id': each.id,
@@ -232,45 +230,17 @@ def unique(lst, bigram=[]):
     return answer
 
 
-def plot_search(professions):  # график
-    t = []
-    num = []
-    for i in professions:
-        t.append(str(i['code']))
-        num.append(i['count'])
-    x = np.array(t)
-    y = np.array(num)
-
-    diagram = sns.barplot(x=x, y=y)
-    diagram.clear()
-    diagram = sns.barplot(x=x, y=y)
-    dia = diagram.get_figure()
-
-    dia.savefig('./static/diagram/test_diagram.svg')
-    diagram_link = '../static/diagram/test_diagram.svg'
-    return diagram_link
-
 
 def plot_stat(count_labels):  # график
-    t = []
-    num = []
     professions = []
     if len(count_labels) > 0:
         for key, value in count_labels.items():
             profession = Profstandard.query.get(key)
             professions.append({
-                'profession': profession,
+                'profstandard_id': profession.id,
+                'id': profession.id,
+                'name': profession.name,
+                'code': profession.code,
                 'count': value
             })
-            t.append('| ' + profession.code)
-            num.append(value)
-        x = np.array(t, dtype=str)
-        y = np.array(num)
-        diagram = sns.barplot(x=y, y=x)
-        diagram.clear()
-        diagram = sns.barplot(x=y, y=x)
-        dia = diagram.get_figure()
-
-        dia.savefig('./static/diagram/test_diagram2.svg')
-    diagram_link = '../static/diagram/test_diagram2.svg'
-    return diagram_link, professions
+    return professions

@@ -10,16 +10,12 @@ from collections import Counter
 import pandas as pd
 import matplotlib
 import pymorphy2
-
 import json
-
-import ast
 import similarity
 
 import searcher
 
 matplotlib.use('agg')
-import matplotlib.pyplot as plt
 
 from config import Config
 from utils import get_date
@@ -37,7 +33,7 @@ from models import MatchPart, VacancyPart, ProfstandardPost, VacancyPartType, Pr
 
 from dto import Params, SelectedItems, Selected
 
-from handlers import general_function_tree, plot_search, plot_stat, common_words, unique
+from handlers import general_function_tree, plot_stat, common_words, unique
 
 
 @app.route('/searcher/<query_type>')
@@ -223,7 +219,7 @@ def results():
         params = Params(region, source, dt_sdate, dt_edate, prof_id_list)
         session['params'] = params
 
-    period = 'C: ' + str(params.start_date) + ' По: ' + str(params.end_date)  # месяц - день - год
+    period = 'C: ' + str(params.start_date.date()) + ' По: ' + str(params.end_date.date())  # месяц - день - год
 
     professions = []
     total = Vacancy.query \
@@ -244,10 +240,11 @@ def results():
             .filter_by(source_id=params.source.id)
 
         rate = vacancy.count() * 100 / total
+        profession = Profstandard.query.get(prof_id)
         prof_dict = {
             'profstandard_id': prof_id,
-            'code': Profstandard.query.get(prof_id).code,
-            'name': Profstandard.query.get(prof_id).name,
+            'code': profession.code,
+            'name': profession.name,
             'count': vacancy.count(),
             'rate': str(round(rate, 2)) + '%'
         }
@@ -261,26 +258,58 @@ def results():
             'count': 0,
             'rate': 0
         }]
-
-    diagram_link = plot_search(professions)
-
     return render_template('results.html',
                            title='results',
                            params=params,
                            period=period,
                            professions=professions,
-                           diagram_link=diagram_link,
                            total=total)
 
 
-@app.route('/profession')
-def profession():
+
+
+
+
+@app.route('/get_intersection')
+def get_profession():
+    if 'params' in session:
+        params = session['params']
+
+    else:
+        redirect('/index')
+    prof_id = request.args.get('id')
+
+    # 1. Пересечения
+    classified_vacancies = db.session.query(ClassifiedVacancy) \
+        .filter(ClassifiedVacancy.profstandard_id == prof_id) \
+        .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
+        .filter(Vacancy.create_date <= params.end_date) \
+        .filter(Vacancy.create_date >= params.start_date) \
+        .filter(Vacancy.region_id == params.region.id) \
+        .filter(Vacancy.source_id == params.source.id)
+
+    # vacancies_id = list(map(lambda x: x.vacancy_id, classified_vacancies.all()))
+    count_labels = defaultdict(int)
+
+    for v in classified_vacancies.all():
+        for row in ClassifiedVacancy.query \
+                .filter(ClassifiedVacancy.vacancy_id == v.vacancy_id) \
+                .filter(ClassifiedVacancy.profstandard_id != v.profstandard_id):
+            count_labels[row.profstandard_id] += 1
+
+    professions = plot_stat(count_labels)
+    return jsonify(professions)
+
+
+@app.route('/get_top')
+def get_top():
     if 'params' in session:
         params = session['params']
     else:
         redirect('/index')
     prof_id = request.args.get('id')
 
+    # 2. топ вакансий
     query = db.session.query(Vacancy, ClassifiedVacancy) \
         .filter(ClassifiedVacancy.profstandard_id == prof_id) \
         .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
@@ -291,7 +320,7 @@ def profession():
         .order_by(ClassifiedVacancy.probability)
     best_vacancies = []
     worst_vacancies = []
-
+    # 2.1 топ худших
     for vacancy, classified_vacancy in query[:10]:
         worst_vacancy = {
             'id': vacancy.id,
@@ -299,7 +328,7 @@ def profession():
             'probability': classified_vacancy.probability
         }
         worst_vacancies.append(worst_vacancy)
-
+    # 2.2 топ худших
     for vacancy, classified_vacancy in reversed(query[-10:]):
         best_vacancy = {
             'id': vacancy.id,
@@ -307,7 +336,23 @@ def profession():
             'probability': classified_vacancy.probability
         }
         best_vacancies.append(best_vacancy)
+    return jsonify({'best': best_vacancies, 'worst': worst_vacancies})
 
+
+
+
+
+
+@app.route('/get_branches')
+def get_branches():
+    if 'params' in session:
+        params = session['params']
+    else:
+        redirect('/index')
+    prof_id = request.args.get('id')
+
+
+    # 3. Сопоставление
     query = db.session.query(MatchPart, VacancyPart) \
         .filter(MatchPart.vacancy_part_id == VacancyPart.id) \
         .filter(VacancyPart.vacancy_id == Vacancy.id) \
@@ -326,15 +371,16 @@ def profession():
             'vacancy_part': vacancy_part.text
         })
 
+    # 3.1 Дерево
     general_functions, count, just_selected = general_function_tree(prof_id, matched_parts)
 
     sorting_generals = pd.DataFrame(general_functions)
-    general_functions = sorting_generals.sort_values('weight', ascending=False).to_dict('r')
+    general_functions = sorting_generals.sort_values('weight', ascending=False).to_dict('r') # валится ошибка
     posts = defaultdict(list)
     general_functions_by_level = defaultdict(list)
 
     for post in ProfstandardPost.query.filter_by(profstandard_id=prof_id):
-        posts[post.qualification_level].append(post)
+        posts[post.qualification_level].append(post.name)
 
     for function in general_functions:
         general_functions_by_level[function['level']].append(function)
@@ -348,7 +394,36 @@ def profession():
             'general_functions': value
         })
 
-    classified_vacancies = db.session.query(ClassifiedVacancy) \
+    # 5. Выделение
+
+    if 'selected' in session and int(prof_id) in session['selected'].items:
+        selected = session['selected'].items[int(prof_id)]
+    else:
+        selected = SelectedItems(int(prof_id), [], [], [])
+
+    return jsonify({'branches': branches, 'selected': selected})
+
+
+
+
+
+
+
+
+
+@app.route('/profession')
+def profession():
+    if 'params' in session:
+        params = session['params']
+    else:
+        redirect('/index')
+    prof_id = request.args.get('id')
+
+
+    # 3. Сопоставление
+    query = db.session.query(MatchPart, VacancyPart) \
+        .filter(MatchPart.vacancy_part_id == VacancyPart.id) \
+        .filter(VacancyPart.vacancy_id == Vacancy.id) \
         .filter(ClassifiedVacancy.profstandard_id == prof_id) \
         .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
         .filter(Vacancy.create_date <= params.end_date) \
@@ -356,23 +431,38 @@ def profession():
         .filter(Vacancy.region_id == params.region.id) \
         .filter(Vacancy.source_id == params.source.id)
 
-    # vacancies_id = list(map(lambda x: x.vacancy_id, classified_vacancies.all()))
+    matched_parts = defaultdict(list)
 
-    count_labels = defaultdict(int)
+    for match_part, vacancy_part in query:
+        matched_parts[match_part.profstandard_part_id].append({
+            'similarity': round(match_part.similarity, 3),
+            'vacancy_part': vacancy_part.text
+        })
 
-    for v in classified_vacancies.all():
-        for row in ClassifiedVacancy.query \
-                .filter(ClassifiedVacancy.vacancy_id == v.vacancy_id) \
-                .filter(ClassifiedVacancy.profstandard_id != v.profstandard_id):
-            count_labels[row.profstandard_id] += 1
+    # 3.1 Дерево
+    general_functions, count, just_selected = general_function_tree(prof_id, matched_parts)
 
-    diagram_link, professions = plot_stat(count_labels)
+    sorting_generals = pd.DataFrame(general_functions)
+    general_functions = sorting_generals.sort_values('weight', ascending=False).to_dict('r') # валится ошибка
+    posts = defaultdict(list)
+    general_functions_by_level = defaultdict(list)
 
-    if 'selected' in session and int(prof_id) in session['selected'].items:
-        selected = session['selected'].items[int(prof_id)]
-    else:
-        selected = SelectedItems(int(prof_id), [], [], [])
+    for post in ProfstandardPost.query.filter_by(profstandard_id=prof_id):
+        posts[post.qualification_level].append(post.name)
 
+    for function in general_functions:
+        general_functions_by_level[function['level']].append(function)
+
+    branches = []
+
+    for key, value in general_functions_by_level.items():
+        branches.append({
+            'level': key,
+            'posts': posts[key],
+            'general_functions': value
+        })
+
+    # 4 тексты
     text = []
     for branch in branches:
         for gen in branch['general_functions']:
@@ -381,10 +471,18 @@ def profession():
     text = unique(text)
     top_bigrams = common_words(text, 2, topn=20)
     top_words = common_words(text, 1, topn=25, bigram=top_bigrams)
+
+    # 5. Выделение
+
+    if 'selected' in session and int(prof_id) in session['selected'].items:
+        selected = session['selected'].items[int(prof_id)]
+    else:
+        selected = SelectedItems(int(prof_id), [], [], [])
+
+    print(branches)
+
     return render_template('profession.html',
                            title='profession',
-                           best_vacancies=best_vacancies,
-                           worst_vacancies=worst_vacancies,
                            profession=Profstandard.query.get(prof_id).name,
                            branches=branches,
                            count=count,
@@ -394,8 +492,6 @@ def profession():
                            params=params,
                            sdate=params.start_date,
                            edate=params.end_date,
-                           diagram_link=diagram_link,
-                           professions=professions,
                            selected=selected)
 
 
@@ -535,7 +631,7 @@ def selected():
                 'branches': branches
             })
 
-        period = 'C: ' + str(params.start_date) + ' По: ' + str(params.end_date)  # месяц - день - год
+        period = 'C: ' + str(params.start_date.date()) + ' По: ' + str(params.end_date.date())  # месяц - день - год
 
         return render_template('selected.html',
                                params=params,

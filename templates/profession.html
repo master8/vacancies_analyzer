@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="../static/css/uikit.min.css" />
     <script src="../static/js/uikit.min.js"></script>
     <script src="../static/js/uikit-icons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+    <script type="text/javascript"  src="../static/js/charts.js"></script>
+    <script type="text/javascript"  src="../static/js/getqueries.js"></script>
+    <link rel="shortcut icon" href="../static/images/curriculum.svg" type="image/png">
 </head>
 <body>
 
@@ -23,7 +27,7 @@
             <div class="uk-card uk-card-default uk-card-body">
                 <div class="uk-overflow-auto">
                     <h3>Пересечения с другими профессиями</h3>
-                    <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+                    <table id ='crossTable' class="uk-table uk-table-hover uk-table-middle uk-table-divider">
                         <thead>
                             <tr>
                                 <th class="uk-table-shrink">Код</th>
@@ -31,55 +35,42 @@
                                 <th class="uk-table-shrink">Количество</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {% for p in professions %}
-                                <tr>
-                                    <td class="uk-text-nowrap">{{ p.profession.code }}</td>
-                                    <td class="uk-table-link">
-                                        <a class="uk-link-reset" href="/profession?id={{ p.profession.id }}">
-                                            {{ p.profession.name }}
-                                        </a>
-                                    </td>
-                                    <td class="uk-text-nowrap">{{ p.count }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
+                        <!-- Table inserting -->
                     </table>
                 </div>
             </div>
         </div>
         <div>
-            <div class="uk-card uk-card-default uk-card-body uk-child-width-expand@s">
-                <img class="uk-height-large" src="{{ diagram_link }}?cache=none" uk-svg>
+            <div class="uk-card uk-card-default uk-card-small uk-card-body uk-child-width-expand@s">
+                <canvas id="myChart" width="300" height="300"></canvas>
+                <!-- graph  -->
+
+                <script>
+                    window.onload = loadProfession('{{profession_id}}')
+                </script>
+
             </div>
         </div>
     </div>
 </div>
+
 <div class="uk-padding uk-padding-remove-top">
     <div class="uk-child-width-expand@s" uk-grid>
         <div>
             <div class="uk-card uk-card-default uk-card-body">
                 <div class="uk-overflow-auto">
-                    <h3>Тол лучших совпадений</h3>
-                    <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+                    <h3>Топ лучших совпадений</h3>
+                <script>
+                    window.onload = loadTop('{{profession_id}}')
+                </script>
+                    <table  id="topbest"  class="uk-table uk-table-hover uk-table-middle uk-table-divider">
                         <thead>
                             <tr>
                                 <th class="uk-table-shrink">Вероятность</th>
                                 <th class="uk-table-expand">Название вакансии</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {% for vacancy in best_vacancies %}
-                                <tr>
-                                    <td class="uk-text-nowrap">{{ vacancy.probability|round(4, 'floor') }}</td>
-                                    <td class="uk-table-link">
-                                        <a class="uk-link-reset" href="/vacancy?id={{ vacancy.id }}">
-                                            {{ vacancy.name }}
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
+                        <!--- best table--->
                     </table>
                     <a class="uk-button uk-button-default" href="/vacancies?prof={{ profession_id }}">Все вакансии</a>
                     <a class="uk-button uk-button-default" href="/split/vacancies?prof={{ profession_id }}">Все разделенные вакансии</a>
@@ -90,31 +81,21 @@
             <div class="uk-card uk-card-secondary uk-card-body">
                 <div class="uk-overflow-auto">
                     <h3>Топ худших совпадений</h3>
-                    <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+                    <table id="topworst" class="uk-table uk-table-hover uk-table-middle uk-table-divider">
                         <thead>
                             <tr>
                                 <th class="uk-table-shrink">Вероятность</th>
                                 <th class="uk-table-expand">Название вакансии</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {% for vacancy in worst_vacancies %}
-                                <tr>
-                                    <td class="uk-text-nowrap">{{ vacancy.probability|round(4, 'floor') }}</td>
-                                    <td class="uk-table-link">
-                                        <a class="uk-link-reset" href="/vacancy?id={{ vacancy.id }}">
-                                            {{ vacancy.name }}
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
+                        <!--- worst table--->
                     </table>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 <div class="uk-padding uk-padding-remove-top">
     <div class="uk-card uk-card-secondary uk-card-body">
         <h2 class="uk-text-center">Сопоставление. Дерево профессионального стандарта</h2>
@@ -129,84 +110,91 @@
 
         <a class="uk-button uk-button-default" href="/selected">Посмотреть выбранные</a>
         <h3 class="uk-article-meta">Обобщенных функций: {{ count }} найдено <br> Частые слова: {{ top_words }} <br> Частые словосочетания: {{ top_bigrams }} </h3>
-        {% for branch in branches %}
-            <div class="uk-grid-divider uk-child-width-expand@s" uk-grid>
-                <div class="uk-width-1-6@m">
-                    <h4>Уровень {{ branch.level }}</h4>
-                    <ul class="uk-list">
-                        {% for post in branch.posts %}
-                            <li>{{ post.name }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                <div>
-                    <ul uk-accordion>
-                        {% for general_function in branch.general_functions %}
-                            <li class="uk-open">
-                                <input class="uk-checkbox mode-view" type="checkbox" style="float: left; margin: 6px"
-                                       {% if general_function.id in selected.general_fun_ids %}
-                                           checked
-                                       {% endif %}
-                                       value="{{ general_function.id }}" name="gf" hidden>
-                                <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
-                                <div class="uk-accordion-content uk-margin-large-left">
-                                    <h3 class="uk-article-meta">Функций: {{ general_function.count }} найдено <br> Частые слова: {{ general_function.monogram}}.<br> Частые словосочетания: {{ general_function.bigram }} </h3>
-                                    <ul uk-accordion>
-                                        {% for function in general_function.functions %}
-                                            <li>
-                                                <input class="uk-checkbox mode-view" type="checkbox" style="float: left; margin: 6px"
-                                                       {% if function.id in selected.fun_ids %}
-                                                           checked
-                                                       {% endif %}
-                                                       value="{{ function.id }}" name="f" hidden>
-                                                <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
-                                                <div class="uk-accordion-content uk-margin-large-left">
-                                                    <h4 class="uk-article-meta">Характеристик: {{ function.count }} найдено <br> Частые слова: {{ function.monogram}}.<br> Частые словосочетания: {{ function.bigram }}</h4>
-                                                    <ul uk-accordion>
-                                                        {% for part in function.parts %}
-                                                            <li>
-                                                                <input class="uk-checkbox mode-view" type="checkbox" style="float: left; margin: 6px"
-                                                                       {% if part.id in selected.part_ids %}
-                                                                           checked
-                                                                       {% endif %}
-                                                                       value="{{ part.id }}" name="p" hidden>
-                                                                <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
-                                                                <div class="uk-accordion-content uk-margin-large-left">
-                                                                     <br class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: {{ part.monogram}}.<br> Частые словосочетания: {{ part.bigram }} </h5>
+        <!-- large piece of cake --->
 
-                                                                    <table class="uk-table uk-table-small uk-table-divider">
-                                                                        <thead>
-                                                                            <tr>
-                                                                                {{ part.lemmatized }}
-                                                                                <th class="uk-table-shrink">Близость</th>
-                                                                                <th class="uk-table-expand">Часть вакансии.</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                        {% for vacancy in part.vacancy_parts[:5] %}
-                                                                            <tr>
-                                                                                <td>{{ vacancy.similarity|round(2, 'floor') }}</td>
-                                                                                <td>{{ vacancy.vacancy_part }}</td>
-                                                                              <!--  <td>{{ vacancy.lemmatized }}</td> -->
-                                                                            </tr>
-                                                                        {% endfor %}
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                            </li>
-                                                        {% endfor %}
-                                                    </ul>
-                                                </div>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
+
+        <div id="brachesGenerator">
+
+            {% for branch in branches %}
+                <div class="uk-grid-divider uk-child-width-expand@s" uk-grid>
+
+                    <div class="uk-width-1-6@m">
+                        <h4>Уровень {{ branch.level }}</h4>
+                        <ul class="uk-list">
+                            {% for post in branch.posts %}
+                                <li>{{ post }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div>
+                        <ul uk-accordion>
+                            {% for general_function in branch.general_functions %}
+                                <li class="uk-open">
+                                    <input class="uk-checkbox mode-view" type="checkbox" style="float: left; margin: 6px"
+                                           {% if general_function.id in selected.general_fun_ids %}
+                                               checked
+                                           {% endif %}
+                                           value="{{ general_function.id }}" name="gf" hidden>
+                                    <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-danger">{{ general_function.weight }}</span> {{ general_function.name }}</a>
+                                    <div class="uk-accordion-content uk-margin-large-left">
+                                        <h3 class="uk-article-meta">Функций: {{ general_function.count }} найдено <br> Частые слова: {{ general_function.monogram}}.<br> Частые словосочетания: {{ general_function.bigram }} </h3>
+                                        <ul uk-accordion>
+                                            {% for function in general_function.functions %}
+                                                <li>
+                                                    <input class="uk-checkbox mode-view" type="checkbox" style="float: left; margin: 6px"
+                                                           {% if function.id in selected.fun_ids %}
+                                                               checked
+                                                           {% endif %}
+                                                           value="{{ function.id }}" name="f" hidden>
+                                                    <a class="uk-accordion-title" href="#"><span class="uk-label uk-label-success">{{ function.weight }}</span> {{ function.name }}</a>
+                                                    <div class="uk-accordion-content uk-margin-large-left">
+                                                        <h4 class="uk-article-meta">Характеристик: {{ function.count }} найдено <br> Частые слова: {{ function.monogram}}.<br> Частые словосочетания: {{ function.bigram }}</h4>
+                                                        <ul uk-accordion>
+                                                            {% for part in function.parts %}
+                                                                <li>
+                                                                    <input class="uk-checkbox mode-view" type="checkbox" style="float: left; margin: 6px"
+                                                                           {% if part.id in selected.part_ids %}
+                                                                               checked
+                                                                           {% endif %}
+                                                                           value="{{ part.id }}" name="p" hidden>
+                                                                    <a class="uk-accordion-title" href="#"><span class="uk-label">{{ part.weight }}</span> {{ part.standard_part }}</a>
+                                                                    <div class="uk-accordion-content uk-margin-large-left">
+                                                                         <br class="uk-article-meta">Частей характеристики: {{ part.count }}. <br> Частые слова: {{ part.monogram}}.<br> Частые словосочетания: {{ part.bigram }} </h5>
+
+                                                                        <table class="uk-table uk-table-small uk-table-divider">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    {{ part.lemmatized }}
+                                                                                    <th class="uk-table-shrink">Близость</th>
+                                                                                    <th class="uk-table-expand">Часть вакансии.</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                            {% for vacancy in part.vacancy_parts[:5] %}
+                                                                                <tr>
+                                                                                    <td>{{ vacancy.similarity|round(2, 'floor') }}</td>
+                                                                                    <td>{{ vacancy.vacancy_part }}</td>
+                                                                                  <!--  <td>{{ vacancy.lemmatized }}</td> -->
+                                                                                </tr>
+                                                                            {% endfor %}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
         </form>
     </div>
 </div>

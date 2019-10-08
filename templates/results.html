@@ -7,11 +7,15 @@
     <link rel="stylesheet" href="../static/css/uikit.min.css" />
     <script src="../static/js/uikit.min.js"></script>
     <script src="../static/js/uikit-icons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+    <script type="text/javascript"  src="../static/js/charts.js"></script>
+    <link rel="shortcut icon" href="../static/images/curriculum.svg" type="image/png">
 </head>
 <body>
 <div class="uk-padding">
     <div class="uk-card uk-card-default uk-card-body">
         <h1 class="uk-text-center">Результат поиска вакансий</h1>
+        <!--<div uk-spinner="ratio: 3"></div>-->
         <p class="uk-text-center">Регион: <b>{{ params.region.name }}</b> Источник: <b>{{ params.source.name }}</b> Период: <b>{{ period }}</b></p>
         <a class="uk-button uk-button-default uk-align-right" href="/">Home</a>
     </div>
@@ -51,7 +55,13 @@
         </div>
         <div>
             <div class="uk-card uk-card-default uk-card-body uk-child-width-expand@s">
-                <img src="{{ diagram_link }}?cache=none" uk-svg>
+                <canvas id="myChart" width="300" height="300"></canvas>
+
+                <script>
+                    window.onload = loadcharts( JSON.parse('{{professions |tojson}}'),
+                        'Число вакансий', 'Число вакансий')
+
+                </script>
             </div>
         </div>
     </div>
