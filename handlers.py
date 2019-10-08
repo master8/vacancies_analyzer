@@ -1,14 +1,9 @@
-import numpy as np
-import seaborn as sns
 import pandas as pd
-import codecs
-import os
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from dto import SelectedItems
 from models import Function, ProfstandardPart, GeneralFunction, Profstandard
-
-sns.set(style="whitegrid")
 
 
 def general_function_tree(prof_id, matched_parts, selected: SelectedItems = None):
@@ -136,7 +131,7 @@ def parts_vacancies_leafs(function_id, matched_parts, selected: SelectedItems = 
         leaf_parts = {
             'id': each.id,
             'weight': round(parts_weight, 2),
-            'standard_part': each.text,
+            'name': each.text,
             'vacancy_parts': vacancy_parts,  # вакансии
             'count': parts_count,
             'monogram': top_word,
@@ -208,10 +203,6 @@ print('loaded')
 
 def unique(lst, bigram=[]):
     answer = []
-    # print('prof')
-    # print(len(prof_bag))
-    # print('bi')
-    # print(len(bigram))
     for i in lst:
         if [wrd for wrd in bigram if i[1] in wrd] == []:
             # if type(i) == list:
@@ -219,16 +210,12 @@ def unique(lst, bigram=[]):
             #         answer.append(i)
             #     else:
             #         pass
-            #         # print(i[1])
             # else:
-            #     # print('wtf')
-            #     # print(i)
             #     answer.append(i)
             answer.append(i)
     answer = set(answer)
     answer = list(answer)
     return answer
-
 
 
 def plot_stat(count_labels):  # график

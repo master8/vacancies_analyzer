@@ -186,16 +186,55 @@ def home():
     professions = Profstandard.query.all()
     regions = Region.query.all()
     sources = Source.query.all()
-
     if 'params' in session:
         session.pop('params')
-
     if 'competence' in session:
         session.pop('competence')
-
     session['selected'] = Selected()
-
     return render_template('index.html', title='home', professions=professions, regions=regions, sources=sources)
+
+
+@app.route('/get_results')
+def get_results():
+    params = session['params']
+    professions = []
+    total = Vacancy.query \
+        .filter(ClassifiedVacancy.profstandard_id.in_(params.profession_ids)) \
+        .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
+        .filter(Vacancy.create_date <= params.end_date) \
+        .filter(Vacancy.create_date >= params.start_date) \
+        .filter_by(region_id=params.region.id) \
+        .filter_by(source_id=params.source.id).count()
+
+    for prof_id in params.profession_ids:
+        vacancy = Vacancy.query \
+            .filter(ClassifiedVacancy.profstandard_id == prof_id) \
+            .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
+            .filter(Vacancy.create_date <= params.end_date) \
+            .filter(Vacancy.create_date >= params.start_date) \
+            .filter_by(region_id=params.region.id) \
+            .filter_by(source_id=params.source.id)
+
+        rate = vacancy.count() * 100 / total
+        profession = Profstandard.query.get(prof_id)
+        prof_dict = {
+            'id': prof_id,
+            'code': profession.code,
+            'name': profession.name,
+            'count': vacancy.count(),
+            'rate': str(round(rate, 2)) + '%'
+        }
+        professions.append(prof_dict)
+
+    if not professions:
+        professions = [{
+            'id': 0,
+            'code': '',
+            'name': 'Профессия не выбрана',
+            'count': 0,
+            'rate': 0
+        }]
+    return jsonify({'professions': professions, 'total': total})
 
 
 @app.route('/results')
@@ -221,49 +260,10 @@ def results():
 
     period = 'C: ' + str(params.start_date.date()) + ' По: ' + str(params.end_date.date())  # месяц - день - год
 
-    professions = []
-    total = Vacancy.query \
-        .filter(ClassifiedVacancy.profstandard_id.in_(params.profession_ids)) \
-        .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
-        .filter(Vacancy.create_date <= params.end_date) \
-        .filter(Vacancy.create_date >= params.start_date) \
-        .filter_by(region_id=params.region.id) \
-        .filter_by(source_id=params.source.id).count()
-
-    for prof_id in params.profession_ids:
-        vacancy = Vacancy.query \
-            .filter(ClassifiedVacancy.profstandard_id == prof_id) \
-            .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
-            .filter(Vacancy.create_date <= params.end_date) \
-            .filter(Vacancy.create_date >= params.start_date) \
-            .filter_by(region_id=params.region.id) \
-            .filter_by(source_id=params.source.id)
-
-        rate = vacancy.count() * 100 / total
-        profession = Profstandard.query.get(prof_id)
-        prof_dict = {
-            'profstandard_id': prof_id,
-            'code': profession.code,
-            'name': profession.name,
-            'count': vacancy.count(),
-            'rate': str(round(rate, 2)) + '%'
-        }
-        professions.append(prof_dict)
-
-    if not professions:
-        professions = [{
-            'profstandard_id': 0,
-            'code': '',
-            'name': 'Профессия не выбрана',
-            'count': 0,
-            'rate': 0
-        }]
     return render_template('results.html',
                            title='results',
                            params=params,
-                           period=period,
-                           professions=professions,
-                           total=total)
+                           period=period,)
 
 
 
@@ -341,8 +341,6 @@ def get_top():
 
 
 
-
-
 @app.route('/get_branches')
 def get_branches():
     if 'params' in session:
@@ -394,6 +392,17 @@ def get_branches():
             'general_functions': value
         })
 
+
+    text = []
+    for branch in branches:
+        for gen in branch['general_functions']:
+            for gen_text in gen['gen_text']:
+                text.append(gen_text)
+    text = unique(text)
+    top_bigrams = common_words(text, 2, topn=20)
+    top_words = common_words(text, 1, topn=25, bigram=top_bigrams)
+
+
     # 5. Выделение
 
     if 'selected' in session and int(prof_id) in session['selected'].items:
@@ -401,13 +410,8 @@ def get_branches():
     else:
         selected = SelectedItems(int(prof_id), [], [], [])
 
-    return jsonify({'branches': branches, 'selected': selected})
-
-
-
-
-
-
+    return jsonify({'branches': branches, 'selected': selected.dict(),
+                    'topWords': top_words, 'topBigrams': top_bigrams, 'count':count})
 
 
 
@@ -419,79 +423,13 @@ def profession():
         redirect('/index')
     prof_id = request.args.get('id')
 
-
-    # 3. Сопоставление
-    query = db.session.query(MatchPart, VacancyPart) \
-        .filter(MatchPart.vacancy_part_id == VacancyPart.id) \
-        .filter(VacancyPart.vacancy_id == Vacancy.id) \
-        .filter(ClassifiedVacancy.profstandard_id == prof_id) \
-        .filter(Vacancy.id == ClassifiedVacancy.vacancy_id) \
-        .filter(Vacancy.create_date <= params.end_date) \
-        .filter(Vacancy.create_date >= params.start_date) \
-        .filter(Vacancy.region_id == params.region.id) \
-        .filter(Vacancy.source_id == params.source.id)
-
-    matched_parts = defaultdict(list)
-
-    for match_part, vacancy_part in query:
-        matched_parts[match_part.profstandard_part_id].append({
-            'similarity': round(match_part.similarity, 3),
-            'vacancy_part': vacancy_part.text
-        })
-
-    # 3.1 Дерево
-    general_functions, count, just_selected = general_function_tree(prof_id, matched_parts)
-
-    sorting_generals = pd.DataFrame(general_functions)
-    general_functions = sorting_generals.sort_values('weight', ascending=False).to_dict('r') # валится ошибка
-    posts = defaultdict(list)
-    general_functions_by_level = defaultdict(list)
-
-    for post in ProfstandardPost.query.filter_by(profstandard_id=prof_id):
-        posts[post.qualification_level].append(post.name)
-
-    for function in general_functions:
-        general_functions_by_level[function['level']].append(function)
-
-    branches = []
-
-    for key, value in general_functions_by_level.items():
-        branches.append({
-            'level': key,
-            'posts': posts[key],
-            'general_functions': value
-        })
-
-    # 4 тексты
-    text = []
-    for branch in branches:
-        for gen in branch['general_functions']:
-            for gen_text in gen['gen_text']:
-                text.append(gen_text)
-    text = unique(text)
-    top_bigrams = common_words(text, 2, topn=20)
-    top_words = common_words(text, 1, topn=25, bigram=top_bigrams)
-
-    # 5. Выделение
-
-    if 'selected' in session and int(prof_id) in session['selected'].items:
-        selected = session['selected'].items[int(prof_id)]
-    else:
-        selected = SelectedItems(int(prof_id), [], [], [])
-
-
     return render_template('profession.html',
                            title='profession',
                            profession=Profstandard.query.get(prof_id).name,
-                           branches=branches,
-                           count=count,
-                           top_words=top_words,
-                           top_bigrams=top_bigrams,
                            profession_id=prof_id,
                            params=params,
                            sdate=params.start_date,
-                           edate=params.end_date,
-                           selected=selected)
+                           edate=params.end_date)
 
 
 @app.route('/vacancy')
