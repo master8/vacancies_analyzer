@@ -479,7 +479,6 @@ def profession():
     else:
         selected = SelectedItems(int(prof_id), [], [], [])
 
-    print(branches)
 
     return render_template('profession.html',
                            title='profession',
