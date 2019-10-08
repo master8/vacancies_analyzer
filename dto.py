@@ -36,11 +36,6 @@ class Params:
             'profession_ids': self.profession_ids
         }
 
-    def get_query(self):
-        return '?' + '&'.join(['prof=' + str(prof) for prof in self.profession_ids]) \
-               + f'&region={self.region.id}&sdate={datetime.strftime(self.start_date, "%Y-%m-%d")}' \
-                 f'&edate={datetime.strftime(self.end_date, "%Y-%m-%d")}&source={self.source.id}'
-
 
 class SelectedItems:
     def __init__(self,
