@@ -8,7 +8,8 @@ function loadcharts(professions, title, label){
         }
         return color;
     }
-
+    // скрытие спиннера
+    document.getElementById('spinnerChart').setAttribute('style','display:none')
 
     var ctx = document.getElementById('myChart').getContext('2d');
     var myChart = new Chart(ctx, {

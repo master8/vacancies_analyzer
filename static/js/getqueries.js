@@ -1,3 +1,27 @@
+function appendTable(profession){
+    let tr = document.createElement('tr');
+    let code = document.createElement('td');
+    code.setAttribute('class','uk-text-nowrap');
+    code.innerText=profession.code;
+    tr.appendChild(code);
+
+    let link = document.createElement('td');
+    link.setAttribute('class','uk-table-link');
+    let a = document.createElement('a');
+    a.setAttribute('class','uk-link-reset');
+    a.href=`/profession?id=${profession.id}`;
+    a.innerText=profession.name;
+    link.appendChild(a);
+    tr.appendChild(link);
+
+    let count = document.createElement('td');
+    count.setAttribute('class','uk-text-nowrap');
+    count.innerText = profession.count;
+    tr.appendChild(count);
+
+    return tr
+}
+
 async function loadProfession(prof_id){
 
     let professions = await fetch(`/get_intersection?id=${prof_id}`, {
@@ -13,26 +37,7 @@ async function loadProfession(prof_id){
     let body = document.createElement('tbody');
 
     professions.forEach((profession)=>{
-        let tr = document.createElement('tr');
-
-        let code = document.createElement('td');
-        code.setAttribute('class','uk-text-nowrap');
-        code.innerText=profession.code;
-        tr.appendChild(code);
-
-        let link = document.createElement('td');
-        link.setAttribute('class','uk-table-link');
-        let a = document.createElement('a');
-        a.setAttribute('class','uk-link-reset');
-        a.href=`/profession?id=${profession.id}`;
-        a.innerText=profession.name;
-        link.appendChild(a);
-        tr.appendChild(link);
-
-        let count = document.createElement('td');
-        count.setAttribute('class','uk-text-nowrap');
-        count.innerText = profession.count;
-        tr.appendChild(count);
+        let tr = appendTable(profession);
 
         body.appendChild(tr)
     });
@@ -41,7 +46,45 @@ async function loadProfession(prof_id){
     crossTable.appendChild(body);
 
     loadcharts(professions,'Пересечения с другими профессиями', 'Пересечений')
+    // скрытие спиннера
+    document.getElementById('spinnerTable').setAttribute('style','display:none')
 }
+
+async function loadResults(){
+
+    let response = await fetch(`/get_results`, {
+        method: 'GET', // *GET, POST, PUT, DELETE, etc.
+        mode: 'cors', // no-cors, cors, *same-origin
+        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: 'same-origin', // include, *same-origin, omit
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    }).then(data => data.json());
+    let professions = response['professions'];
+    document.getElementById('total').innerText=`Итого: ${response['total']}`;
+    let body = document.createElement('tbody');
+
+    professions.forEach((profession)=>{
+        let tr = appendTable(profession);
+
+        let freq = document.createElement('td');
+        freq.setAttribute('class','uk-text-nowrap');
+        freq.innerText = profession.rate;
+        tr.appendChild(freq);
+
+        body.appendChild(tr)
+    });
+
+    let crossTable = document.getElementById('crossTable');
+    crossTable.appendChild(body);
+
+    loadcharts(professions,'Число вакансий', 'Число вакансий')
+    // скрытие спиннера
+    document.getElementById('spinnerTable').setAttribute('style','display:none')
+}
+
+
 
 async function loadTop(prof_id){
 
@@ -85,10 +128,54 @@ async function loadTop(prof_id){
     bestTable.appendChild(createBody(top.best));
     let worstTable = document.getElementById('topworst');
     worstTable.appendChild(createBody(top.worst));
+    // скрытие спиннера
+    document.getElementById('spinnerTop').setAttribute('style','display:none')
+    document.getElementById('spinnerWorst').setAttribute('style','display:none')
 
 }
 
+function createCheckBox(name,part,ids,selected){
+    let newCheckbox = document.createElement("input");
+    newCheckbox.setAttribute('class','uk-checkbox mode-view');
+    newCheckbox.setAttribute('type','checkbox');
+    newCheckbox.setAttribute('style','float: left; margin: 6px');
+    newCheckbox.setAttribute('name',name);
+    newCheckbox.setAttribute('hidden','');
+    newCheckbox.value = part['id'];
+    if (selected[ids].includes(part['id']))
+        newCheckbox.setAttribute('checked','');
+    return newCheckbox
+}
 
+function createLinkName(part, classType){
+    let partLink = document.createElement('a');
+    partLink.href='#';
+    partLink.setAttribute('class','uk-accordion-title');
+    let spanTitle = document.createElement('span');
+    spanTitle.innerText=part['weight'];
+    spanTitle.setAttribute('class',`uk-label ${classType}`);
+    partLink.appendChild(spanTitle);
+    partLink.innerHTML+=` ${part['name']}`;
+    return partLink
+}
+
+function createAccordionMeta(partType, part, depth){
+    //              2 элемента добавил, идем вглубь
+    //              контент аккордеона, 4 уровень
+    let accordionGeneralFunction = document.createElement('div');
+    accordionGeneralFunction.setAttribute('class','uk-accordion-content uk-margin-large-left');
+    accordionGeneralFunction.setAttribute('aria-hidden','false')
+    //                  описание ген функции, 5 уровень
+    let articleMeta = document.createElement(depth);
+    articleMeta.setAttribute('class','uk-article-meta');
+    articleMeta.innerHTML=`${ partType }: ${ part['count']} найдено <br> 
+                            Частые слова: ${ part['monogram'].join(', ')  }.<br> 
+                            Частые словосочетания: ${ part['bigram'].join(', ')  }`;
+    //                  добавление описания на 5 уровень
+    accordionGeneralFunction.appendChild(articleMeta);
+    //                  Список функций, 5 уровень
+    return accordionGeneralFunction
+}
 
 async function loadBranch(prof_id){
 
@@ -102,12 +189,10 @@ async function loadBranch(prof_id){
         }
     }).then(data => data.json());
 
-    let generator = document.getElementById('brachesGenerator');
+    let generator = document.getElementById('branchesGenerator');
 
     let branches = response['branches'];
     let selected = response['selected'];
-
-
 
     branches.forEach(branch=>{
         // 0 уровень
@@ -129,7 +214,7 @@ async function loadBranch(prof_id){
         posts.forEach(post=>{
             let li = document.createElement('li');
             li.innerText=post;
-            branchList.appendChild(branchList)
+            branchList.appendChild(li)
         });
         firstColumn.appendChild(branchList); // всего 2 элемента, оба присоединил
 
@@ -145,57 +230,101 @@ async function loadBranch(prof_id){
             let li = document.createElement('li');
             li.setAttribute('class','uk-open');
             //              галочка на обобщенной функции, 4 уровень
-            let selectBoxGeneral = document.createElement("input");
-            selectBoxGeneral.setAttribute('class','uk-checkbox mode-view');
-            selectBoxGeneral.setAttribute('type','checkbox');
-            selectBoxGeneral.setAttribute('style','float: left; margin: 6px');
-            selectBoxGeneral.setAttribute('name','gf');
-            selectBoxGeneral.setAttribute('hidden','');
-            selectBoxGeneral.value = general_function['id'];
-            if (selected['general_fun_ids'].includes(general_function.id))
-                //TODO Проверить работоспособность сохранения значения выбранных
-                selectBoxGeneral.setAttribute('checked','');
-            li.appendChild(selectBoxGeneral)
+            let selectBoxGeneral = createCheckBox('gf',general_function,'general_fun_ids',selected);
+            li.appendChild(selectBoxGeneral);
             //              ссылка аккордеона, 4 уровень
-            let generalTitle = document.createElement('a');
-            generalTitle.href='#';
-            generalTitle.setAttribute('class','uk-accordion-title');
-            //                  спан внутри, 5 уровень
-            let spanTitle = document.createElement('span');
-            spanTitle.innerText=general_function['weight'];
-            spanTitle.setAttribute('class','uk-label uk-label-success');
-            generalTitle.appendChild(spanTitle);
-            //              имя аккордеона, 4 уровень
-            spanTitle.innerText=general_function['name'];
-            li.appendChild(spanTitle);
-            //              2 элемента добавил, идем вглубь
-            //              контент аккордеона, 4 уровень
-            let accordionGeneralFunction = document.createElement('div');
-            accordionGeneralFunction.setAttribute('class','uk-accordion-content uk-margin-large-left');
-            accordionGeneralFunction.setAttribute('aria-hidden','false')
-            //                  описание ген функции, 5 уровень
-            let articleMeta = document.createElement('h3');
-            articleMeta.setAttribute('class','uk-article-meta');
-            articleMeta.innerHTML=`Характеристик: ${ general_function['count'] } найдено <br> 
-                                    Частые слова: ${ general_function['monogram'] }.<br> 
-                                    Частые словосочетания: ${ general_function['bigram'] }`;
-            accordionGeneralFunction.appendChild(articleMeta);
+            let generalTitle = createLinkName(general_function,'uk-label-danger');
+            li.appendChild(generalTitle);
 
-
-
-
+            let accordionGeneralFunction = createAccordionMeta('Функций', general_function, 'h3');
             li.appendChild(accordionGeneralFunction);
+
+            let ulFunction = document.createElement('ul');
+            ulFunction.setAttribute('uk-accordion','');
+            ulFunction.setAttribute('class','uk-accordion');
+
+            //                      функции, 6 уровень
+            let functions = general_function['functions'];
+            functions.forEach(func =>{
+                let liFunction = document.createElement('li');
+                //                      галочка на функции, 7 уровень
+                let selectBoxFunction = createCheckBox('f',func,'fun_ids', selected);
+                liFunction.appendChild(selectBoxFunction);
+                //                      ссылка на функции, 7 уровень
+                let funcTitle = createLinkName(func,'uk-label-success')
+                liFunction.appendChild(funcTitle);
+
+                let accordionFunction = createAccordionMeta('Характеристик', func,'h4')
+
+                let ulPart = document.createElement('ul');
+                ulPart.setAttribute('uk-accordion','');
+                ulPart.setAttribute('class','uk-accordion');
+
+                let parts = func['parts'];
+                parts.forEach(part =>{
+                    let liPart = document.createElement('li');
+
+                    let selectBoxPart = createCheckBox('p',part,'part_ids', selected);
+                    liPart.appendChild(selectBoxPart);
+
+                    let partTitle = createLinkName(part,'')
+                    liPart.appendChild(partTitle);
+
+                    let partFunction = createAccordionMeta('Частей характеристики', part,'h4')
+                                        let partTable = document.createElement('table');
+                    partTable.setAttribute('class', 'uk-table uk-table-small uk-table-divider');
+
+                    let partTableHead= document.createElement('thead');
+                    let partTableBody= document.createElement('tbody');
+
+                    partTableHead.innerHTML=`<tr>                       
+                                                <th class="uk-table-shrink">Близость</th>
+                                                <th class="uk-table-expand">Часть вакансии</th>
+                                            </tr>`;
+
+                    let vacancy_parts = part['vacancy_parts'];
+                    vacancy_parts.forEach((vacancy,index) => {
+                        if (index>4) return true;
+                        let trVacancy = document.createElement('tr');
+                        trVacancy.innerHTML=`<td>${ vacancy['similarity'].toString().substring(0,4) }</td>
+                                            <td>${ vacancy['vacancy_part'] }</td>`
+                        partTableBody.appendChild(trVacancy)
+                    })
+
+                    partTable.appendChild(partTableHead);
+                    partTable.appendChild(partTableBody);
+                    partFunction.appendChild(partTable);
+
+                    liPart.appendChild(partFunction);
+                    ulPart.appendChild(liPart);
+                });
+
+                accordionFunction.appendChild(ulPart)
+
+                liFunction.appendChild(accordionFunction);
+                ulFunction.appendChild(liFunction)
+            });
+
+            accordionGeneralFunction.appendChild(ulFunction);
             accordion.appendChild(li)
-        })
+        });
 
-        secondColumn.appendChild(accordion) // всего 1 элемент
+        secondColumn.appendChild(accordion); // всего 1 элемент
 
-        grid.appendChild(firstColumn)
-        grid.appendChild(secondColumn)
+        grid.appendChild(firstColumn);
+        grid.appendChild(secondColumn);
         generator.appendChild(grid)
     })
 
+    let count = response['count'];
+    let topWords = response['topWords'];
+    let topBigrams = response['topBigrams'];
 
-
-
+    let countTopWords = document.getElementById('countTopWords');
+    countTopWords.setAttribute('class','uk-article-meta');
+    countTopWords.innerHTML=`Обобщенных функций: ${ count } найдено <br> 
+                               Частые слова: ${ topWords.join(', ') } <br> 
+                               Частые словосочетания: ${ topBigrams.join(', ') } `
+    // скрытие спиннера
+    document.getElementById('spinnerBranch').setAttribute('style','display:none')
 }

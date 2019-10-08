@@ -1,4 +1,5 @@
-# Created by .ignore support plugin (hsz.mobi)
+# Created b.idea
+y .ignore support plugin (hsz.mobi)
 ### JetBrains template
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
@@ -21,7 +22,6 @@ __pycache__
 .idea/**/dynamic.xml
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
-
 
 # Gradle
 .idea/**/gradle.xml
@@ -242,6 +242,7 @@ $RECYCLE.BIN/
 *.lnk
 
 static/diagram/
+/static/diagram/test_diagram.svg
 /static/diagram/test_diagram2.svg
 /data/t_all_vacancies.csv
 /data/u_predict.csv
@@ -250,4 +251,3 @@ static/Word2Vec/big_word2vec_model_CBOW.trainables.syn1neg.npy
 static/Word2Vec/big_word2vec_model_CBOW
 /flask_session/
 *.xml
-*.svg
