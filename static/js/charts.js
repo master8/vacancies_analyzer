@@ -31,9 +31,9 @@ function loadcharts(professions, title, label){
                 var name = professions.filter((obj)=>
                             obj.code === this.data.labels[selectedIndex]);
 
-                console.log(name[0]['profstandard_id'])
+                console.log(name[0]['id'])
                 console.log(myChart.data.labels[selectedIndex]);
-                document.location.href = '/profession?id='+name[0]['profstandard_id'];
+                document.location.href = '/profession?id='+name[0]['id'];
             },
             onHover: function(e) {
                  var point = this.getElementAtEvent(e);

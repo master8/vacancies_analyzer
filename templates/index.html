@@ -29,12 +29,35 @@
                         <div class="uk-form-controls uk-list uk-margin-top">
                             <div class="uk-overflow-auto">
                                 <table class="uk-table uk-table-middle uk-table-divider">
+                                <style>
+                                    .hovered{
+                                        background-color: #ffffdd;
+                                        color: #000;
+                                        font-weight: bolder;
+
+                                    }
+                                    .checked-box{
+                                        background-color: #1e87f0;
+                                        color: #fff;
+                                        font-weight: bolder;
+                                    }
+
+                                </style>
+                                <script>
+                                    function checkMyBox(element) {
+                                        element.firstElementChild.firstElementChild.checked = !element.firstElementChild.firstElementChild.checked;
+                                        if (element.firstElementChild.firstElementChild.checked)
+                                            element.classList.add('checked-box');
+                                        else
+                                            element.classList.remove('checked-box');
+                                    }
+                                </script>
                                     <tbody>
                                         {% for profession in professions %}
                                             {% if profession.is_support == True %}
-                                            <tr style="cursor: pointer" onmousedown="this.firstElementChild.firstElementChild.checked = !this.firstElementChild.firstElementChild.checked" onmouseover="this.style.backgroundColor='#ffffdd';" onmouseout="this.style.backgroundColor='#fff';" >
+                                            <tr style="cursor: pointer" onmousedown="checkMyBox(this)" onmouseover="this.classList.add('hovered')" onmouseout="this.classList.remove('hovered')" >
                                                 <td class="uk-table-shrink" >
-                                                    <input class="uk-checkbox"  type="checkbox" value="{{ profession.id }}" name="prof"/>
+                                                    <input class="uk-checkbox" style="display: none" type="checkbox" value="{{ profession.id }}" name="prof"/>
                                                 </td>
                                                 <td class="uk-text-truncate uk-table-expand">{{ profession.name }}</td>
                                             </tr>
