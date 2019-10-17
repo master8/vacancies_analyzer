@@ -32,7 +32,8 @@ async function loadProfession(prof_id){
         headers: {
             'Content-Type': 'application/json',
         }
-    }).then(data => data.json());
+    }).then(data => data.json())
+        .catch(error => window.location.href = '/');
 
     let body = document.createElement('tbody');
 
@@ -60,7 +61,8 @@ async function loadResults(){
         headers: {
             'Content-Type': 'application/json',
         }
-    }).then(data => data.json());
+    }).then(data => data.json())
+        .catch(error => window.location.href = '/');
     let professions = response['professions'];
     document.getElementById('total').innerText=`Итого: ${response['total']}`;
     let body = document.createElement('tbody');
@@ -96,7 +98,8 @@ async function loadTop(prof_id){
         headers: {
             'Content-Type': 'application/json',
         }
-    }).then(data => data.json());
+    }).then(data => data.json())
+        .catch(error => window.location.href = '/');
 
 
     function createBody(vacancies) {
@@ -187,7 +190,8 @@ async function loadBranch(prof_id){
         headers: {
             'Content-Type': 'application/json',
         }
-    }).then(data => data.json());
+    }).then(data => data.json())
+        .catch(error => window.location.href = '/');
 
     let generator = document.getElementById('branchesGenerator');
 
