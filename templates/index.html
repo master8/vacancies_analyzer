@@ -8,6 +8,7 @@
     <link rel="shortcut icon" href="../static/images/favicon.png" type="image/png">
     <script src="../static/js/uikit.min.js"></script>
     <script src="../static/js/uikit-icons.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
 </head>
 <body>
@@ -106,6 +107,40 @@
                             {% endfor %}
                         </div>
                     </div>
+                        <div class="uk-card-media-bottom" id="myDiv">
+
+                        </div>
+                <script>
+                    Plotly.d3.csv('https://raw.githubusercontent.com/master8/vacancies_analyzer/clustering/static/clusters.csv', function(err, rows){
+                          function unpack(rows, key) {
+                              return rows.map(function(row)
+                              { return row[key]; });
+                          }
+                          var trace2 = {
+                              x:unpack(rows, 'x'),  y: unpack(rows, 'y'), z: unpack(rows, 'z'),
+                              mode: 'markers',
+                              marker: {
+                                size: 6,
+                                opacity: 0.8,
+                              },
+                              type: 'scatter3d'
+                            };
+                            var data = [trace2];
+                            var layout = {
+                                  dragmode: true,
+                                  autosize: true,
+                                  margin: {
+                                    l: 0,
+                                    r: 0,
+                                    b: 0,
+                                    t: 0
+                              },
+                                paper_bgcolor: '#222222',
+                                showlegend:false
+                            };
+                            Plotly.newPlot('myDiv', data, layout, {showSendToCloud: true});
+                    });
+                </script>
                 </div>
             </div>
         </div>
