@@ -150,12 +150,12 @@ function createCheckBox(name,part,ids,selected){
     return newCheckbox
 }
 
-function createLinkName(part, classType){
+function createLinkName(part, classType, totalCount){
     let partLink = document.createElement('a');
     partLink.href='#';
     partLink.setAttribute('class','uk-accordion-title');
     let spanTitle = document.createElement('span');
-    spanTitle.innerText=part['weight'];
+    spanTitle.innerText=part['weight'] +` (0% из ${(part['count']*100/totalCount).toString().slice(0,5)}%)`;
     spanTitle.setAttribute('class',`uk-label ${classType}`);
     partLink.appendChild(spanTitle);
     partLink.innerHTML+=` ${part['name']}`;
@@ -181,6 +181,7 @@ function createAccordionMeta(partType, part, depth){
 }
 
 async function loadBranch(prof_id){
+    let generator = document.getElementById('branchesGenerator');
 
     let response = await fetch(`/get_branches?id=${prof_id}`, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
@@ -192,8 +193,11 @@ async function loadBranch(prof_id){
         }
     }).then(data => data.json())
         .catch(error => window.location.href = '/');
+    let count = response['count'];
+    let topWords = response['topWords'];
+    let topBigrams = response['topBigrams'];
 
-    let generator = document.getElementById('branchesGenerator');
+
 
     let branches = response['branches'];
     let selected = response['selected'];
@@ -237,7 +241,7 @@ async function loadBranch(prof_id){
             let selectBoxGeneral = createCheckBox('gf',general_function,'general_fun_ids',selected);
             li.appendChild(selectBoxGeneral);
             //              ссылка аккордеона, 4 уровень
-            let generalTitle = createLinkName(general_function,'uk-label-danger');
+            let generalTitle = createLinkName(general_function,'uk-label-danger', count);
             li.appendChild(generalTitle);
 
             let accordionGeneralFunction = createAccordionMeta('Функций', general_function, 'h3');
@@ -255,7 +259,7 @@ async function loadBranch(prof_id){
                 let selectBoxFunction = createCheckBox('f',func,'fun_ids', selected);
                 liFunction.appendChild(selectBoxFunction);
                 //                      ссылка на функции, 7 уровень
-                let funcTitle = createLinkName(func,'uk-label-success')
+                let funcTitle = createLinkName(func,'uk-label-success', count)
                 liFunction.appendChild(funcTitle);
 
                 let accordionFunction = createAccordionMeta('Характеристик', func,'h4')
@@ -271,7 +275,7 @@ async function loadBranch(prof_id){
                     let selectBoxPart = createCheckBox('p',part,'part_ids', selected);
                     liPart.appendChild(selectBoxPart);
 
-                    let partTitle = createLinkName(part,'')
+                    let partTitle = createLinkName(part,'', count)
                     liPart.appendChild(partTitle);
 
                     let partFunction = createAccordionMeta('Частей характеристики', part,'h4')
@@ -320,9 +324,7 @@ async function loadBranch(prof_id){
         generator.appendChild(grid)
     })
 
-    let count = response['count'];
-    let topWords = response['topWords'];
-    let topBigrams = response['topBigrams'];
+
 
     let countTopWords = document.getElementById('countTopWords');
     countTopWords.setAttribute('class','uk-article-meta');
