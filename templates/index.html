@@ -107,25 +107,46 @@
                             {% endfor %}
                         </div>
                     </div>
-                        <div class="uk-card-media-bottom" id="myDiv">
+                    <button type="button" class="uk-button uk-button-default" onclick="processPlot('kmeans_k8')">kmeans 8 classes</button>
+                    <button type="button" class="uk-button uk-button-default" onclick="processPlot('kmeans_k30')">kmeans 30 classes</button>
+                    <div class="uk-card-media-bottom" id="myDiv">
 
-                        </div>
+                    </div>
+                    <div id="checkbox-clustering">
+
+                    </div>
+
                 <script>
+                    function processPlot(modelname = 'kmeans_k30'){
                     Plotly.d3.csv('https://raw.githubusercontent.com/master8/vacancies_analyzer/clustering/static/clusters.csv', function(err, rows){
-                          function unpack(rows, key) {
-                              return rows.map(function(row)
-                              { return row[key]; });
+                        console.log(err)
+                        processData(rows,modelname)
+                    });}
+
+                    function unpack(rows, key, clusterName, clusterId) {
+                              return rows.map(function(row){
+                                  return row[clusterName]===clusterId?row[key]:undefined;
+                              });
                           }
-                          var trace2 = {
-                              x:unpack(rows, 'x'),  y: unpack(rows, 'y'), z: unpack(rows, 'z'),
+
+                    function processData(rows,modelname){
+                            let data = [];
+
+                            for (let i=0;i<+modelname.split('k').slice(-1)[0];i++){
+                                data.push({
+                              x: unpack(rows, 'x',modelname,i.toString()),
+                              y: unpack(rows, 'y',modelname,i.toString()),
+                              z: unpack(rows, 'z',modelname,i.toString()),
+                              hovertext: unpack(rows, 'title',modelname,i.toString()),
+                              text:unpack(rows, 'id',modelname,i.toString()),
+                              hoverinfo: 'text',
                               mode: 'markers',
                               marker: {
-                                size: 6,
+                                size: 4,
                                 opacity: 0.8,
                               },
                               type: 'scatter3d'
-                            };
-                            var data = [trace2];
+                            })}
                             var layout = {
                                   dragmode: true,
                                   autosize: true,
@@ -138,8 +159,21 @@
                                 paper_bgcolor: '#222222',
                                 showlegend:false
                             };
-                            Plotly.newPlot('myDiv', data, layout, {showSendToCloud: true});
-                    });
+                            createPlot(data,layout)
+
+                    }
+                    function createPlot(data, layout) {
+                        Plotly.newPlot('myDiv', data, layout, {showSendToCloud: true});
+                        let myPlot = document.getElementById('myDiv');
+                        myPlot.on('plotly_click', function(data){
+                            let vacancyid = '';
+                            for(var i=0; i < data.points.length; i++){
+                                vacancyid = data.points[i].text
+                            }
+                            document.location.href = 'vacancy?id='+vacancyid
+                        });
+                    }
+                    processPlot();
                 </script>
                 </div>
             </div>
