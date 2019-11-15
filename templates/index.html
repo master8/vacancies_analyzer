@@ -109,6 +109,16 @@
                     </div>
                     <button type="button" class="uk-button uk-button-default" onclick="processPlot('kmeans_k8')">kmeans 8 classes</button>
                     <button type="button" class="uk-button uk-button-default" onclick="processPlot('kmeans_k30')">kmeans 30 classes</button>
+                    <button type="button" class="uk-button uk-button-default" onclick="processPlotCorpus('label_true_k122')">label_true</button>
+                    <button type="button" class="uk-button uk-button-default" onclick="processPlotCorpus('KMeans_artm_k37')">KMeans_artm_k37</button>
+                    <button type="button" class="uk-button uk-button-default" onclick="processPlotCorpus('KMeans_tfidf_k37')">KMeans_tfidf_k37</button>
+                    <button type="button" class="uk-button uk-button-default" onclick="processPlotCorpus('KMeans_w2v_k37')">KMeans_w2v_k37</button>
+                    <button type="button" class="uk-button uk-button-default" onclick="processPlotCorpus('Birch_artm_k122')">Birch_artm_k122</button>
+                    <button type="button" class="uk-button uk-button-default" onclick="processPlotCorpus('Birch_w2v_k38')">Birch_w2v_k38</button>
+                    <button type="button" class="uk-button uk-button-default" onclick="processPlotCorpus('Birch_tfidf_k268')">Birch_tfidf_k268</button>
+                    <button type="button" class="uk-button uk-button-default" onclick="processPlotCorpus('AffinityPropagation_artm_k660')">AffinityPropagation_artm_k660</button>
+                    <button type="button" class="uk-button uk-button-default" onclick="processPlotCorpus('AffinityPropagation_tfidf_k1749')">AffinityPropagation_tfidf_k1749</button>
+                    <button type="button" class="uk-button uk-button-default" onclick="processPlotCorpus('AffinityPropagation_w2v_k469')">AffinityPropagation_w2v_k469</button>
                     <div class="uk-card-media-bottom" id="myDiv">
 
                     </div>
@@ -117,8 +127,16 @@
                     </div>
 
                 <script>
+
                     function processPlot(modelname = 'kmeans_k30'){
-                    Plotly.d3.csv('https://raw.githubusercontent.com/master8/vacancies_analyzer/clustering/static/clusters.csv', function(err, rows){
+                    Plotly.d3.csv('static/df_vacancies_full_clusters_results.csv', function(err, rows){
+                        console.log(err)
+                        processData(rows,modelname)
+                    });}
+
+                    function processPlotCorpus(modelname = 'label_true_k122'){
+                    Plotly.d3.csv('static/corpus_clusterswhole.csv', function(err, rows){
+                        console.log('new clusters ok')
                         console.log(err)
                         processData(rows,modelname)
                     });}
