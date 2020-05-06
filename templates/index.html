@@ -8,6 +8,7 @@
     <link rel="shortcut icon" href="../static/images/favicon.png" type="image/png">
     <script src="../static/js/uikit.min.js"></script>
     <script src="../static/js/uikit-icons.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
 </head>
 <body>
@@ -106,6 +107,92 @@
                             {% endfor %}
                         </div>
                     </div>
+                    <button type="button" class="uk-button uk-button-small uk-button-default" disabled onclick="processPlot('kmeans_k8')">kmeans 8 classes</button>
+                    <button type="button" class="uk-button uk-button-small uk-button-default" disabled onclick="processPlot('kmeans_k30')">kmeans 30 classes</button>
+                    <button type="button" class="uk-button uk-button-small uk-button-default"  onclick="processPlotCorpus('label_true_k122')">label_true</button>
+                    <button type="button" class="uk-button uk-button-small uk-button-default" onclick="processPlotCorpus('KMeans_artm_k37')">KMeans_artm_k37</button>
+                    <button type="button" class="uk-button uk-button-small uk-button-default" onclick="processPlotCorpus('KMeans_tfidf_k37')">KMeans_tfidf_k37</button>
+                    <button type="button" class="uk-button uk-button-small uk-button-default" onclick="processPlotCorpus('KMeans_w2v_k37')">KMeans_w2v_k37</button>
+                    <button type="button" class="uk-button uk-button-small uk-button-default" onclick="processPlotCorpus('Birch_artm_k122')">Birch_artm_k122</button>
+                    <button type="button" class="uk-button uk-button-small uk-button-default" onclick="processPlotCorpus('Birch_w2v_k38')">Birch_w2v_k38</button>
+                    <button type="button" class="uk-button uk-button-small uk-button-default" onclick="processPlotCorpus('Birch_tfidf_k268')">Birch_tfidf_k268</button>
+                    <button type="button" class="uk-button uk-button-small uk-button-default" onclick="processPlotCorpus('AffinityPropagation_artm_k660')">AffinityPropagation_artm_k660</button>
+                    <button type="button" class="uk-button uk-button-small uk-button-default" onclick="processPlotCorpus('AffinityPropagation_tfidf_k1749')">AffinityPropagation_tfidf_k1749</button>
+                    <button type="button" class="uk-button uk-button-small uk-button-default" onclick="processPlotCorpus('AffinityPropagation_w2v_k469')">AffinityPropagation_w2v_k469</button>
+                    <div class="uk-card-media-bottom" id="myDiv">
+
+                    </div>
+                    <div id="checkbox-clustering">
+
+                    </div>
+
+                <script>
+
+                    function processPlot(modelname = 'kmeans_k30'){
+                    Plotly.d3.csv('static/df_vacancies_full_clusters_results.csv', function(err, rows){
+                        console.log(err)
+                        processData(rows,modelname)
+                    });}
+
+                    function processPlotCorpus(modelname = 'label_true_k122'){
+                    Plotly.d3.csv('static/corpus_clusterswhole.csv', function(err, rows){
+                        console.log('new clusters ok')
+                        console.log(err)
+                        processData(rows,modelname)
+                    });}
+
+                    function unpack(rows, key, clusterName, clusterId) {
+                              return rows.map(function(row){
+                                  return row[clusterName]===clusterId?row[key]:undefined;
+                              });
+                          }
+
+                    function processData(rows,modelname){
+                            let data = [];
+
+                            for (let i=0;i<+modelname.split('k').slice(-1)[0];i++){
+                                data.push({
+                              x: unpack(rows, 'x',modelname,i.toString()),
+                              y: unpack(rows, 'y',modelname,i.toString()),
+                              z: unpack(rows, 'z',modelname,i.toString()),
+                              hovertext: unpack(rows, 'title',modelname,i.toString()),
+                              text:unpack(rows, 'id',modelname,i.toString()),
+                              hoverinfo: 'text',
+                              mode: 'markers',
+                              marker: {
+                                size: 4,
+                                opacity: 0.8,
+                              },
+                              type: 'scatter3d'
+                            })}
+                            var layout = {
+                                  dragmode: true,
+                                  autosize: true,
+                                  margin: {
+                                    l: 0,
+                                    r: 0,
+                                    b: 0,
+                                    t: 0
+                              },
+                                paper_bgcolor: '#222222',
+                                showlegend:false
+                            };
+                            createPlot(data,layout)
+
+                    }
+                    function createPlot(data, layout) {
+                        Plotly.newPlot('myDiv', data, layout, {showSendToCloud: true});
+                        let myPlot = document.getElementById('myDiv');
+                        myPlot.on('plotly_click', function(data){
+                            let vacancyid = '';
+                            for(var i=0; i < data.points.length; i++){
+                                vacancyid = data.points[i].text;
+                            }
+                            document.location.href = 'vacancy?id=' + vacancyid;
+                        });
+                    }
+                    // processPlot();
+                </script>
                 </div>
             </div>
         </div>

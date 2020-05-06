@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, request, session, redirect, url_for, jsonify
-from flask import render_template
+from flask import render_template, send_from_directory
 from flask_session import Session
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -8,14 +8,11 @@ from collections import defaultdict
 from collections import Counter
 
 import pandas as pd
-import matplotlib
 import pymorphy2
 import json
 import similarity
 
-import searcher
-
-matplotlib.use('agg')
+#import searcher
 
 from config import Config
 from utils import get_date
@@ -348,8 +345,6 @@ def get_branches():
     else:
         redirect('/index')
     prof_id = request.args.get('id')
-
-
     # 3. Сопоставление
     query = db.session.query(MatchPart, VacancyPart) \
         .filter(MatchPart.vacancy_part_id == VacancyPart.id) \
@@ -592,6 +587,10 @@ def selected():
 def universities():
     universities = University.query.all()
     return render_template('universities.html', title='universities', universities=universities)
+
+@app.route('/clusters')
+def clusters():
+    return send_from_directory('static', 'corpus_clusters.csv', attachment_filename='file.csv', as_attachment=True, mimetype='text/csv', conditional=True)
 
 
 @app.route('/education_program/<id_program>', methods=['GET', 'POST'])
