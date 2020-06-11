@@ -156,7 +156,7 @@ def common_words(text, n_gram, topn=5, bigram=[]):
         text = pd.Series(text).apply(lambda row: row.lower())
         transformed = tfidf_vec.fit_transform(raw_documents=list(text))
         index_value = {i[1]: i[0] for i in tfidf_vec.vocabulary_.items()}
-    except ValueError:
+    except:
         transformed = []
         index_value = {}
 
